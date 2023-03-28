@@ -1,0 +1,24 @@
+(ns minii-temdeglel.main
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]))
+
+(defn main []
+  (m/runApp
+   (m/MaterialApp
+    .title "Welcome to Flutter"
+    .theme (m/ThemeData .primarySwatch m.Colors/blue
+                        .fontFamily "MongolianBaiZheng")
+    .home
+    (m/Scaffold
+     .appBar (m/AppBar
+              .title (m/Text "Mongolian Search Bar"))
+     .body
+     (m/Center
+      .child (mgl/MongolText
+              " ᠳᠠᠶᠠᠭᠠᠷ ᠰᠠᠶ᠋ᠢᠨ ᠪᠠᠶ᠋ᠢᠨ᠎ᠠ ᠊ᠤᠤ?"
+              .style (m/TextStyle
+                      .color m.Colors/blue
+                      ;; .fontFamily "MongolianBaiZheng"
+                      .fontSize 32.0))))
+    .debugShowCheckedModeBanner false)))
