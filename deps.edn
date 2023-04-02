@@ -7,4 +7,4 @@
        
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}
  :cljd/opts {:kind :flutter
-             :main minii-temdeglel.main}}
+             :main mongol-drafts.main}}

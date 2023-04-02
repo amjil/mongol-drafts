@@ -1,4 +1,4 @@
-(ns minii-temdeglel.main
+(ns mongol-drafts.main
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]))
@@ -12,7 +12,7 @@
     .home
     (m/Scaffold
      .appBar (m/AppBar
-              .title (m/Text "Mongolian Search Bar"))
+              .title (m/Text "Mongolian Notes"))
      .body
      (m/Center
       .child (mgl/MongolText

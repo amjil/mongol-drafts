@@ -1,4 +1,4 @@
-# mongol_minii_temdeglel
+# mongol_drafts
 
 A new Flutter project.
 

@@ -1,0 +1,4 @@
+(ns mongol-drafts.list)
+
+(defn widget []
+  )
