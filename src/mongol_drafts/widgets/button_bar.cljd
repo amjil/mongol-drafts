@@ -3,10 +3,17 @@
    ["package:flutter/material.dart" :as m]
    [cljd.flutter.alpha2 :as f]))
 
-(defn bar []
+(defn bar-button [child on-press]
+  (m/Material
+   .child
+   (m/InkWell
+    .onTap on-press
+    .child child)))
+
+(defn topbar []
   (f/widget
    :context ctx
-   :let [width  (-> m/MediaQuery (.of ctx) .-size .-width)]
+   :get [:state :info]
    (m/Row
     .mainAxisAlignment m.MainAxisAlignment/spaceAround
     .children
@@ -16,9 +23,15 @@
               .children
               [(m/Icon (.article_outlined m/Icons))
                (m/Icon (.add m/Icons))
-               (m/Icon (.tag m/Icons))]))
+               (bar-button
+                (m/Icon (.tag m/Icons))
+                (fn []
+                  (swap! state
+                         assoc
+                         :tag-viewable
+                         (not (:tag-viewable @state)))))]))
      (m/Container
-      .width (/ width 3)
+      .width (/ (:width info) 3)
       .height 30)
      (m/Expanded
       .child (m/Row
@@ -27,3 +40,16 @@
               [(m/Icon (.arrow_drop_down m/Icons))
                (m/Icon (.search m/Icons))
                (m/Icon (.view_sidebar_outlined m/Icons))]))])))
+
+(defn toolbar []
+  (f/widget 
+  ;;  (m/Expanded)
+   (m/Container)
+   (m/Padding
+    .padding (.all m/EdgeInsets 5))
+   (m/Wrap
+    .crossAxisAlignment m.WrapCrossAlignment/center
+    .direction m.Axis/vertical
+    .children 
+    [(m/Text "A")
+     (m/Text "B")])))
