@@ -89,46 +89,58 @@
     .height double/infinity)
    (m/Padding
     .padding (.all m/EdgeInsets 5))
-   (m/SingleChildScrollView
-    .scrollDirection m.Axis/vertical)
-   (m/Wrap
-    .crossAxisAlignment m.WrapCrossAlignment/center
-    .direction m.Axis/vertical
-    .spacing 5
-    .children
-    [(toolbar-button
-      (m/Icon (.redo m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (toolbar-button
-      (m/Icon (.undo m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (m/SizedBox .height 8)
-     (toolbar-button
-      (m/Icon (.arrow_back_outlined m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (toolbar-button
-      (m/Icon (.arrow_forward_outlined m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (toolbar-text-button
-      (m/Icon (.arrow_back_outlined m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (toolbar-text-button
-      (m/Icon (.arrow_forward_outlined m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (m/SizedBox .height 8)
-     (toolbar-button-normal
-      (m/Icon (.date_range_outlined m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (toolbar-button-normal
-      (m/Icon (.copy m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (toolbar-button-normal
-      (m/Icon (.paste m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     (toolbar-button-normal
-      (m/Icon (.select_all m/Icons))
-      #(dart:core/print "toolbar-button >>>>"))
-     ])))
+   (m/Column 
+    .children 
+    [(m/Container .height 40 .child (m/Icon (.menu m/Icons)))
+     (m/Expanded
+      .child
+      (m/SingleChildScrollView
+       .scrollDirection m.Axis/vertical
+       .child
+       (m/Wrap
+        .crossAxisAlignment m.WrapCrossAlignment/center
+        .direction m.Axis/vertical
+        .spacing 5
+        .children
+        [(toolbar-button
+          (m/Icon (.redo m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (toolbar-button
+          (m/Icon (.undo m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (m/SizedBox .height 8)
+         (toolbar-button
+          (m/Icon (.arrow_back_outlined m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (toolbar-button
+          (m/Icon (.arrow_forward_outlined m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (toolbar-text-button
+          (m/Icon (.arrow_back_outlined m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (toolbar-text-button
+          (m/Icon (.arrow_forward_outlined m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (m/SizedBox .height 8)
+         (toolbar-button-normal
+          (m/Icon (.date_range_outlined m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (toolbar-button-normal
+          (m/Icon (.copy m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (toolbar-button-normal
+          (m/Icon (.paste m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))
+         (toolbar-button-normal
+          (m/Icon (.select_all m/Icons))
+          #(dart:core/print "toolbar-button >>>>"))])))
+     (m/Container
+      .height 40
+      .child (m/Icon (.keyboard_arrow_down m/Icons)))])
+
+
+
+   ))
 
 
 ;;;
