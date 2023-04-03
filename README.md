@@ -29,8 +29,3 @@ Mongolian Flutter Apps are made possible by the following projects:
 3. Copy pubspec.yaml.bak to pubspec.yaml `cp pubspec.yaml.bak pubspec.yaml`
 4. Open a simulator `open -a Simulator`
 5. Run flutter `clj -M:cljd flutter`
-
-## Roadmap
-- Support English key layout.
-- Support displaying candidates list & suffix list.
-- Support Save active word to Sqlite and can query it when type matched.

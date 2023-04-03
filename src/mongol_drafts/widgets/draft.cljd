@@ -1,10 +1,11 @@
-(ns mongol-drafts.widgets.edit
+(ns mongol-drafts.widgets.draft
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [virtual-keyboard.keyboard :as keyboard]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [virtual-keyboard.options :as keyboard-options]
+   [mongol-drafts.widgets.button-bar :as button-bar]
    [cljd.flutter.alpha2 :as f]))
 
 (defn widget []
@@ -18,15 +19,13 @@
    :bind {:info info :state state :text-controller text-controller :context ctx}
    (m/Column
     .children
-    [(m/Expanded
+    [(button-bar/bar)
+     (m/Expanded
       .child
       (mgl/MongolTextField
        .controller text-controller
        .maxLines 500
        .autofocus true
-       .onTap (fn []
-                (swap! state assoc :candidates-list [])
-                (dart:core/print "onTap TextField"))
        .showCursor true
        .readOnly true
        .style (m/TextStyle .fontSize 20)

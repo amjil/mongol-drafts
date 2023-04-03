@@ -2,7 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [mongol-drafts.widgets.button-bar :as button-bar]))
+   [mongol-drafts.widgets.draft :as draft]))
 
 (defn main []
   (m/runApp
@@ -15,5 +15,5 @@
      .body
      (m/SafeArea
       .child
-      (button-bar/bar)))
+      (draft/widget)))
     .debugShowCheckedModeBanner false)))
