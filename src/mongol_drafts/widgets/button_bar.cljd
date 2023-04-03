@@ -1,6 +1,7 @@
 (ns mongol-drafts.widgets.button-bar
   (:require 
    ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]))
 
 (defn bar-button [child on-press]
@@ -24,7 +25,7 @@
               [(m/Icon (.article_outlined m/Icons))
                (m/Icon (.add m/Icons))
                (bar-button
-                (m/Icon (.tag m/Icons))
+                (m/Icon (.sell_outlined m/Icons))
                 (fn []
                   (swap! state
                          assoc
@@ -41,15 +42,86 @@
                (m/Icon (.search m/Icons))
                (m/Icon (.view_sidebar_outlined m/Icons))]))])))
 
+(defn toolbar-button [child on-press]
+  (f/widget
+   (m/RotatedBox
+    .quarterTurns 1)
+   (m/Material
+    .color (-> m.Colors/blue .-shade200))
+   (m/InkWell
+    .onTap on-press)
+   (m/Padding
+    .padding (.all m/EdgeInsets 6)
+    .child child)))
+
+(defn toolbar-button-normal [child on-press]
+  (f/widget
+   (m/Material
+    .color (-> m.Colors/blue .-shade200))
+   (m/InkWell
+    .onTap on-press)
+   (m/Padding
+    .padding (.all m/EdgeInsets 6)
+    .child child)))
+
+(defn toolbar-text-button [child on-press]
+  (f/widget
+   (m/Material
+    .color (-> m.Colors/blue .-shade200))
+   (m/InkWell
+    .onTap on-press)
+   (m/Padding
+    .padding (.all m/EdgeInsets 6))
+   (m/Row
+    .children [(m/Column
+                .children
+                [(m/RotatedBox
+                  .quarterTurns 1
+                  .child child)
+                 (m/RotatedBox
+                  .quarterTurns 1
+                  .child (m/Text "word"))])])))
+
 (defn toolbar []
-  (f/widget 
-  ;;  (m/Expanded)
-   (m/Container)
+  (f/widget
+   (m/Container
+    .color (-> m/Colors .blue .-shade50)
+    .height double/infinity)
    (m/Padding
     .padding (.all m/EdgeInsets 5))
+   (m/SingleChildScrollView
+    .scrollDirection m.Axis/vertical)
    (m/Wrap
     .crossAxisAlignment m.WrapCrossAlignment/center
     .direction m.Axis/vertical
-    .children 
-    [(m/Text "A")
-     (m/Text "B")])))
+    .spacing 5
+    .children
+    [(toolbar-button
+      (m/Icon (.redo m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (toolbar-button
+      (m/Icon (.undo m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (m/SizedBox .height 8)
+     (toolbar-button
+      (m/Icon (.arrow_back_outlined m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (toolbar-button
+      (m/Icon (.arrow_forward_outlined m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (toolbar-text-button
+      (m/Icon (.arrow_back_outlined m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (toolbar-text-button
+      (m/Icon (.arrow_forward_outlined m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (m/SizedBox .height 8)
+     (toolbar-button-normal
+      (m/Icon (.copy m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (toolbar-button-normal
+      (m/Icon (.paste m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))
+     (toolbar-button-normal
+      (m/Icon (.select_all m/Icons))
+      #(dart:core/print "toolbar-button >>>>"))])))

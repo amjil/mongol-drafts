@@ -37,6 +37,7 @@
           .child
           (mgl/MongolTextField
            .controller text-controller
+           .decoration nil
            .maxLines 1000
            .autofocus true
            .showCursor true
