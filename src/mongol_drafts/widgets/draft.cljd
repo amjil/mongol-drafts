@@ -28,7 +28,7 @@
       (m/Row
        .children
        [(if (true? tag-viewable)
-          (m/Text "AA")
+          (button-bar/tagbar)
           (m/Container))
         (m/Expanded
          .child
