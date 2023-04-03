@@ -1,7 +1,8 @@
 (ns mongol-drafts.main
   (:require
    ["package:flutter/material.dart" :as m]
-   ["package:mongol/mongol.dart" :as mgl]))
+   ["package:mongol/mongol.dart" :as mgl]
+   [mongol-drafts.widgets.button-bar :as button-bar]))
 
 (defn main []
   (m/runApp
@@ -11,14 +12,8 @@
                         .fontFamily "MongolianBaiZheng")
     .home
     (m/Scaffold
-     .appBar (m/AppBar
-              .title (m/Text "Mongolian Notes"))
      .body
-     (m/Center
-      .child (mgl/MongolText
-              " ᠳᠠᠶᠠᠭᠠᠷ ᠰᠠᠶ᠋ᠢᠨ ᠪᠠᠶ᠋ᠢᠨ᠎ᠠ ᠊ᠤᠤ?"
-              .style (m/TextStyle
-                      .color m.Colors/blue
-                      ;; .fontFamily "MongolianBaiZheng"
-                      .fontSize 32.0))))
+     (m/SafeArea
+      .child
+      (button-bar/bar)))
     .debugShowCheckedModeBanner false)))

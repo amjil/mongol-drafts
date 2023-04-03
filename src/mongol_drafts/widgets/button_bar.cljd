@@ -1,0 +1,29 @@
+(ns mongol-drafts.widgets.button-bar
+  (:require 
+   ["package:flutter/material.dart" :as m]
+   [cljd.flutter.alpha2 :as f]))
+
+(defn bar []
+  (f/widget
+   :context ctx
+   :let [width  (-> m/MediaQuery (.of ctx) .-size .-width)]
+   (m/Row
+    .mainAxisAlignment m.MainAxisAlignment/spaceAround
+    .children
+    [(m/Expanded
+      .child (m/Row
+              .mainAxisAlignment m.MainAxisAlignment/spaceAround
+              .children
+              [(m/Icon (.article_outlined m/Icons))
+               (m/Icon (.add m/Icons))
+               (m/Icon (.tag m/Icons))]))
+     (m/Container
+      .width (/ width 3)
+      .height 30)
+     (m/Expanded
+      .child (m/Row
+              .mainAxisAlignment m.MainAxisAlignment/spaceAround
+              .children
+              [(m/Icon (.arrow_drop_down m/Icons))
+               (m/Icon (.search m/Icons))
+               (m/Icon (.view_sidebar_outlined m/Icons))]))])))

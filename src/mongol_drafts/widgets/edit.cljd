@@ -1,0 +1,37 @@
+(ns mongol-drafts.widgets.edit
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [virtual-keyboard.keyboard :as keyboard]
+   [virtual-keyboard.keyboard-action :as keyboard-action]
+   [virtual-keyboard.options :as keyboard-options]
+   [cljd.flutter.alpha2 :as f]))
+
+(defn widget []
+  (f/widget
+   :context ctx
+   :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
+         h  (-> m/MediaQuery (.of ctx) .-size .-height)
+         info (merge keyboard-options/keyboard-option {} {:width w})
+         state (atom keyboard-options/keyboard-state)]
+   :managed [^m/TextEditingController text-controller (m/TextEditingController)]
+   :bind {:info info :state state :text-controller text-controller :context ctx}
+   (m/Column
+    .children
+    [(m/Expanded
+      .child
+      (mgl/MongolTextField
+       .controller text-controller
+       .maxLines 500
+       .autofocus true
+       .onTap (fn []
+                (swap! state assoc :candidates-list [])
+                (dart:core/print "onTap TextField"))
+       .showCursor true
+       .readOnly true
+       .style (m/TextStyle .fontSize 20)
+       .decoration (m/InputDecoration .border (m/OutlineInputBorder))))
+     (m/Container
+      .color (-> m/Colors .grey .-shade300)
+      .child
+      (keyboard/keyboard))])))
