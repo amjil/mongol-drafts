@@ -4,7 +4,7 @@
          :sha "f50b40ae44f953518f5e490c732fc358831d203b"}
         amjil/mongol-virtual-keyboard
        ;;  {:git/url "https://github.com/amjil/mongol-virtual-keyboard.git"
-       ;;   :sha "82bce04e69d928f6697e064ff9914bd38d17a82d"}
+       ;;   :sha "02510d06672908f340eab42d8aadc38d9876b04b"}
         {:local/root "../mongol-virtual-keyboard"}}
        
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}

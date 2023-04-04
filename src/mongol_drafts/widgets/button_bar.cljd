@@ -14,7 +14,7 @@
 (defn topbar []
   (f/widget
    :context ctx
-   :get [:state :info]
+   :get [:state :info :text-controller]
    (m/Row
     .mainAxisAlignment m.MainAxisAlignment/spaceAround
     .children
@@ -30,7 +30,12 @@
                   (swap! state
                          assoc
                          :tag-viewable
-                         (not (:tag-viewable @state)))))]))
+                         (not (:tag-viewable @state)))
+                  (if (false? (:tag-viewable @state))
+                    (swap! state
+                           assoc
+                           :text-controller
+                           text-controller))))]))
      (m/Container
       .width (/ (:width info) 3)
       .height 30)
@@ -84,13 +89,14 @@
 
 (defn toolbar []
   (f/widget
+   :get [:state]
    (m/Container
     .color (-> m/Colors .blue .-shade50)
     .height double/infinity)
    (m/Padding
     .padding (.all m/EdgeInsets 5))
-   (m/Column 
-    .children 
+   (m/Column
+    .children
     [(m/Container
       .height 40
       .child (m/Icon (.menu m/Icons)))
@@ -138,11 +144,14 @@
           #(dart:core/print "toolbar-button >>>>"))])))
      (m/Container
       .height 40
-      .child (m/Icon (.keyboard_arrow_down m/Icons)))])
-
-
-
-   ))
+      .child
+      (m/GestureDetector
+       .child (m/Icon (.keyboard_arrow_down m/Icons))
+       .onTap (fn []
+                (swap! state
+                       assoc
+                       :show-keyboard
+                       (not (:show-keyboard @state))))))])))
 
 
 ;;;
@@ -184,7 +193,6 @@
      (m/SizedBox .height 8)
      (m/Container
       .height 120
-    ;;  .width 40
       .alignment m.Alignment/center
       .decoration (m/BoxDecoration
                    .borderRadius

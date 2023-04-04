@@ -3,7 +3,6 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [virtual-keyboard.keyboard :as keyboard]
-   [virtual-keyboard.keyboard-action :as keyboard-action]
    [virtual-keyboard.options :as keyboard-options]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [cljd.flutter.alpha2 :as f]))
@@ -18,12 +17,14 @@
          info (merge keyboard-options/keyboard-option {} {:width w})
          state (atom (merge keyboard-options/keyboard-state
                       {:tag-viewable false
+                       :show-keyboard true
                        :text-controller text-controller}))]
    :bind {:info info :state state
-          :text-controller text-controller 
-          :tag-controller tag-controller
-          :context ctx}
-   :watch [{:keys [tag-viewable]} state]
+          :text-controller text-controller
+          :tag-controller tag-controller}
+   :watch [{:keys [tag-viewable
+                   show-keyboard]} 
+           state]
    (m/Column
     .children
     [(button-bar/topbar)
@@ -42,15 +43,20 @@
           (mgl/MongolTextField
            .controller text-controller
            .onTap (fn []
-                    (swap! state assoc :text-controller text-controller))
+                    (swap! state assoc :text-controller text-controller)
+                    (swap! state assoc :show-keyboard true))
            .decoration nil
            .maxLines 1000
            .autofocus true
            .showCursor true
            .readOnly true
            .style (m/TextStyle .fontSize 20))))
-        (button-bar/toolbar)]))
-     (m/Container
-      .color (-> m/Colors .blue .-shade100)
-      .child
-      (keyboard/keyboard))])))
+        (if (true? show-keyboard)
+          (button-bar/toolbar)
+          (m/Container))]))
+     (if (true? show-keyboard)
+       (m/Container
+        .color (-> m/Colors .blue .-shade100)
+        .child
+        (keyboard/keyboard))
+       (m/Container))])))
