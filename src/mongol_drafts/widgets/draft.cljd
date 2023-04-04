@@ -11,14 +11,18 @@
 (defn widget []
   (f/widget
    :context ctx
+   :managed [^m/TextEditingController text-controller (m/TextEditingController)
+             ^m/TextEditingController tag-controller (m/TextEditingController)]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
          info (merge keyboard-options/keyboard-option {} {:width w})
          state (atom (merge keyboard-options/keyboard-state
-                      {:tag-viewable false}))]
-   :managed [^m/TextEditingController text-controller (m/TextEditingController)]
+                      {:tag-viewable false
+                       :text-controller text-controller}))]
    :bind {:info info :state state
-          :text-controller text-controller :context ctx}
+          :text-controller text-controller 
+          :tag-controller tag-controller
+          :context ctx}
    :watch [{:keys [tag-viewable]} state]
    (m/Column
     .children
@@ -28,7 +32,7 @@
       (m/Row
        .children
        [(if (true? tag-viewable)
-          (button-bar/tagbar)
+          (button-bar/tagbar tag-controller)
           (m/Container))
         (m/Expanded
          .child
@@ -37,6 +41,8 @@
           .child
           (mgl/MongolTextField
            .controller text-controller
+           .onTap (fn []
+                    (swap! state assoc :text-controller text-controller))
            .decoration nil
            .maxLines 1000
            .autofocus true
@@ -45,6 +51,6 @@
            .style (m/TextStyle .fontSize 20))))
         (button-bar/toolbar)]))
      (m/Container
-      .color (-> m/Colors .grey .-shade300)
+      .color (-> m/Colors .blue .-shade100)
       .child
       (keyboard/keyboard))])))

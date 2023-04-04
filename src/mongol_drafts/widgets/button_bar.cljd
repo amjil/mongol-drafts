@@ -91,7 +91,9 @@
     .padding (.all m/EdgeInsets 5))
    (m/Column 
     .children 
-    [(m/Container .height 40 .child (m/Icon (.menu m/Icons)))
+    [(m/Container
+      .height 40
+      .child (m/Icon (.menu m/Icons)))
      (m/Expanded
       .child
       (m/SingleChildScrollView
@@ -161,8 +163,9 @@
                   .quarterTurns 1
                   .child (m/Text text))])])))
 
-(defn tagbar []
+(defn tagbar [controller]
   (f/widget
+   :get [:state :text-controller :tag-controller]
    (m/Container
     .color (-> m/Colors .blue .-shade50)
     .height double/infinity)
@@ -174,7 +177,7 @@
     .crossAxisAlignment m.WrapCrossAlignment/center
     .direction m.Axis/vertical
     .spacing 5
-    .children 
+    .children
     [(toolbar-button-normal
       (m/Icon (.flag m/Icons))
       #(dart:core/print "tag button >>."))
@@ -193,6 +196,9 @@
        .padding (.all m/EdgeInsets 8)
        .child
        (mgl/MongolTextField
+        .controller controller
+        .onTap (fn [] 
+                 (swap! state assoc :text-controller tag-controller))
         .showCursor true
         .readOnly true
         .style (m/TextStyle .fontSize 14)
