@@ -18,6 +18,8 @@
          state (atom (merge keyboard-options/keyboard-state
                       {:tag-viewable false
                        :show-keyboard true
+                       :tag-on-edit false
+                       :current-layout "mn"
                        :text-controller text-controller}))]
    :bind {:info info :state state
           :text-controller text-controller
@@ -43,8 +45,11 @@
           (mgl/MongolTextField
            .controller text-controller
            .onTap (fn []
-                    (swap! state assoc :text-controller text-controller)
-                    (swap! state assoc :show-keyboard true))
+                    (swap! state assoc :show-keyboard true)
+                    (when (true? (:tag-on-edit @state))
+                      (.clear (:text-controller @state))
+                      (swap! state assoc :tag-on-edit false))
+                    (swap! state assoc :text-controller text-controller))
            .decoration nil
            .maxLines 1000
            .autofocus true
