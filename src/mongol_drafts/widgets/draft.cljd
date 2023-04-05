@@ -47,7 +47,8 @@
            .onTap (fn []
                     (swap! state assoc :show-keyboard true)
                     (when (true? (:tag-on-edit @state))
-                      (.clear (:text-controller @state))
+                      (let [^m/TextEditingController controller (:text-controller @state)]
+                        (.clear controller))
                       (swap! state assoc :tag-on-edit false))
                     (swap! state assoc :text-controller text-controller))
            .decoration nil

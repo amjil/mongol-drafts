@@ -178,6 +178,16 @@
    :get [:state :text-controller :tag-controller]
    :managed [focus (m/FocusNode)]
    :watch [{:keys [tag-on-edit]} state]
+   :bg-watcher ([^m/TextEditingValue {tag-edit-text .-text} tag-controller]
+                (if (and (not (empty? tag-edit-text)) (.endsWith tag-edit-text "\n"))
+                  (do
+                    ;; (.substring tag-edit-text 0
+                    ;;             (dec (.-length tag-edit-text)))
+                    ;; TODO
+                    (let [^m/TextEditingController controller tag-controller]
+                      (.clear controller))
+                    (dart:core/print (str ">>> ")))
+                  (dart:core/print (str "11>>> "))))
    (m/Container
     .color (-> m/Colors .blue .-shade50)
     .height double/infinity)
@@ -212,14 +222,11 @@
           (mgl/MongolTextField
            .focusNode focus
            .controller controller
-          ;;  .onChanged (fn [text]
-          ;;               (if (.endsWith text "\n")
-          ;;                 (dart:core/print "ends with return")
-          ;;                 (dart:core/print "ends with no return")))
            .showCursor true
            .readOnly true
            .style (m/TextStyle .fontSize 14)
-           .maxLines 1
+           .maxLines 2
+           .minLines 1
            .decoration nil)
           (m/GestureDetector
            .onTap (fn []
