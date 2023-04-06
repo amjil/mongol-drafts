@@ -1,0 +1,36 @@
+(ns mongol-drafts.widgets.drawer
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter.alpha2 :as f]))
+
+(declare left-sub-drawer)
+
+(defn left-drawer []
+  (f/widget
+   :context ctx
+   (m/SizedBox
+    .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
+              0.89))
+   (m/Drawer)
+   (m/Scaffold
+    .drawer
+    (left-sub-drawer))
+   .body
+   (m/Container
+    .color (-> m/Colors .blueGrey .-shade100))
+   (m/Center
+    .child
+    (m/Text "multi-layer drawer example"))))
+
+(defn left-sub-drawer []
+  (f/widget
+   :context ctx
+   (m/SizedBox
+    .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
+              0.75))
+   (m/Drawer)
+   (m/Container
+    .color (-> m/Colors .blueGrey .-shade100))
+   (m/Center)
+   (m/Text "this is 2nd drawer")))
