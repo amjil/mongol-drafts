@@ -19,9 +19,38 @@
    .body
    (m/Container
     .color (-> m/Colors .blueGrey .-shade100))
-   (m/Center
-    .child
-    (m/Text "multi-layer drawer example"))))
+  ;;  (m/Center
+  ;;   .child
+  ;;   (m/Text "multi-layer drawer example"))
+   (m/SafeArea)
+   (m/Column
+    .children
+    [(m/Row
+      .children
+      [(m/Row
+        .children
+        [(m/SizedBox .width 10)
+         (m/Icon (.arrow_circle_down m/Icons))
+         (m/SizedBox .width 20)
+         (m/Icon (.add_outlined m/Icons))])
+       (m/Spacer)
+       (m/Row
+        .children
+        [(m/Icon (.manage_search_outlined m/Icons))
+         (m/SizedBox .width 20)
+         (m/Icon (.remove_circle_outline m/Icons))
+         (m/SizedBox .width 20)
+         (m/Icon (.pending_outlined m/Icons))
+         (m/SizedBox .width 10)])])
+     (m/Expanded
+      .child
+      (m/Row
+       .children
+       [(mgl/MongolTextField)
+        ]
+       ))])
+   
+   ))
 
 (defn left-sub-drawer []
   (f/widget
