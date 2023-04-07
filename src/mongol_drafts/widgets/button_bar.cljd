@@ -87,6 +87,24 @@
                   .quarterTurns 1
                   .child (m/Text "word"))])])))
 
+(defn keyboard-close-button [flag]
+  (f/widget
+   :get [:state]
+   (m/Container
+    .height 40
+    .child
+    (m/GestureDetector
+     .child (m/Icon (.keyboard_arrow_down m/Icons))
+     .onTap (fn []
+              (if (true? flag)
+                (swap! state
+                       assoc
+                       :show-keyboard
+                       (not (:show-keyboard @state)))
+                (swap! state
+                       assoc
+                       :show-stacked-keyboard
+                       (not (:show-stacked-keyboard @state)))))))))
 (defn toolbar []
   (f/widget
    :get [:state]
@@ -143,16 +161,7 @@
          (toolbar-button-normal
           (m/Icon (.select_all m/Icons))
           #(dart:core/print "toolbar-button >>>>"))])))
-     (m/Container
-      .height 40
-      .child
-      (m/GestureDetector
-       .child (m/Icon (.keyboard_arrow_down m/Icons))
-       .onTap (fn []
-                (swap! state
-                       assoc
-                       :show-keyboard
-                       (not (:show-keyboard @state))))))])))
+     (keyboard-close-button true)])))
 
 
 ;;;
@@ -241,3 +250,11 @@
      (m/SizedBox .height 8)
      (tagbar-button "ᠪᠦᠬᠦ" #(prn "a"))
      (tagbar-button "ᠰᠣᠨᠢᠨ" #(prn "b"))])))
+
+;;;
+(defn keyboard-upper-bar []
+  (m/Expanded
+   .child
+   (m/Row
+    .children
+    [(keyboard-close-button false)])))

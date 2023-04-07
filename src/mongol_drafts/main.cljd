@@ -2,7 +2,9 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [mongol-drafts.widgets.draft :as draft]))
+   [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.widgets.draft :as draft]
+   ))
 
 (defn main []
   (m/runApp
@@ -11,9 +13,7 @@
     .theme (m/ThemeData .primarySwatch m.Colors/blue
                         .fontFamily "MongolianBaiZheng")
     .home
-    (m/Scaffold
-     .body
-     (m/SafeArea
-      .child
-      (draft/widget)))
+    (draft/widget)
+    
+
     .debugShowCheckedModeBanner false)))

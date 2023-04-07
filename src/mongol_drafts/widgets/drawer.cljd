@@ -6,9 +6,23 @@
 
 (declare left-sub-drawer)
 
+(defn toolbar-button-normal [child on-press]
+  (f/widget
+   (m/Material
+    .borderRadius (.circular m/BorderRadius 25)
+    .color (-> m.Colors/blue .-shade200))
+   (m/InkWell
+    .customBorder (m/CircleBorder)
+    .splashColor (-> m.Colors/blue)
+    .onTap on-press)
+   (m/Padding
+    .padding (.all m/EdgeInsets 2)
+    .child child)))
+
 (defn left-drawer []
   (f/widget
    :context ctx
+   :get [:state]
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.89))
@@ -18,10 +32,7 @@
     (left-sub-drawer))
    .body
    (m/Container
-    .color (-> m/Colors .blueGrey .-shade100))
-  ;;  (m/Center
-  ;;   .child
-  ;;   (m/Text "multi-layer drawer example"))
+    .color (-> m/Colors .blueGrey .-shade50))
    (m/SafeArea)
    (m/Column
     .children
@@ -30,27 +41,57 @@
       [(m/Row
         .children
         [(m/SizedBox .width 10)
-         (m/Icon (.arrow_circle_down m/Icons))
+         (m/Icon (.arrow_circle_down m/Icons)
+                 .color (-> m/Colors .blue .-shade600))
          (m/SizedBox .width 20)
-         (m/Icon (.add_outlined m/Icons))])
+         (m/Icon (.add_outlined m/Icons)
+                 .color (-> m/Colors .blue .-shade600))])
        (m/Spacer)
        (m/Row
         .children
-        [(m/Icon (.manage_search_outlined m/Icons))
+        [(m/Icon (.manage_search_outlined m/Icons)
+                 .color (-> m/Colors .blue .-shade600))
          (m/SizedBox .width 20)
-         (m/Icon (.remove_circle_outline m/Icons))
+         (m/Icon (.cancel_outlined m/Icons)
+                 .color (-> m/Colors .blue .-shade600))
          (m/SizedBox .width 20)
-         (m/Icon (.pending_outlined m/Icons))
+         (m/Icon (.pending_outlined m/Icons)
+                 .color (-> m/Colors .blue .-shade600))
          (m/SizedBox .width 10)])])
+     (m/Divider)
      (m/Expanded
       .child
       (m/Row
+       .crossAxisAlignment m.CrossAxisAlignment/start
        .children
-       [(mgl/MongolTextField)
-        ]
-       ))])
-   
-   ))
+       [(m/Container
+         .constraints
+         (m/BoxConstraints
+          .minHeight 60
+          .maxHeight (- (-> m/MediaQuery (.of ctx) .-size .-height)
+                        460))
+         .child
+         (m/Padding
+          .padding (.all m/EdgeInsets 6)
+          .child
+          (mgl/MongolTextField
+           .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
+           .style (m/TextStyle .fontSize 16)
+           .decoration
+           (m/InputDecoration
+            .isDense true
+            .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
+            .border (m/OutlineInputBorder
+                     .borderSide (m/BorderSide
+                                  .width 0.8
+                                  .color m.Colors/blue)
+                     .borderRadius (.circular m/BorderRadius 20))))))
+        (m/Column
+         .children
+         [(toolbar-button-normal
+           (m/Icon (.flag m/Icons))
+           #(dart:core/print "tag button >>."))
+          (m/VerticalDivider .width 2)])]))])))
 
 (defn left-sub-drawer []
   (f/widget
@@ -60,6 +101,6 @@
               0.75))
    (m/Drawer)
    (m/Container
-    .color (-> m/Colors .blueGrey .-shade100))
+    .color (-> m/Colors .blueGrey .-shade50))
    (m/Center)
    (m/Text "this is 2nd drawer")))
