@@ -1,0 +1,46 @@
+(ns mongol-drafts.widgets.tabbar
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter.alpha2 :as f]))
+
+(declare tabbar-view)
+
+(defn tabbar []
+  (f/widget
+;;    :vsync vsync
+;;    :managed [controller (m/TabController .length 3 .vsync vsync
+                                        ;;  )]
+   (m/DefaultTabController
+    .length 3
+    .child
+    (m/Column
+     .children
+     [(m/TabBar
+       .isScrollable true
+       .tabs
+       [(m/Tab
+         .icon
+         (m/Icon (.directions_car m/Icons)
+                 .color (-> m/Colors .blue .-shade600)))
+        (m/Tab
+         .icon
+         (m/Icon (.directions_transit m/Icons)
+                 .color (-> m/Colors .blue .-shade600)))
+        (m/Tab
+         .icon
+         (m/Icon (.directions_bike m/Icons)
+                 .color (-> m/Colors .blue .-shade600)))])
+      (m/Expanded
+       .child
+       (tabbar-view))]))))
+
+(defn tabbar-view []
+  (m/TabBarView
+   .children
+   [(m/Icon (.directions_car m/Icons)
+            .color (-> m/Colors .blue .-shade600))
+    (m/Icon (.directions_transit m/Icons)
+            .color (-> m/Colors .blue .-shade600))
+    (m/Icon (.directions_bike m/Icons)
+            .color (-> m/Colors .blue .-shade600))]))

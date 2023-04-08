@@ -20,6 +20,7 @@
                             {:tag-viewable false
                              :show-keyboard true
                              :show-stacked-keyboard false
+                             :show-drawer-search false
                              :tag-on-edit false
                              :current-layout "mn"
                              :text-controller text-controller}))]

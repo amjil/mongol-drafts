@@ -2,7 +2,8 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [cljd.flutter.alpha2 :as f]))
+   [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.widgets.tabbar :as tabbar]))
 
 (declare left-sub-drawer)
 
@@ -64,34 +65,46 @@
       (m/Row
        .crossAxisAlignment m.CrossAxisAlignment/start
        .children
-       [(m/Container
-         .constraints
-         (m/BoxConstraints
-          .minHeight 60
-          .maxHeight (- (-> m/MediaQuery (.of ctx) .-size .-height)
-                        460))
+       [(if (true? (:show-drawer-search @state))
+          (m/Container
+           .constraints
+           (m/BoxConstraints
+            .minHeight 60
+            .maxHeight (- (-> m/MediaQuery (.of ctx) .-size .-height)
+                          460))
+           .child
+           (m/Padding
+            .padding (.all m/EdgeInsets 6)
+            .child
+            (mgl/MongolTextField
+             .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
+             .style (m/TextStyle .fontSize 16)
+             .decoration
+             (m/InputDecoration
+              .isDense true
+              .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
+              .border (m/OutlineInputBorder
+                       .borderSide (m/BorderSide
+                                    .width 0.8
+                                    .color m.Colors/blue)
+                       .borderRadius (.circular m/BorderRadius 20))))))
+          (m/Container))
+        ;; (m/Column
+        ;;  .children
+        ;;  [(toolbar-button-normal
+        ;;    (m/Icon (.flag m/Icons))
+        ;;    #(dart:core/print "tag button >>."))
+        ;;   (m/VerticalDivider .width 2)])
+        (m/Padding
+         .padding (.fromLTRB m/EdgeInsets 8 10 8 0)
          .child
-         (m/Padding
-          .padding (.all m/EdgeInsets 6)
-          .child
-          (mgl/MongolTextField
-           .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
-           .style (m/TextStyle .fontSize 16)
-           .decoration
-           (m/InputDecoration
-            .isDense true
-            .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
-            .border (m/OutlineInputBorder
-                     .borderSide (m/BorderSide
-                                  .width 0.8
-                                  .color m.Colors/blue)
-                     .borderRadius (.circular m/BorderRadius 20))))))
-        (m/Column
-         .children
-         [(toolbar-button-normal
-           (m/Icon (.flag m/Icons))
-           #(dart:core/print "tag button >>."))
-          (m/VerticalDivider .width 2)])]))])))
+         (m/GestureDetector
+          .child (m/Icon (.filter_list_outlined m/Icons))
+          .onTap (fn []  (dart:core/print "tag button >>."))))
+        (m/Expanded 
+         .child
+        (tabbar/tabbar))
+        ]))])))
 
 (defn left-sub-drawer []
   (f/widget
