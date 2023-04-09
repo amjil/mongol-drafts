@@ -8,29 +8,41 @@
 
 (defn tabbar []
   (f/widget
-;;    :vsync vsync
-;;    :managed [controller (m/TabController .length 3 .vsync vsync
-                                        ;;  )]
    (m/DefaultTabController
-    .length 3
+    .length 6
     .child
     (m/Column
      .children
-     [(m/TabBar
-       .isScrollable true
-       .tabs
-       [(m/Tab
-         .icon
-         (m/Icon (.directions_car m/Icons)
-                 .color (-> m/Colors .blue .-shade600)))
-        (m/Tab
-         .icon
-         (m/Icon (.directions_transit m/Icons)
-                 .color (-> m/Colors .blue .-shade600)))
-        (m/Tab
-         .icon
-         (m/Icon (.directions_bike m/Icons)
-                 .color (-> m/Colors .blue .-shade600)))])
+     [(m/Row
+       .children
+       [(m/Expanded
+         .child
+         (m/TabBar
+          .isScrollable true
+          .tabs
+          [(m/Tab
+            .icon
+            (m/Icon (.inbox_outlined m/Icons)
+                    .color (-> m/Colors .blue .-shade600)))
+           (m/Tab
+            .icon
+            (m/Icon (.flag_outlined m/Icons)
+                    .color (-> m/Colors .blue .-shade600)))
+           (m/Tab
+            .icon
+            (m/Icon (.archive_outlined m/Icons)
+                    .color (-> m/Colors .blue .-shade600)))
+           (m/Container)
+           (m/Tab
+            .child
+            (m/Text "All"
+                    .style (m/TextStyle .color (-> m/Colors .blue .-shade600))))
+           (m/Tab
+            .icon
+            (m/Icon (.delete_outlined m/Icons)
+                    .color (-> m/Colors .blue .-shade600)))
+           ]))])
+
       (m/Expanded
        .child
        (tabbar-view))]))))
@@ -38,9 +50,20 @@
 (defn tabbar-view []
   (m/TabBarView
    .children
-   [(m/Icon (.directions_car m/Icons)
-            .color (-> m/Colors .blue .-shade600))
+   [(m/Container
+     .child
+     (m/Row
+      .mainAxisAlignment m.MainAxisAlignment/start
+      .children
+      [(mgl/MongolText "Abc")
+       (mgl/MongolText "aaaaaaa")
+       (mgl/MongolText "modified: 2023/4/9, 21:16")]))
     (m/Icon (.directions_transit m/Icons)
             .color (-> m/Colors .blue .-shade600))
     (m/Icon (.directions_bike m/Icons)
+            .color (-> m/Colors .blue .-shade600))
+    (m/Container)
+    (m/Text "All"
+            .style (m/TextStyle .color (-> m/Colors .blue .-shade600)))
+    (m/Icon (.delete_outlined m/Icons)
             .color (-> m/Colors .blue .-shade600))]))
