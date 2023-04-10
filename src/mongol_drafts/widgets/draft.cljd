@@ -69,7 +69,7 @@
                .decoration nil
                .maxLines 1000
                .autofocus true
-               .showCursor true
+               .showCursor (if (true? show-keyboard) true false)
                .readOnly true
                .style (m/TextStyle .fontSize 20))))
             (if (true? show-keyboard)
