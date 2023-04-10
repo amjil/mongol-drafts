@@ -1,0 +1,26 @@
+(ns mongol-drafts.widgets.list
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter.alpha2 :as f]))
+
+
+(def entities 
+  ["abc" "When The Trees Grow up"])
+
+(defn widget []
+  (m.ListView/separated
+   .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
+   .scrollDirection m.Axis/horizontal
+   .padding (.fromLTRB m/EdgeInsets 20 20 8 8)
+   .itemCount (count entities)
+   .itemBuilder (fn [^m/BuildContext context i]
+                  (m/Container
+                   .constraints
+                   (m/BoxConstraints
+                    .maxWidth 40)
+                   .child 
+                   (m/Padding 
+                    .padding (.only m/EdgeInsets .left 10 .right 10)
+                    .child
+                   (mgl/MongolText (nth entities i)))))))

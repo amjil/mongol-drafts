@@ -2,7 +2,8 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [cljd.flutter.alpha2 :as f]))
+   [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.widgets.list :as content-list]))
 
 (declare tabbar-view)
 
@@ -79,14 +80,7 @@
    .child
    (m/TabBarView
     .children
-    [(m/Container
-      .child
-      (m/Row
-       .mainAxisAlignment m.MainAxisAlignment/start
-       .children
-       [(mgl/MongolText "Abc")
-        (mgl/MongolText "aaaaaaa")
-        (mgl/MongolText "modified: 2023/4/9, 21:16")]))
+    [(content-list/widget)
      (m/Icon (.directions_transit m/Icons)
              .color (-> m/Colors .blue .-shade600))
      (m/Icon (.directions_bike m/Icons)
