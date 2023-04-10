@@ -101,10 +101,10 @@
          (m/GestureDetector
           .child (m/Icon (.filter_list_outlined m/Icons))
           .onTap (fn []  (dart:core/print "tag button >>."))))
-        (m/Expanded 
+        (m/VerticalDivider)
+        (m/Expanded
          .child
-        (tabbar/tabbar))
-        ]))])))
+         (tabbar/tabbar))]))])))
 
 (defn left-sub-drawer []
   (f/widget
