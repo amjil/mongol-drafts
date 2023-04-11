@@ -5,20 +5,9 @@
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.tabbar :as tabbar]))
 
-(declare left-sub-drawer)
-
-(defn toolbar-button-normal [child on-press]
-  (f/widget
-   (m/Material
-    .borderRadius (.circular m/BorderRadius 25)
-    .color (-> m.Colors/blue .-shade200))
-   (m/InkWell
-    .customBorder (m/CircleBorder)
-    .splashColor (-> m.Colors/blue)
-    .onTap on-press)
-   (m/Padding
-    .padding (.all m/EdgeInsets 2)
-    .child child)))
+(declare left-sub-drawer
+         in-drawer-search-field
+         toolbar-button-normal)
 
 (defn left-drawer []
   (f/widget
@@ -29,6 +18,10 @@
               0.89))
    (m/Drawer)
    (m/Scaffold
+    .onDrawerChanged
+    (fn [c]
+      (if (false? c)
+        (swap! state assoc :show-stacked-keyboard false)))
     .drawer
     (left-sub-drawer))
    .body
@@ -50,8 +43,16 @@
        (m/Spacer)
        (m/Row
         .children
-        [(m/Icon (.manage_search_outlined m/Icons)
-                 .color (-> m/Colors .blue .-shade600))
+        [(toolbar-button-normal
+          (m/Icon (.manage_search_outlined m/Icons)
+                  .color (-> m/Colors .blue .-shade600))
+          (fn []
+            (swap! state assoc :show-drawer-search
+                   (not (:show-drawer-search @state)))
+            (if (and 
+                 (false? (:show-drawer-search @state))
+                 (true? (:show-stacked-keyboard @state)))
+              (swap! state assoc :show-stacked-keyboard false))))
          (m/SizedBox .width 20)
          (m/Icon (.cancel_outlined m/Icons)
                  .color (-> m/Colors .blue .-shade600))
@@ -66,35 +67,8 @@
        .crossAxisAlignment m.CrossAxisAlignment/start
        .children
        [(if (true? (:show-drawer-search @state))
-          (m/Container
-           .constraints
-           (m/BoxConstraints
-            .minHeight 60
-            .maxHeight (- (-> m/MediaQuery (.of ctx) .-size .-height)
-                          460))
-           .child
-           (m/Padding
-            .padding (.all m/EdgeInsets 6)
-            .child
-            (mgl/MongolTextField
-             .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
-             .style (m/TextStyle .fontSize 16)
-             .decoration
-             (m/InputDecoration
-              .isDense true
-              .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
-              .border (m/OutlineInputBorder
-                       .borderSide (m/BorderSide
-                                    .width 0.8
-                                    .color m.Colors/blue)
-                       .borderRadius (.circular m/BorderRadius 20))))))
+          (in-drawer-search-field)
           (m/Container))
-        ;; (m/Column
-        ;;  .children
-        ;;  [(toolbar-button-normal
-        ;;    (m/Icon (.flag m/Icons))
-        ;;    #(dart:core/print "tag button >>."))
-        ;;   (m/VerticalDivider .width 2)])
         (m/Padding
          .padding (.fromLTRB m/EdgeInsets 8 10 8 0)
          .child
@@ -105,15 +79,193 @@
         (m/Expanded
          .child
          (tabbar/tabbar))]))])))
+;;
+(def tags ["notes" "plans" "unknown" "ideas" "program" "work" "study"])
 
 (defn left-sub-drawer []
   (f/widget
    :context ctx
+   :get [:state]
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.75))
    (m/Drawer)
    (m/Container
     .color (-> m/Colors .blueGrey .-shade50))
-   (m/Center)
-   (m/Text "this is 2nd drawer")))
+   (m/SafeArea)
+   (m/Column
+    .children
+    [(m/Row
+      .mainAxisAlignment m.MainAxisAlignment/end
+      .children
+      [(toolbar-button-normal
+        (m/Icon (.manage_search_outlined m/Icons)
+                .color (-> m/Colors .blue .-shade600))
+        (fn []
+          (swap! state assoc :show-sub-drawer-search
+                 (not (:show-sub-drawer-search @state)))
+          (if (and
+               (false? (:show-sub-drawer-search @state))
+               (true? (:show-stacked-keyboard @state)))
+            (swap! state assoc :show-stacked-keyboard false))))
+       (m/SizedBox .width 20)
+       (m/Icon (.cancel_outlined m/Icons)
+               .color (-> m/Colors .blue .-shade600))
+       (m/SizedBox .width 20)
+       (m/Icon (.pending_outlined m/Icons)
+               .color (-> m/Colors .blue .-shade600))
+       (m/SizedBox .width 10)])
+     (m/Divider)
+     (m/Expanded
+      .child
+      (m/Row
+       .crossAxisAlignment m.CrossAxisAlignment/start
+       .children
+       [(m/SizedBox .width 10)
+        (if (true? (:show-sub-drawer-search @state))
+          (in-drawer-search-field)
+          (m/Container))
+        (m/Container
+         .width 30
+         .child
+         (m/Column
+          .children
+          [(mgl/MongolText
+            "Filter"
+            .style (m/TextStyle .fontWeight m.FontWeight/bold
+                                .fontSize 18))
+           (m/SizedBox .height 16)
+           (m/Container
+            .padding (.all m/EdgeInsets 2)
+            .decoration (m/BoxDecoration
+                         .color (-> m/Colors .blue .-shade100)
+                         .borderRadius
+                         (.all m/BorderRadius (.circular m/Radius 6))
+                         .border
+                         (.all m/Border .color m.Colors/blue .width 1))
+            .child
+            (m/Column
+             .children
+             [(m/Container
+               .padding (.symmetric m/EdgeInsets .horizontal 2 .vertical 12)
+               .decoration (m/BoxDecoration
+                            .color (-> m/Colors .blue .-shade300)
+                            .borderRadius
+                            (.all m/BorderRadius (.circular m/Radius 6))
+                            .border
+                            (.all m/Border .color m.Colors/blue .width 1))
+               .child
+               (mgl/MongolText "All"))
+
+              (m/Container
+               .margin (.only m/EdgeInsets .top 8)
+               .padding (.symmetric m/EdgeInsets .horizontal 2 .vertical 12)
+               .child
+               (mgl/MongolText "Any"))]))]))
+        (m/VerticalDivider)
+        (m/Expanded
+         .child
+         (m/Column
+          .children
+          [(m/Expanded
+            .flex 2
+            .child
+            (m/CustomScrollView
+             .scrollDirection m/Axis.horizontal
+             .slivers
+             [(m/SliverFillRemaining
+               .hasScrollBody false
+               .child
+               (m/Row
+                .crossAxisAlignment m/CrossAxisAlignment.stretch
+                .children
+                [(m/Container
+                  .color (-> m/Colors .grey .-shade100)
+                  .child
+                  (m/Row
+                   .crossAxisAlignment m/CrossAxisAlignment.start
+                   .children
+                   (map #(m/Padding
+                          .padding (.all m/EdgeInsets 10)
+                          .child
+                          (m/Column
+                           .children [(m/Icon (.sell_rounded m/Icons)
+                                              .color (-> m/Colors .blue .-shade500)
+                                              .size 16)
+                                      (m/SizedBox .height 4)
+                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))])) 
+                        (take 3 tags))))
+                 (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
+                 (m/Container
+                  .color (-> m/Colors .grey .-shade100)
+                  .child
+                  (m/Row
+                   .crossAxisAlignment m/CrossAxisAlignment.start
+                   .children
+                   (map #(m/Padding
+                          .padding (.all m/EdgeInsets 10)
+                          .child
+                          (m/Column
+                           .children [(m/Icon (.do_disturb_alt m/Icons)
+                                              .color (-> m/Colors .blue .-shade500)
+                                              .size 16)
+                                      (m/SizedBox .height 4)
+                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))])) 
+                        (take-last 2 tags))))]))]))
+           (m/Divider)
+           (m/Expanded
+            .flex 4
+            .child
+            (m.ListView/separated
+             .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
+             .scrollDirection m.Axis/horizontal
+             .padding (.fromLTRB m/EdgeInsets 8 20 8 8)
+             .itemCount (count tags)
+             .itemBuilder (fn [^m/BuildContext context i]
+                            (m/Container
+                             .constraints
+                             (m/BoxConstraints
+                              .maxWidth 40)
+                             .child
+                             (m/Padding
+                              .padding (.only m/EdgeInsets .left 10 .right 10)
+                              .child
+                              (mgl/MongolText (nth tags i) .style (m/TextStyle .fontSize 18)))))))]))]))])))
+
+(defn in-drawer-search-field []
+  (f/widget
+   :context ctx
+   :get [:state]
+   (m/Container
+    .constraints
+    (m/BoxConstraints
+     .minHeight 60
+     .maxHeight (- (-> m/MediaQuery (.of ctx) .-size .-height)
+                   460)))
+   (m/Padding
+    .padding (.all m/EdgeInsets 6))
+   (mgl/MongolTextField
+    .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
+    .style (m/TextStyle .fontSize 16)
+    .decoration
+    (m/InputDecoration
+     .isDense true
+     .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
+     .border (m/OutlineInputBorder
+              .borderSide (m/BorderSide
+                           .width 0.8
+                           .color m.Colors/blue)
+              .borderRadius (.circular m/BorderRadius 10))))))
+
+(defn toolbar-button-normal [child on-press]
+  (f/widget
+   (m/Material
+    .borderRadius (.circular m/BorderRadius 25)
+    .color (-> m.Colors/blue .-shade100))
+   (m/InkWell
+    .customBorder (m/CircleBorder)
+    .splashColor (-> m.Colors/blue)
+    .onTap on-press)
+   (m/Padding
+    .padding (.all m/EdgeInsets 2)
+    .child child)))
