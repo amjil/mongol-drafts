@@ -19,11 +19,11 @@
          info (merge keyboard-options/keyboard-option {} {:width w})
          state (atom (merge keyboard-options/keyboard-state
                             {:tag-viewable false
-                             :show-keyboard true
+                             :show-keyboard false
                              :show-stacked-keyboard false
                              :show-drawer-search false
                              :show-sub-drawer-search false
-                             :show-search-diaglog true
+                             :show-search-diaglog false
                              :tag-on-edit false
                              :current-layout "mn"
                              :text-controller text-controller}))]
