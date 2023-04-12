@@ -3,7 +3,8 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.widgets.list :as content-list]))
+   [mongol-drafts.widgets.list :as content-list]
+   [mongol-drafts.widgets.empty :as empty-content]))
 
 (declare tabbar-view)
 
@@ -53,27 +54,6 @@
        .child
        (tabbar-view))]))))
 
-(defn empty-content-view []
-  (f/widget
-   (m/Center)
-   (m/Padding
-    .padding
-    (.fromLTRB m/EdgeInsets 0 40 0 0))
-   (m/Column
-    .children
-    [(m/Text
-      "{}"
-      .style
-      (m/TextStyle .fontSize 40
-                   .fontFamily "roboto"))
-     (m/SizedBox
-      .height 20)
-     (m/Row
-      .mainAxisAlignment m.MainAxisAlignment/center
-      .children [(mgl/MongolText "ᠶᠭᠤ" .style (m/TextStyle .fontSize 20))
-                 (mgl/MongolText "ᠴᠤ" .style (m/TextStyle .fontSize 20))
-                 (mgl/MongolText "ᠦᠭᠡᠢ" .style (m/TextStyle .fontSize 20))])])))
-
 (defn tabbar-view []
   (m/Container
    .color (.-shade100 m.Colors/blueGrey)
@@ -89,7 +69,7 @@
              .style (m/TextStyle .color (-> m/Colors .blue .-shade600)))
     ;; (m/Icon (.delete_outlined m/Icons)
     ;;         .color (-> m/Colors .blue .-shade600))
-     (empty-content-view)])))
+     (empty-content/empty-content-view)])))
 
 ;;
 (defn tab-content-view []

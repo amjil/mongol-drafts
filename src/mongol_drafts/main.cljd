@@ -3,8 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.widgets.draft :as draft]
-   ))
+   [mongol-drafts.widgets.draft :as draft]))
 
 (defn main []
   (m/runApp

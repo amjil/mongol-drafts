@@ -1,0 +1,26 @@
+(ns mongol-drafts.widgets.empty
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter.alpha2 :as f]))
+
+(defn empty-content-view []
+  (f/widget
+   (m/Center)
+   (m/Padding
+    .padding
+    (.fromLTRB m/EdgeInsets 0 40 0 0))
+   (m/Column
+    .children
+    [(m/Text
+      "{}"
+      .style
+      (m/TextStyle .fontSize 40
+                   .fontFamily "roboto"))
+     (m/SizedBox
+      .height 20)
+     (m/Row
+      .mainAxisAlignment m.MainAxisAlignment/center
+      .children [(mgl/MongolText "ᠶᠭᠤ" .style (m/TextStyle .fontSize 20))
+                 (mgl/MongolText "ᠴᠤ" .style (m/TextStyle .fontSize 20))
+                 (mgl/MongolText "ᠦᠭᠡᠢ" .style (m/TextStyle .fontSize 20))])])))

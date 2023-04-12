@@ -15,7 +15,8 @@
 (defn topbar []
   (f/widget
    :context ctx
-   :get [:state :info :text-controller]
+   :get [:state :info 
+         :text-controller :search-controller]
    (m/Row
     .mainAxisAlignment m.MainAxisAlignment/spaceAround
     .children
@@ -47,11 +48,10 @@
               [(m/Icon (.arrow_drop_down m/Icons))
                (bar-button
                 (m/Icon (.search m/Icons))
-                (fn [] 
+                (fn []
                   (swap! state assoc :show-search-diaglog true)
                   (swap! state assoc :show-stacked-keyboard true)
-                  (swap! state assoc :show-keyboard false)
-                  ))
+                  (swap! state assoc :show-keyboard false)))
                (m/Icon (.view_sidebar_outlined m/Icons))]))])))
 
 (defn toolbar-button [child on-press]

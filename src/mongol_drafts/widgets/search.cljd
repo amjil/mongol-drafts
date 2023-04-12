@@ -2,7 +2,8 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [cljd.flutter.alpha2 :as f]))
+   [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.widgets.empty :as empty-content]))
 
 (declare search-field)
 
@@ -10,10 +11,12 @@
   (f/widget
    :context ctx
    :get [:state]
+   :watch [{:keys [search-result]} state]
    (m/Positioned
     .top 0
     .left 0
     .right 0)
+   (m/Material)
    (m/SafeArea)
    (m/Container
     ;; .color (-> m/Colors .red)
@@ -22,11 +25,11 @@
     .height (- (-> m/MediaQuery (.of ctx) .-size .-height)
                410)
     .decoration (m/BoxDecoration
-                 .color (-> m/Colors .blue .-shade400)
+                 .color (-> m/Colors .blue .-shade50)
                  .borderRadius
                  (.all m/BorderRadius (.circular m/Radius 6))
                  .border
-                 (.all m/Border .color m.Colors/blue .width 1))
+                 (.all m/Border .color m.Colors/blue .width 0.2))
     .margin (.only m/EdgeInsets .left 6 .right 6))
    (m/Row
     .mainAxisAlignment m.MainAxisAlignment/spaceBetween
@@ -39,46 +42,59 @@
         .child
         (m/InkWell
          .customBorder (m/CircleBorder)
+         .child (m/Icon (.search_outlined m/Icons)
+                        .color (-> m/Colors .blue .-shade600)
+                        .size 36)))
+       (search-field)
+       (m/Material
+        .borderRadius (.circular m/BorderRadius 25)
+        .child
+        (m/InkWell
+         .customBorder (m/CircleBorder)
          .onTap (fn []
                   (swap! state assoc :show-search-diaglog false)
                   (swap! state assoc :show-stacked-keyboard false))
          .child (m/Icon (.cancel_outlined m/Icons)
-                        .color (-> m/Colors .blue .-shade600))))
-       (mgl/MongolText "ABC")])
+                        .color m/Colors.blue.shade600
+                        .size 36)))])
      (m/Expanded
       .child
-     (m/SingleChildScrollView
-      .scrollDirection m/Axis.horizontal
-      .child
-      (m/Row
-       .children [(m/Text "ABC")
-                  (m/Text "ABC")
-                  (m/Text "ABC")
-                  (m/Text "ABC")
-                  (m/Text "ABC")
-                  (m/Text "ABC")])))])))
+      (if (empty? search-result)
+        (empty-content/empty-content-view)
+        (m/SingleChildScrollView
+         .scrollDirection m/Axis.horizontal
+         .child
+         (m/Row
+          .children [(m/Text "ABC")
+                     (m/Text "ABC")
+                     (m/Text "ABC")
+                     (m/Text "ABC")
+                     (m/Text "ABC")
+                     (m/Text "ABC")]))))])))
   
   
 (defn search-field []
   (f/widget
    :context ctx
-   :get [:state]
-;;    (m/Container
-;;     .width 100
-;;     .height 300
-;;     ;; .constraints
-;;     ;; (m/BoxConstraints
-;;     ;;  .minHeight 60)
-;;     )
-;;    (m/Padding
-;;     .padding (.all m/EdgeInsets 6))
-;;    (m/IntrinsicHeight)
+   :get [:state :search-controller]
+   (m/Expanded)
+   (m/Padding
+    .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
-    ;; .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
+    .controller search-controller
+    .onTap (fn []
+             (swap! state assoc :show-stacked-keyboard true)
+             (swap! state assoc :text-controller search-controller))
     .style (m/TextStyle .fontSize 16)
     .decoration
     (m/InputDecoration
+     .suffixIcon
+     (m/IconButton .onPressed
+                   (fn []
+                     (.clear search-controller))
+                   .icon (m/Icon (.clear m/Icons)))
      .isDense true
+    ;;  .hintText "Search"
      .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
      .border (m/OutlineInputBorder
               .borderSide (m/BorderSide
