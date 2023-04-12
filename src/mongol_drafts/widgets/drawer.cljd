@@ -126,15 +126,16 @@
           (in-drawer-search-field)
           (m/Container))
         (m/Container
-         .width 30
+         .margin (.only m/EdgeInsets .top 6)
          .child
          (m/Column
+          .mainAxisAlignment m.MainAxisAlignment/spaceBetween
           .children
           [(mgl/MongolText
             "Filter"
             .style (m/TextStyle .fontWeight m.FontWeight/bold
                                 .fontSize 18))
-           (m/SizedBox .height 16)
+           (m/SizedBox .height 40)
            (m/Container
             .padding (.all m/EdgeInsets 2)
             .decoration (m/BoxDecoration
@@ -193,7 +194,7 @@
                                               .color (-> m/Colors .blue .-shade500)
                                               .size 16)
                                       (m/SizedBox .height 4)
-                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))])) 
+                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))]))
                         (take 3 tags))))
                  (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
                  (m/Container
@@ -210,7 +211,7 @@
                                               .color (-> m/Colors .blue .-shade500)
                                               .size 16)
                                       (m/SizedBox .height 4)
-                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))])) 
+                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))]))
                         (take-last 2 tags))))]))]))
            (m/Divider)
            (m/Expanded

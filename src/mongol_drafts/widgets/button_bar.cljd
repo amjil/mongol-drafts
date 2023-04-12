@@ -1,9 +1,10 @@
 (ns mongol-drafts.widgets.button-bar
-  (:require 
+  (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [cljd.flutter.alpha2 :as f]))
-
+   [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.widgets.search :as search]))
+   
 (defn bar-button [child on-press]
   (m/Material
    .child
@@ -44,7 +45,13 @@
               .mainAxisAlignment m.MainAxisAlignment/spaceAround
               .children
               [(m/Icon (.arrow_drop_down m/Icons))
-               (m/Icon (.search m/Icons))
+               (bar-button
+                (m/Icon (.search m/Icons))
+                (fn [] 
+                  (swap! state assoc :show-search-diaglog true)
+                  (swap! state assoc :show-stacked-keyboard true)
+                  (swap! state assoc :show-keyboard false)
+                  ))
                (m/Icon (.view_sidebar_outlined m/Icons))]))])))
 
 (defn toolbar-button [child on-press]

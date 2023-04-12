@@ -1,0 +1,87 @@
+(ns mongol-drafts.widgets.search
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter.alpha2 :as f]))
+
+(declare search-field)
+
+(defn widget []
+  (f/widget
+   :context ctx
+   :get [:state]
+   (m/Positioned
+    .top 0
+    .left 0
+    .right 0)
+   (m/SafeArea)
+   (m/Container
+    ;; .color (-> m/Colors .red)
+    .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
+              60)
+    .height (- (-> m/MediaQuery (.of ctx) .-size .-height)
+               410)
+    .decoration (m/BoxDecoration
+                 .color (-> m/Colors .blue .-shade400)
+                 .borderRadius
+                 (.all m/BorderRadius (.circular m/Radius 6))
+                 .border
+                 (.all m/Border .color m.Colors/blue .width 1))
+    .margin (.only m/EdgeInsets .left 6 .right 6))
+   (m/Row
+    .mainAxisAlignment m.MainAxisAlignment/spaceBetween
+    .children
+    [(m/Column
+      .mainAxisAlignment m.MainAxisAlignment/spaceBetween
+      .children
+      [(m/Material
+        .borderRadius (.circular m/BorderRadius 25)
+        .child
+        (m/InkWell
+         .customBorder (m/CircleBorder)
+         .onTap (fn []
+                  (swap! state assoc :show-search-diaglog false)
+                  (swap! state assoc :show-stacked-keyboard false))
+         .child (m/Icon (.cancel_outlined m/Icons)
+                        .color (-> m/Colors .blue .-shade600))))
+       (mgl/MongolText "ABC")])
+     (m/Expanded
+      .child
+     (m/SingleChildScrollView
+      .scrollDirection m/Axis.horizontal
+      .child
+      (m/Row
+       .children [(m/Text "ABC")
+                  (m/Text "ABC")
+                  (m/Text "ABC")
+                  (m/Text "ABC")
+                  (m/Text "ABC")
+                  (m/Text "ABC")])))])))
+  
+  
+(defn search-field []
+  (f/widget
+   :context ctx
+   :get [:state]
+;;    (m/Container
+;;     .width 100
+;;     .height 300
+;;     ;; .constraints
+;;     ;; (m/BoxConstraints
+;;     ;;  .minHeight 60)
+;;     )
+;;    (m/Padding
+;;     .padding (.all m/EdgeInsets 6))
+;;    (m/IntrinsicHeight)
+   (mgl/MongolTextField
+    ;; .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
+    .style (m/TextStyle .fontSize 16)
+    .decoration
+    (m/InputDecoration
+     .isDense true
+     .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
+     .border (m/OutlineInputBorder
+              .borderSide (m/BorderSide
+                           .width 0.8
+                           .color m.Colors/blue)
+              .borderRadius (.circular m/BorderRadius 10))))))

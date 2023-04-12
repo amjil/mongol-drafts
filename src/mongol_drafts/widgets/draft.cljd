@@ -6,7 +6,8 @@
    [virtual-keyboard.options :as keyboard-options]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.drawer :as drawer]
-   [cljd.flutter.alpha2 :as f]))
+   [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.widgets.search :as search]))
 
 (defn widget []
   (f/widget
@@ -22,6 +23,7 @@
                              :show-stacked-keyboard false
                              :show-drawer-search false
                              :show-sub-drawer-search false
+                             :show-search-diaglog true
                              :tag-on-edit false
                              :current-layout "mn"
                              :text-controller text-controller}))]
@@ -30,7 +32,8 @@
           :tag-controller tag-controller}
    :watch [{:keys [tag-viewable
                    show-keyboard
-                   show-stacked-keyboard]}
+                   show-stacked-keyboard
+                   show-search-diaglog]}
            state]
    (m/Stack
     .children
@@ -101,4 +104,7 @@
            [(button-bar/keyboard-upper-bar)
             (keyboard/keyboard)])
           ))))
+       (m/Container))
+     (if (true? show-search-diaglog)
+       (search/widget)
        (m/Container))])))
