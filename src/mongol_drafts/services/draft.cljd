@@ -1,0 +1,62 @@
+(ns mongol-drafts.services.draft
+  (:require
+   ["package:sqflite/sqflite.dart" :as sqf]
+   [mongol-drafts.services.sqlite :as sql]))
+
+(defn create-draft [v]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        id1 (await
+             (.rawInsert db
+                         "INSERT INTO drafts values (?)"
+                         [v]))
+        _ (await
+           (.rawInsert db
+                       "INSERT INTO draft_info (draft_id) values (?)"
+                       [id1]))]
+    id1))
+
+(defn delete-draft [id]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawDelete db
+                 "DELETE FROM drafts WHERE rowid = ?"
+                 [id]))
+    (await
+     (.rawDelete db
+                 "DELETE FROM draft_info WHERE draft_id = ?"
+                 [id]))))
+
+(defn update-draft [id content]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await (.rawUpdate db
+                       "UPDATE drafts SET content = ? WHERE rowid = ?"
+                       [content id]))))
+
+(defn list-drafts [page]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await 
+     (.rawQuery
+      db 
+      "select a.*, b.content 
+       from draft_info a 
+          left join drafts b on a.draft_id = b.rowid 
+       order by a.updated_at desc
+       limit ?, 20;"
+      [page]))))
+
+(defn query-drafts [word page]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        ids (await (.rawQuery db 
+                              "select rowid from drafts 
+                               where drafts match ?"
+                              [word]))]
+    (await 
+     (.rawQuery
+      db 
+      "select a.*, b.content 
+       from draft_info a 
+          left join drafts b on a.draft_id = b.rowid 
+        where draft_id in ?
+       order by a.updated_at desc
+       limit ?, 20;"
+      [ids page]))))
