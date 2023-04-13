@@ -16,7 +16,7 @@
                                                          draft_id integer primary key,
                                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
                                                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-                                  (.execute db "CREATE TABLE tags(id INTEGER PRIMARY KEY, workspace_id integer, name varchar(100))")
+                                  (.execute db "CREATE TABLE tags(workspace_id integer, name varchar(100), related_num integer)")
                                   (.execute db "CREATE TABLE draft_tags(tag_id integer, draft_id integer)")
                                   (.execute db "CREATE INDEX draft_tags_index_tag ON draft_tags(tag_id)")
                                   (.execute db "CREATE INDEX draft_tags_index_draft ON draft_tags(draft_id)"))

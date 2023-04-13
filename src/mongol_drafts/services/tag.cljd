@@ -1,0 +1,38 @@
+(ns mongol-drafts.services.tag
+  (:require
+   ["package:sqflite/sqflite.dart" :as sqf]
+   [mongol-drafts.services.sqlite :as sql]))
+
+(defn create-tag [v]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        id1 (await
+             (.rawInsert db
+                         "INSERT INTO tags values (?)"
+                         [v]))]
+    id1))
+
+(defn delete-tag [id]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawDelete db
+                 "DELETE FROM tags WHERE rowid = ?"
+                 [id]))))
+
+(defn count-tags []
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (->
+     (await
+      (.rawQuery db "select count(*) as total from tags "))
+     first
+     (get "total"))))
+
+(defn list-tags [page]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawQuery
+      db
+      "select rowid as id, name, related_num
+       from tags 
+       order by related_num desc
+       limit ?, 20;"
+      [page]))))
