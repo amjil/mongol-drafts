@@ -38,6 +38,8 @@ dependencies:
   cupertino_icons: ^1.0.2
   mongol: ^4.0.0
   mongol_code: ^0.3.0
+  sqflite: ^2.2.6
+  path: ^1.8.3
 
 dev_dependencies:
   flutter_test:

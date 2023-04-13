@@ -1,0 +1,16 @@
+(ns mongol-drafts.services.sqlite
+  (:require
+   ["package:sqflite/sqflite.dart" :as sql]
+   ["package:path/path.dart" :as path]))
+
+(defn initialize-db []
+  (let [dbpath (path/join (await (sql/getDatabasesPath))
+                          "database.db")]
+    (sql/openDatabase dbpath
+                      :onCreate (fn [db _]
+                                  (.execute db "CREATE VIRTUAL TABLE drafts USING fts5(content TEXT)")
+                                  (.execute db "CREATE TABLE tags(name varchar(100))")
+                                  (.execute db "CREATE TABLE draft_tags(tag_id integer, draft_id integer)")
+                                  )
+                      :version 1)))
+
