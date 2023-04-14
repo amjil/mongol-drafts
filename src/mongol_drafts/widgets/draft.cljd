@@ -7,7 +7,8 @@
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.drawer :as drawer]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.widgets.search :as search]))
+   [mongol-drafts.widgets.search :as search]
+   [mongol-drafts.widgets.tagbar :as tagbar]))
 
 (defn widget []
   (f/widget
@@ -56,7 +57,7 @@
           (m/Row
            .children
            [(if (true? tag-viewable)
-              (button-bar/tagbar tag-controller)
+              (tagbar/tagbar tag-controller)
               (m/Container))
             (m/Expanded
              .child
