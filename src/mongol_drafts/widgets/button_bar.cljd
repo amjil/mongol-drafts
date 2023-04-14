@@ -29,6 +29,7 @@
                (bar-button
                 (m/Icon (.add m/Icons))
                 (fn []
+                  (dart:core/print (:draft @state))
                   (dart:core/print "abc")))
                (bar-button
                 (m/Icon (.sell_outlined m/Icons))

@@ -3,12 +3,18 @@
    ["package:sqflite/sqflite.dart" :as sqf]
    [mongol-drafts.services.sqlite :as sql]))
 
+(declare query-tag-with-name)
+
 (defn create-tag [v]
   (let [^sqf/Database db (await (sql/initialize-db))
-        id1 (await
-             (.rawInsert db
-                         "INSERT INTO tags values (?)"
-                         [v]))]
+        result (await (query-tag-with-name v))
+        id1
+        (if (empty? result)
+          (await
+           (.rawInsert db
+                       "INSERT INTO tags (name) values (?)"
+                       [v]))
+          (-> result first (get "id")))]
     id1))
 
 (defn delete-tag [id]
@@ -47,6 +53,17 @@
        ORDER BY related_num desc
        ;"
       [word]))))
+
+(defn query-tag-with-name [n]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawQuery
+      db
+      "SELECT rowid as id, name, related_num
+       FROM tags 
+       WHERE name = ?
+       ;"
+      [n]))))
 
 (defn query-draft-tags [id]
   (let [^sqf/Database db (await (sql/initialize-db))]

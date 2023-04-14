@@ -1,0 +1,53 @@
+(ns mongol-drafts.states.draft
+  (:require 
+   [mongol-drafts.services.draft :as draft-service]))
+
+(defn set-current-draft [state draft]
+  (swap! state assoc :draft draft))
+
+(defn new-draft [state]
+  (let [id (await (await
+                   (draft-service/create-draft "")))]
+    (swap! state assoc :draft {:id id :content ""})))
+
+(defn list-drafts [state]
+  (let [offset (-> @state :drafts :offset)
+        drafts (await (draft-service/list-drafts offset))]
+    (if (empty? drafts)
+      (swap! state :drafts :is-end true)
+      (do
+        (swap! state :drafts :is-end false)
+        (swap! state assoc-in [:drafts :contents]
+               (concat (get-in @state [:drafts :contents])))))))
+
+(defn delete-draft [state id]
+  (let [result (await (draft-service/delete-draft id))]
+    (if (= 1 result)
+      (let [drafts (get-in @state [:drafts :contents])
+            i (->> drafts
+                   (keep-indexed #(if (= (:id %2) id) %1))
+                   first)]
+        (swap! state assoc-in [:drafts :contents]
+               (into (subvec drafts 0 i) (subvec drafts (inc i))))))))
+
+(defn update-draft [state id content]
+  (let [drafts (get-in @state [:drafts :contents])
+        i (->> drafts
+               (keep-indexed (fn [idx itm] (if (= (:id itm) id) idx)))
+               first)]
+    (await (draft-service/update-draft id content))
+    (swap! state assoc-in [:drafts :contents i :content] content)))
+
+(defn query-drafts [state q]
+  (let [num (-> @state :draft :contents count) 
+        drafts (await (draft-service/query-drafts q num))]
+    (if (empty? drafts)
+      (swap! state :drafts :is-end true)
+      (do
+        (swap! state :drafts :is-end false)
+        (swap! state assoc-in [:drafts :contents]
+               (concat (get-in @state [:drafts :contents])))))))
+
+(defn clear-drafts [state]
+  (swap! state assoc-in [:drafts :is-end] false)
+  (swap! state assoc-in [:drafts :contents] []))

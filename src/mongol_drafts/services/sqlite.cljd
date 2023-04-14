@@ -9,14 +9,13 @@
     (sql/openDatabase dbpath
                       .onCreate (fn [^sql/Database db _]
                                   (.execute db "CREATE TABLE workspaces(name varchar(100))")
-                                  (.execute db "CREATE TABLE drafts(workspace_id integer, name varchar(100))")
                                   (.execute db "CREATE VIRTUAL TABLE drafts USING fts4(content TEXT)")
                                   (.execute db "CREATE TABLE draft_info (
                                                          workspace_id integer DEFAULT 0, 
                                                          draft_id integer primary key,
                                                          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
                                                          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-                                  (.execute db "CREATE TABLE tags(workspace_id integer, name varchar(100), related_num integer)")
+                                  (.execute db "CREATE TABLE tags(workspace_id integer DEFAULT 0, name varchar(100), related_num integer DEFAULT 0)")
                                   (.execute db "CREATE TABLE draft_tags(tag_id integer, draft_id integer)")
                                   (.execute db "CREATE INDEX draft_tags_index_tag ON draft_tags(tag_id)")
                                   (.execute db "CREATE INDEX draft_tags_index_draft ON draft_tags(draft_id)"))

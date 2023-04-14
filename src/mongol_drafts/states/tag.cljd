@@ -1,0 +1,30 @@
+(ns mongol-drafts.states.tag
+  (:require
+   [mongol-drafts.services.tag :as tag-service]))
+
+(defn get-draft-tags [state]
+  (let [draft (:draft @state)
+        tags (await (tag-service/query-draft-tags (:draft_id draft)))]
+    (swap! state assoc :draft-tags tags)))
+
+(defn add-draft-tag [state name]
+  (let [id  (await (tag-service/create-tag name))
+        draft (:draft @state)
+        _ (await (tag-service/add-draft-tag (:draft_id draft) id))]
+    (swap! state assoc :draft-tags 
+           (conj (:draft-tags @state) {:id id :name name :related_num 1}))))
+
+(defn delete-draft-tag [state id]
+  (let [draft (:draft @state)
+        tags (:draft-tags @state)
+        _ (await (tag-service/delete-draft-tag (:draft_id draft) id))]
+    (swap! state assoc :draft-tags 
+           (remove #(= id (:id %)) tags))))
+
+(defn query-tags [state q]
+  (let [result (await (tag-service/query-tags q))]
+    (swap! state assoc :query-tags-result result)))
+
+(defn all-tags [state]
+  (let [result (await (tag-service/all-tags))]
+    (swap! state assoc :query-tags-result result)))

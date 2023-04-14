@@ -8,7 +8,8 @@
    [mongol-drafts.widgets.drawer :as drawer]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
-   [mongol-drafts.widgets.tagbar :as tagbar]))
+   [mongol-drafts.widgets.tagbar :as tagbar]
+   [mongol-drafts.states.draft :as draft-state]))
 
 (defn widget []
   (f/widget
@@ -28,7 +29,8 @@
                              :show-search-diaglog false
                              :tag-on-edit false
                              :current-layout "mn"
-                             :text-controller text-controller}))]
+                             :text-controller text-controller}))
+         _ (draft-state/new-draft state)]
    :bind {:info info :state state
           :text-controller text-controller
           :tag-controller tag-controller
