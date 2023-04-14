@@ -22,17 +22,78 @@
   (let [^sqf/Database db (await (sql/initialize-db))]
     (->
      (await
-      (.rawQuery db "select count(*) as total from tags "))
+      (.rawQuery db "SELECT count(*) as total FROM tags "))
      first
      (get "total"))))
 
-(defn list-tags [page]
+(defn all-tags []
   (let [^sqf/Database db (await (sql/initialize-db))]
     (await
      (.rawQuery
       db
-      "select rowid as id, name, related_num
-       from tags 
-       order by related_num desc
-       limit ?, 20;"
-      [page]))))
+      "SELECT rowid as id, name, related_num
+       FROM tags 
+       ORDER BY related_num desc
+       ;"))))
+
+(defn query-tags [word]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawQuery
+      db
+      "SELECT rowid as id, name, related_num
+       FROM tags 
+       WHERE name like '%?%'
+       ORDER BY related_num desc
+       ;"
+      [word]))))
+
+(defn query-draft-tags [id]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawQuery
+      db
+      "SELECT b.tag_id as id, a.name, a.related_num
+       FROM tags a 
+       LEFT JOIN draft_tags b ON a.rowid = b.tag_id
+       WHERE b.draft_id = ?
+       ORDER BY related_num desc
+       ;"
+      [id]))))
+
+(defn add-draft-tag [draft_id tag_id]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawInsert db
+                 "INSERT INTO draft_tags (draft_id, tag_id) VALUES (?, ?)"
+                 [draft_id tag_id]))
+    (await 
+     (.rawUpdate db 
+                 "UPDATE tags SET related_num = related_num + 1
+                  WHERE rowid = ?"
+                 [tag_id]))))
+
+(defn delete-draft-tag [draft_id tag_id]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        num (-> 
+             (.rawQuery db "SELECT related_num as num FROM tags
+                            WHERE rowid = ?"
+                        [tag_id])
+             await
+             first
+             (get "num"))]
+    (await
+     (.rawDelete db
+                 "DELETE FROM draft_tags 
+                  WHERE draft_id = ? and tag_id = ?"
+                 [draft_id tag_id]))
+    (if (zero? num)
+      (await
+       (.rawDelete db
+                   "DELETE FROM tags WHERE rowid = ?"
+                   [tag_id]))
+      (await
+       (.rawUpdate db
+                   "UPDATE tags SET related_num = related_num - 1
+                    WHERE rowid = ?"
+                   [tag_id])))))
