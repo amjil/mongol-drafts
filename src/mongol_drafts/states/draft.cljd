@@ -6,9 +6,12 @@
   (swap! state assoc :draft draft))
 
 (defn new-draft [state]
-  (let [id (await (await
-                   (draft-service/create-draft "")))]
-    (swap! state assoc :draft {:id id :content ""})))
+  (let [result (await (draft-service/last-draft))]
+    (if (empty? result)
+      (let [id (await (draft-service/create-draft ""))
+            result (-> (draft-service/last-draft) await first)]
+        (swap! state assoc :draft result))
+      (swap! state assoc :draft (-> result first)))))
 
 (defn list-drafts [state]
   (let [offset (-> @state :drafts :offset)
@@ -35,8 +38,9 @@
         i (->> drafts
                (keep-indexed (fn [idx itm] (if (= (:id itm) id) idx)))
                first)]
-    (await (draft-service/update-draft id content))
-    (swap! state assoc-in [:drafts :contents i :content] content)))
+    (draft-service/update-draft id content)
+    (swap! state assoc-in [:drafts :contents i :content] content)
+    (swap! state assoc-in [:draft :content] content)))
 
 (defn query-drafts [state q]
   (let [num (-> @state :draft :contents count) 
