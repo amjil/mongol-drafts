@@ -40,11 +40,16 @@
                    show-stacked-keyboard
                    show-search-diaglog]}
            state]
+   :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
+                (let [id (-> @state :draft :id)
+                      content (-> @state :draft :content)]
+                  (if (and (not-empty id) (not= edit-text content))
+                    (draft-state/update-draft state id edit-text))))
    (m/Stack
     .children
     [(m/Scaffold
-      .onDrawerChanged 
-      (fn [c] 
+      .onDrawerChanged
+      (fn [c]
         (if (false? c)
           (swap! state assoc :show-stacked-keyboard false)))
       .drawer (drawer/left-drawer)
@@ -98,17 +103,16 @@
         .child
         (m/IntrinsicHeight
          .child
-        (m/Container
-         .color (-> m/Colors .blue .-shade100)
-         .child
-         (m/SafeArea
-          .top false
+         (m/Container
+          .color (-> m/Colors .blue .-shade100)
           .child
-          (m/Column 
-           .children 
-           [(button-bar/keyboard-upper-bar)
-            (keyboard/keyboard)])
-          ))))
+          (m/SafeArea
+           .top false
+           .child
+           (m/Column
+            .children
+            [(button-bar/keyboard-upper-bar)
+             (keyboard/keyboard)])))))
        (m/Container))
      (if (true? show-search-diaglog)
        (search/widget)
