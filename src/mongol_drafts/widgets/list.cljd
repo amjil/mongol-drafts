@@ -2,8 +2,8 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
+   ["package:flutter_slidable/flutter_slidable.dart" :as slidable]
    [cljd.flutter.alpha2 :as f]))
-
 
 (def entities 
   ["abc" "When The Trees Grow up"])
@@ -14,13 +14,39 @@
    .scrollDirection m.Axis/horizontal
    .padding (.fromLTRB m/EdgeInsets 20 20 8 8)
    .itemCount (count entities)
-   .itemBuilder (fn [^m/BuildContext context i]
-                  (m/Container
-                   .constraints
-                   (m/BoxConstraints
-                    .maxWidth 40)
-                   .child 
-                   (m/Padding 
-                    .padding (.only m/EdgeInsets .left 10 .right 10)
-                    .child
-                   (mgl/MongolText (nth entities i)))))))
+   .itemBuilder
+   (fn [^m/BuildContext context i]
+     (f/widget
+      :context ctx
+      :let [h (-> m/MediaQuery (.of ctx) .-size .-height)]
+      (slidable/Slidable
+       .key (m/ValueKey i)
+       .direction m/Axis.vertical
+       .endActionPane
+       (slidable/ActionPane
+        ;; .motion (slidable/ScrollMotion)
+        .motion (slidable/BehindMotion)
+        ;; .motion (slidable/StretchMotion)
+        .dismissible (slidable/DismissiblePane .onDismissed (fn [] (dart:core/print "slide")))
+        .children
+        [(slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide"))
+                                  .backgroundColor (.green m/Colors)
+                                  .foregroundColor (.white m/Colors)
+                                  .icon (.delete m/Icons)
+                                  )
+         (slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide"))
+                                  .backgroundColor (.red m/Colors)
+                                  .foregroundColor (.white m/Colors)
+                                  .icon (.share m/Icons)
+                                  )]))
+      (m/Container
+       .height (- h 40)
+      ;;  .constraints
+      ;;  (m/BoxConstraints
+      ;;   .maxWidth 40
+      ;;   .height h)
+       )
+      (m/Padding
+       .padding (.only m/EdgeInsets .left 10 .right 10))
+      (mgl/MongolText (nth entities i))))))
+
