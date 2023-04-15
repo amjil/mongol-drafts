@@ -26,11 +26,15 @@
                  "DELETE FROM draft_info WHERE draft_id = ?"
                  [id]))))
 
+
 (defn update-draft [id content]
-  (let [^sqf/Database db (await (sql/initialize-db))]
-    (await (.rawUpdate db
-                       "UPDATE drafts SET content = ? WHERE rowid = ?"
-                       [content id]))))
+  (dart:core/print (str "id >>> " id))
+  (let [^sqf/Database db (await (sql/initialize-db))
+        num (await (.rawUpdate db
+                               "UPDATE drafts SET content = ? WHERE rowid = ?"
+                               [content id]))]
+    (dart:core/print (str "num >>> " num))
+    num))
 
 (defn list-drafts [page]
   (let [^sqf/Database db (await (sql/initialize-db))]
@@ -43,6 +47,18 @@
        order by a.updated_at desc
        limit ?, 20;"
       [page]))))
+
+(defn last-draft []
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawQuery
+      db
+      "select a.*, b.content, b.rowid as id 
+       from draft_info a 
+          left join drafts b on a.draft_id = b.rowid 
+       order by a.draft_id desc
+       limit 1
+       ;"))))
 
 (defn query-drafts [word page]
   (let [^sqf/Database db (await (sql/initialize-db))
