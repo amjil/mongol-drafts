@@ -36,17 +36,17 @@
     (dart:core/print (str "num >>> " num))
     num))
 
-(defn list-drafts [page]
+(defn list-drafts [offset]
   (let [^sqf/Database db (await (sql/initialize-db))]
     (await 
      (.rawQuery
       db 
-      "select a.*, b.content 
+      "select a.*, b.content, b.rowid as id
        from draft_info a 
           left join drafts b on a.draft_id = b.rowid 
        order by a.updated_at desc
        limit ?, 20;"
-      [page]))))
+      [offset]))))
 
 (defn last-draft []
   (let [^sqf/Database db (await (sql/initialize-db))]

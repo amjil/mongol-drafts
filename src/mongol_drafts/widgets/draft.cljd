@@ -51,7 +51,12 @@
       .onDrawerChanged
       (fn [c]
         (if (false? c)
-          (swap! state assoc :show-stacked-keyboard false)))
+          (swap! state assoc :show-stacked-keyboard false)
+          (do 
+            (swap! state assoc-in [:drafts :is-end] false)
+            (draft-state/list-drafts state)
+            (dart:core/print "onDrawerChanged")
+            )))
       .drawer (drawer/left-drawer)
       .body
       (m/SafeArea
