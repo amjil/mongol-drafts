@@ -3,15 +3,20 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.widgets.empty :as empty-content]))
+   [mongol-drafts.widgets.empty :as empty-content]
+   [mongol-drafts.states.draft :as draft-state]))
 
 (declare search-field)
 
 (defn widget []
   (f/widget
    :context ctx
-   :get [:state]
-   :watch [{:keys [search-result]} state]
+   :get [:state :search-controller]
+   :watch [{{:keys [contents is-end]} :drafts} state]
+   :bg-watcher ([^m/TextEditingValue {edit-text .-text} search-controller]
+                (when-not (empty? edit-text)
+                  (dart:core/print (str "edit-text >> " edit-text))
+                  (draft-state/query-drafts state edit-text)))
    (m/Positioned
     .top 0
     .left 0
@@ -59,19 +64,13 @@
                         .size 36)))])
      (m/Expanded
       .child
-      (if (empty? search-result)
+      (if (empty? contents)
         (empty-content/empty-content-view)
         (m/SingleChildScrollView
          .scrollDirection m/Axis.horizontal
          .child
          (m/Row
-          .children [(m/Text "ABC")
-                     (m/Text "ABC")
-                     (m/Text "ABC")
-                     (m/Text "ABC")
-                     (m/Text "ABC")
-                     (m/Text "ABC")]))))])))
-  
+          .children (map #(mgl/MongolText (get % "content")) contents)))))])))
   
 (defn search-field []
   (f/widget
@@ -82,6 +81,7 @@
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
     .controller search-controller
+    .autofocus true
     .onTap (fn []
              (swap! state assoc :show-stacked-keyboard true)
              (swap! state assoc :text-controller search-controller))

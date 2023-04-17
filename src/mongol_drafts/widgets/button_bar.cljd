@@ -57,7 +57,8 @@
                 (fn []
                   (swap! state assoc :show-search-diaglog true)
                   (swap! state assoc :show-stacked-keyboard true)
-                  (swap! state assoc :show-keyboard false)))
+                  (swap! state assoc :show-keyboard false)
+                  (.clear search-controller)))
                (m/Icon (.view_sidebar_outlined m/Icons))]))])))
 
 (defn toolbar-button [child on-press]

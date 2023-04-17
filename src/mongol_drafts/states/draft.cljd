@@ -50,14 +50,15 @@
                (concat (get-in @state [:drafts :contents]) drafts))))))
 
 (defn query-drafts [state q]
-  (let [num (-> @state :draft :contents count) 
+  (let [num (-> @state :draft :contents count)
         drafts (await (draft-service/query-drafts q num))]
+    (dart:core/print (str "darts = " drafts))
     (if (empty? drafts)
-      (swap! state :drafts :is-end true)
+      (swap! state assoc-in [:drafts :is-end] true)
       (do
-        (swap! state :drafts :is-end false)
-        (swap! state assoc-in [:drafts :contents]
-               (concat (get-in @state [:drafts :contents])))))))
+        (swap! state assoc-in [:drafts :is-end] false)
+        (swap! state update-in [:drafts :contents]
+               concat (into [] drafts))))))
 
 (defn clear-drafts [state]
   (swap! state assoc-in [:drafts :is-end] false)

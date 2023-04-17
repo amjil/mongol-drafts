@@ -60,19 +60,26 @@
        limit 1
        ;"))))
 
-(defn query-drafts [word page]
+(defn query-drafts [word offset]
   (let [^sqf/Database db (await (sql/initialize-db))
-        ids (await (.rawQuery db 
-                              "select rowid from drafts 
+        ;; Runtime error: unable to use function MATCH in the requested context
+        ids (->> (.rawQuery db
+                            "select rowid from drafts 
                                where drafts match ?"
-                              [word]))]
-    (await 
-     (.rawQuery
-      db 
-      "select a.*, b.content 
-       from draft_info a 
+                            [word])
+                 await
+                 (map #(get % "rowid")))
+        ids-q (str "(" (clojure.string/join ", " (map #(str %) ids)) ")")]
+    (if (empty? ids)
+      []
+      (await
+       (.rawQuery
+        db
+        (str
+         "select a.*, b.content 
+         from draft_info a 
           left join drafts b on a.draft_id = b.rowid 
-        where draft_id in ?
-       order by a.updated_at desc
-       limit ?, 20;"
-      [ids page]))))
+         where draft_id in " ids-q " 
+         order by a.updated_at desc
+         limit ?, 20;")
+        [offset])))))
