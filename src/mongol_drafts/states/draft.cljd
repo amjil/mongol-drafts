@@ -1,17 +1,28 @@
 (ns mongol-drafts.states.draft
-  (:require 
+  (:require
+   ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.draft :as draft-service]))
 
 (defn set-current-draft [state draft]
   (swap! state assoc :draft draft))
 
 (defn new-draft [state]
-  (let [result (await (draft-service/last-draft))]
-    (if (empty? result)
-      (let [id (await (draft-service/create-draft ""))
+  (let [result (await (draft-service/last-draft))
+        content (-> result first (get "content"))
+        ^m/TextEditingController 
+        controller (:text-controller @state)]
+    (cond
+      (empty? content)
+      (do
+        (swap! state assoc :draft
+               (into {} (-> result first)))
+        (.clear controller))
+
+      :else
+      (let [_ (await (draft-service/create-draft ""))
             result (-> (draft-service/last-draft) await first)]
-        (swap! state assoc :draft result))
-      (swap! state assoc :draft (-> result first)))))
+        (swap! state assoc :draft (into {} result))
+        (set! (.-text controller) (get result "content"))))))
 
 (defn delete-draft [state id]
   (let [result (await (draft-service/delete-draft id))]
@@ -22,13 +33,9 @@
                new-drafts)))))
 
 (defn update-draft [state id content]
-  (let [drafts (get-in @state [:drafts :contents])
-        i (->> drafts
-               (keep-indexed (fn [idx itm] (if (= (:id itm) id) idx)))
-               first)]
-    (draft-service/update-draft id content)
-    (swap! state assoc-in [:drafts :contents i :content] content)
-    (swap! state assoc-in [:draft :content] content)))
+  (let [result (await (draft-service/update-draft id content))
+        draft (:draft @state)]
+    (swap! state assoc-in [:draft "content"] content)))
 
 (defn list-drafts [state]
   (let [num (-> @state :drafts :contents count)
@@ -55,3 +62,12 @@
 (defn clear-drafts [state]
   (swap! state assoc-in [:drafts :is-end] false)
   (swap! state assoc-in [:drafts :contents] []))
+
+;;;;;
+(defn focus-on-draft [state text-controller]
+  (swap! state assoc :show-keyboard true)
+  (when (true? (:tag-on-edit @state))
+    (let [^m/TextEditingController controller (:text-controller @state)]
+      (.clear controller))
+    (swap! state assoc :tag-on-edit false))
+  (swap! state assoc :text-controller text-controller))

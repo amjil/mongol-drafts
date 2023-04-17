@@ -29,10 +29,10 @@
         .endActionPane
         (slidable/ActionPane
          .motion (slidable/BehindMotion)
-        ;;  .onDismissed (fn [] (dart:core/print "onDismissed >> ")
-        ;;                 true)
-         .dismissible (slidable/DismissiblePane .onDismissed (fn [] (dart:core/print "slide")
-                                                               true))
+         .dismissible (slidable/DismissiblePane
+                       .onDismissed
+                       (fn []
+                         (dart:core/print "slide")))
          .children
          [(slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide flag"))
                                    .backgroundColor (.green m/Colors)
@@ -41,11 +41,13 @@
                                    .label nil)
           (slidable/SlidableAction .onPressed
                                    (fn [context]
-                                     (draft-state/delete-draft state (-> contents (nth i) (get "id")))
                                      (let [controller (-> slidable/Slidable (.of context))]
                                        (if (some? controller)
                                          (.dismiss controller 
-                                                   (slidable/ResizeRequest (Duration .milliseconds 300) (fn [] {}))
+                                                   (slidable/ResizeRequest
+                                                    (Duration .milliseconds 300)
+                                                    (fn []
+                                                      (draft-state/delete-draft state (-> contents (nth i) (get "id")))))
                                                    .duration (Duration .milliseconds 300))))
                                      (dart:core/print "slide delete"))
                                    .autoClose false

@@ -41,9 +41,9 @@
                    show-search-diaglog]}
            state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
-                (let [id (-> @state :draft :id)
-                      content (-> @state :draft :content)]
-                  (if (and (not-empty id) (not= edit-text content))
+                (let [id (-> @state :draft (get "id"))
+                      content (-> @state :draft (get "content"))]
+                  (if (and (number? id) (not= edit-text content))
                     (draft-state/update-draft state id edit-text))))
    (m/Stack
     .children
@@ -52,11 +52,11 @@
       (fn [c]
         (if (false? c)
           (swap! state assoc :show-stacked-keyboard false)
-          (do 
+          (do
             (swap! state assoc-in [:drafts :is-end] false)
+            (swap! state assoc-in [:drafts :contents] [])
             (draft-state/list-drafts state)
-            (dart:core/print "onDrawerChanged")
-            )))
+            (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
       .body
       (m/SafeArea
@@ -78,13 +78,7 @@
               .child
               (mgl/MongolTextField
                .controller text-controller
-               .onTap (fn []
-                        (swap! state assoc :show-keyboard true)
-                        (when (true? (:tag-on-edit @state))
-                          (let [^m/TextEditingController controller (:text-controller @state)]
-                            (.clear controller))
-                          (swap! state assoc :tag-on-edit false))
-                        (swap! state assoc :text-controller text-controller))
+               .onTap #(draft-state/focus-on-draft state text-controller)
                .decoration nil
                .maxLines 1000
                .autofocus true

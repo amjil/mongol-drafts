@@ -4,7 +4,7 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
-   [mongol-drafts.services.draft :as draft-service]))
+   [mongol-drafts.states.draft :as draft-state]))
    
 (defn bar-button [child on-press]
   (m/Material
@@ -29,8 +29,9 @@
                (bar-button
                 (m/Icon (.add m/Icons))
                 (fn []
-                  (dart:core/print (:draft @state))
-                  (dart:core/print "abc")))
+                  (dart:core/print "abc new draft")
+                  (draft-state/new-draft state)
+                  (draft-state/focus-on-draft state text-controller)))
                (bar-button
                 (m/Icon (.sell_outlined m/Icons))
                 (fn []
