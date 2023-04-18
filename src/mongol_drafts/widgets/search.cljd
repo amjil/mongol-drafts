@@ -14,9 +14,7 @@
    :get [:state :search-controller]
    :watch [{{:keys [contents is-end]} :drafts} state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} search-controller]
-                (when-not (empty? edit-text)
-                  (dart:core/print (str "edit-text >> " edit-text))
-                  (draft-state/query-drafts state edit-text)))
+                (draft-state/query-drafts state edit-text))
    (m/Positioned
     .top 0
     .left 0
@@ -91,7 +89,8 @@
      .suffixIcon
      (m/IconButton .onPressed
                    (fn []
-                     (.clear search-controller))
+                     (let [^m/TextEditingController controller search-controller]
+                       (.clear controller)))
                    .icon (m/Icon (.clear m/Icons)))
      .isDense true
     ;;  .hintText "Search"
