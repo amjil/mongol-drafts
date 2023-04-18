@@ -84,8 +84,8 @@
      (.rawInsert db
                  "INSERT INTO draft_tags (draft_id, tag_id) VALUES (?, ?)"
                  [draft_id tag_id]))
-    (await 
-     (.rawUpdate db 
+    (await
+     (.rawUpdate db
                  "UPDATE tags SET related_num = related_num + 1
                   WHERE rowid = ?"
                  [tag_id]))))

@@ -3,16 +3,16 @@
    [mongol-drafts.services.tag :as tag-service]))
 
 (defn get-draft-tags [state]
-  (let [draft (:draft @state)
-        tags (await (tag-service/query-draft-tags (:draft_id draft)))]
-    (swap! state assoc :draft-tags tags)))
+  (let [draft-id (-> @state :draft (get "id"))
+        tags (await (tag-service/query-draft-tags draft-id))]
+    (swap! state assoc :draft-tags (into [] tags))))
 
 (defn add-draft-tag [state name]
   (let [id  (await (tag-service/create-tag name))
-        draft (:draft @state)
-        _ (await (tag-service/add-draft-tag (:draft_id draft) id))]
-    (swap! state assoc :draft-tags 
-           (conj (:draft-tags @state) {:id id :name name :related_num 1}))))
+        draft-id (-> @state :draft (get "id"))
+        _ (await (tag-service/add-draft-tag draft-id id))]
+    (swap! state update :draft-tags conj
+           {"id" id "name" name "related_num" 1})))
 
 (defn delete-draft-tag [state id]
   (let [draft (:draft @state)

@@ -4,7 +4,8 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.empty :as empty-content]
-   [mongol-drafts.states.draft :as draft-state]))
+   [mongol-drafts.states.draft :as draft-state]
+   [mongol-drafts.widgets.list :as list-content]))
 
 (declare search-field)
 
@@ -64,11 +65,7 @@
       .child
       (if (empty? contents)
         (empty-content/empty-content-view)
-        (m/SingleChildScrollView
-         .scrollDirection m/Axis.horizontal
-         .child
-         (m/Row
-          .children (map #(mgl/MongolText (get % "content")) contents)))))])))
+        (list-content/widget)))])))
   
 (defn search-field []
   (f/widget

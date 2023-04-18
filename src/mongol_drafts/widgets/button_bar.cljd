@@ -4,7 +4,8 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
-   [mongol-drafts.states.draft :as draft-state]))
+   [mongol-drafts.states.draft :as draft-state]
+   [mongol-drafts.states.tag :as tag-state]))
    
 (defn bar-button [child on-press]
   (m/Material
@@ -39,6 +40,7 @@
                          assoc
                          :tag-viewable
                          (not (:tag-viewable @state)))
+                  (tag-state/get-draft-tags state)
                   (if (false? (:tag-viewable @state))
                     (swap! state
                            assoc
