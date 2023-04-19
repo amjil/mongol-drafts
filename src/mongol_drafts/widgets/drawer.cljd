@@ -3,7 +3,8 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.widgets.tabbar :as tabbar]))
+   [mongol-drafts.widgets.tabbar :as tabbar]
+   [mongol-drafts.states.tag :as tag-state]))
 
 (declare left-sub-drawer
          in-drawer-search-field
@@ -20,8 +21,10 @@
    (m/Scaffold
     .onDrawerChanged
     (fn [c]
-      (if (false? c)
-        (swap! state assoc :show-stacked-keyboard false)))
+      (when (false? c)
+        (swap! state assoc :show-stacked-keyboard false))
+      (when (true? c)
+        (tag-state/all-tags state)))
     .drawer
     (left-sub-drawer))
    .body
@@ -80,12 +83,13 @@
          .child
          (tabbar/tabbar))]))])))
 ;;
-(def tags ["notes" "plans" "unknown" "ideas" "program" "work" "study"])
+;; (def tags ["notes" "plans" "unknown" "ideas" "program" "work" "study"])
 
 (defn left-sub-drawer []
   (f/widget
    :context ctx
    :get [:state]
+   :watch [{tags :tags} state]
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.75))
@@ -194,7 +198,7 @@
                                               .color (-> m/Colors .blue .-shade500)
                                               .size 16)
                                       (m/SizedBox .height 4)
-                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))]))
+                                      (mgl/MongolText (get % "name") .style (m/TextStyle .fontSize 18))]))
                         (take 3 tags))))
                  (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
                  (m/Container
@@ -211,7 +215,7 @@
                                               .color (-> m/Colors .blue .-shade500)
                                               .size 16)
                                       (m/SizedBox .height 4)
-                                      (mgl/MongolText % .style (m/TextStyle .fontSize 18))]))
+                                      (mgl/MongolText (get % "name") .style (m/TextStyle .fontSize 18))]))
                         (take-last 2 tags))))]))]))
            (m/Divider)
            (m/Expanded
@@ -231,7 +235,7 @@
                              (m/Padding
                               .padding (.only m/EdgeInsets .left 10 .right 10)
                               .child
-                              (mgl/MongolText (nth tags i) .style (m/TextStyle .fontSize 18)))))))]))]))])))
+                              (mgl/MongolText (get (nth tags i) "name") .style (m/TextStyle .fontSize 18)))))))]))]))])))
 
 (defn in-drawer-search-field []
   (f/widget

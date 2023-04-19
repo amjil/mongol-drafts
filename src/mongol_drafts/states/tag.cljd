@@ -23,8 +23,8 @@
 
 (defn query-tags [state q]
   (let [result (await (tag-service/query-tags q))]
-    (swap! state assoc :query-tags-result result)))
+    (swap! state assoc :tags result)))
 
 (defn all-tags [state]
   (let [result (await (tag-service/all-tags))]
-    (swap! state assoc :query-tags-result result)))
+    (swap! state assoc :tags result)))
