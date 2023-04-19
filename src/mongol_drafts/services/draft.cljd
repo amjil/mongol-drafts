@@ -58,6 +58,20 @@
        limit 1
        ;"))))
 
+(defn get-draft [id]
+  (let [^sqf/Database db (await (sql/initialize-db))]
+    (await
+     (.rawQuery
+      db
+      "select a.*, b.content, b.rowid as id 
+       from draft_info a 
+          left join drafts b on a.draft_id = b.rowid 
+       where b.rowid = ?
+       order by a.draft_id desc
+       limit 1
+       ;"
+      [id]))))
+
 (defn query-drafts [word offset]
   (let [^sqf/Database db (await (sql/initialize-db))
         ;; Runtime error: unable to use function MATCH in the requested context

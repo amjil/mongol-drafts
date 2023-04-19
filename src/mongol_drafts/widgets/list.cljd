@@ -12,7 +12,7 @@
 (defn widget []
   (f/widget
    :context ctx
-   :get [:state]
+   :get [:state :text-controller m/Navigator]
    :let [h (-> m/MediaQuery (.of ctx) .-size .-height)]
    :watch [{{contents :contents} :drafts} state]
    (m.ListView/separated
@@ -23,6 +23,11 @@
     .itemBuilder
     (fn [^m/BuildContext context i]
       (f/widget
+       (m/GestureDetector
+        .onTap (fn []
+                 (draft-state/focus-on-draft state text-controller)
+                 (draft-state/set-current-draft state (-> contents (nth i) (get "id")))
+                 (.pop navigator)))
        (slidable/Slidable
         .key (m/ValueKey i)
         .direction m/Axis.vertical

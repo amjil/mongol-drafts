@@ -3,8 +3,12 @@
    ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.draft :as draft-service]))
 
-(defn set-current-draft [state draft]
-  (swap! state assoc :draft draft))
+(defn set-current-draft [state id]
+  (let [result (await (draft-service/get-draft id))
+        ^m/TextEditingController
+        controller (:text-controller @state)]
+    (swap! state assoc :draft (into {} (-> result first)))
+    (set! (.-text controller) (get (:draft @state) "content"))))
 
 (defn new-draft [state]
   (let [result (await (draft-service/last-draft))
@@ -15,12 +19,13 @@
       (empty? content)
       (do
         (swap! state assoc :draft
-               (into {} (-> result first)))
-        (.clear controller))
+               (into {} (-> result last)))
+        (if-not (empty? (.-text controller))
+          (.clear controller)))
 
       :else
       (let [id (await (draft-service/create-draft ""))
-            result (-> (draft-service/last-draft) await first)]
+            result (-> (draft-service/last-draft) await last)]
         (swap! state assoc :draft (into {} result))
         (.clear controller)))))
 

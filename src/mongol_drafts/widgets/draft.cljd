@@ -41,10 +41,10 @@
                    show-search-diaglog]}
            state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
-                (let [id (-> @state :draft (get "id"))
-                      content (-> @state :draft (get "content"))]
+                (let [id (get (:draft @state) "id")
+                      content (get (:draft @state) "content")]
+                  (dart:core/print (str "bg-watcher id = " id " content = " content " edit-text = " edit-text))
                   (when (and (number? id) (not= edit-text content))
-                    (dart:core/print (str "bg-watcher id = " id))
                     (draft-state/update-draft state id edit-text))))
    (m/Stack
     .children
