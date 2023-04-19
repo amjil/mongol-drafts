@@ -9,7 +9,7 @@
 (defn new-draft [state]
   (let [result (await (draft-service/last-draft))
         content (-> result first (get "content"))
-        ^m/TextEditingController 
+        ^m/TextEditingController
         controller (:text-controller @state)]
     (cond
       (empty? content)
@@ -19,10 +19,10 @@
         (.clear controller))
 
       :else
-      (let [_ (await (draft-service/create-draft ""))
+      (let [id (await (draft-service/create-draft ""))
             result (-> (draft-service/last-draft) await first)]
         (swap! state assoc :draft (into {} result))
-        (set! (.-text controller) (get result "content"))))))
+        (.clear controller)))))
 
 (defn delete-draft [state id]
   (let [result (await (draft-service/delete-draft id))]

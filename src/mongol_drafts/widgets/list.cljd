@@ -68,8 +68,22 @@
         )
        (m/Padding
         .padding (.only m/EdgeInsets .left 10 .right 10))
-       (mgl/MongolText
         (if (empty? (-> contents (nth i) (get "content")))
-          "--blank--"
-          (-> contents (nth i) (get "content")))))))))
+          (mgl/MongolText
+           "--blank--")
+          (let [^String orig-content (-> contents (nth i) (get "content"))
+                ^String content (.trim orig-content)
+                num (count content)
+                idx (if (empty? content)
+                      -1
+                      (.indexOf content "\n"))]
+            (m/Row
+             .crossAxisAlignment m.CrossAxisAlignment/start
+             .children
+             [(if (neg? idx)
+                (mgl/MongolText content .maxLines 1)
+                (mgl/MongolText (.substring content 0 idx) .maxLines 1))
+              (if (and (pos? idx) (< (inc idx) (dec num)) (not-empty (.substring content (inc idx))))
+                (mgl/MongolText (.substring content (inc idx)) .maxLines 2)
+                (m/Container))]))))))))
 

@@ -28,12 +28,10 @@
 
 
 (defn update-draft [id content]
-  (dart:core/print (str "id >>> " id))
   (let [^sqf/Database db (await (sql/initialize-db))
         num (await (.rawUpdate db
                                "UPDATE drafts SET content = ? WHERE rowid = ?"
                                [content id]))]
-    (dart:core/print (str "num >>> " num))
     num))
 
 (defn list-drafts [offset]
