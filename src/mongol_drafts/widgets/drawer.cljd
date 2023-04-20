@@ -4,7 +4,8 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.tabbar :as tabbar]
-   [mongol-drafts.states.tag :as tag-state]))
+   [mongol-drafts.states.tag :as tag-state]
+   [mongol-drafts.states.draft :as draft-state]))
 
 (declare left-sub-drawer
          in-drawer-search-field
@@ -83,37 +84,49 @@
          .child
          (tabbar/tabbar))]))])))
 ;;
-;; (def tags ["notes" "plans" "unknown" "ideas" "program" "work" "study"])
-
-(defn filtered-tag [name]
-  (m/Padding
-   .padding (.all m/EdgeInsets 10)
+(defn filtered-tag [state tag]
+  (m/GestureDetector
+   .onTap (fn []
+            (dart:core/print (str "filtered-tag " tag))
+            (when-not (= "Any" (get tag "name"))
+              (tag-state/delete-filter-tag state tag)))
    .child
-   (m/Column
-    .children [(m/Icon (.sell_rounded m/Icons)
-                       .color (-> m/Colors .blue .-shade500)
-                       .size 16)
-               (m/SizedBox .height 4)
-               (mgl/MongolText name .style (m/TextStyle .fontSize 18))])))
+   (m/Padding
+    .padding (.all m/EdgeInsets 10)
+    .child
+    (m/Column
+     .children [(m/Icon (.sell_rounded m/Icons)
+                        .color (-> m/Colors .blue .-shade500)
+                        .size 16)
+                (m/SizedBox .height 4)
+                (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
 
-(defn omitted-tag [name]
-  (m/Padding
-   .padding (.all m/EdgeInsets 10)
+(defn omitted-tag [state tag]
+  (m/GestureDetector
+   .onTap (fn []
+            (when-not (= "none" (get tag "name"))
+              (tag-state/delete-omitted-tag state tag)))
    .child
-   (m/Column
-    .children [(m/Icon (.do_disturb_alt m/Icons)
-                       .color (-> m/Colors .blue .-shade500)
-                       .size 16)
-               (m/SizedBox .height 4)
-               (mgl/MongolText name .style (m/TextStyle .fontSize 18))])))
+   (m/Padding
+    .padding (.all m/EdgeInsets 10)
+    .child
+    (m/Column
+     .children [(m/Icon (.do_disturb_alt m/Icons)
+                        .color (-> m/Colors .blue .-shade500)
+                        .size 16)
+                (m/SizedBox .height 4)
+                (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
 
 (defn left-sub-drawer []
   (f/widget
    :context ctx
-   :get [:state]
+   :get [:state :search-tag-controller]
    :watch [{tags :tags
             filter-tags :filter-tags
-            omitted-tags :omitted-tags} state]
+            omitted-tags :omitted-tags
+            filtered-tags :filtered-tags} state]
+   :bg-watcher ([^m/TextEditingValue {search-text .-text} search-tag-controller]
+                (swap! state assoc :tag-search search-text))
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.75))
@@ -215,8 +228,8 @@
                    .crossAxisAlignment m/CrossAxisAlignment.start
                    .children
                    (if (empty? filter-tags)
-                     [(filtered-tag "Any")]
-                     (map #(filtered-tag (get % "name")) filter-tags))))
+                     [(filtered-tag state {"name" "Any"})]
+                     (map #(filtered-tag state %) filter-tags))))
                  (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
                  (m/Container
                   .color (-> m/Colors .grey .-shade100)
@@ -225,8 +238,8 @@
                    .crossAxisAlignment m/CrossAxisAlignment.start
                    .children
                    (if (empty? omitted-tags)
-                     [(filtered-tag "none")]
-                     (map #(omitted-tag (get % "name"))
+                     [(omitted-tag state {"name" "none"})]
+                     (map #(omitted-tag state %)
                           omitted-tags))))]))]))
            (m/Divider)
            (m/Expanded
@@ -236,7 +249,7 @@
              .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
              .scrollDirection m.Axis/horizontal
              .padding (.fromLTRB m/EdgeInsets 8 20 8 8)
-             .itemCount (count tags)
+             .itemCount (count (if (empty? filtered-tags) tags filtered-tags))
              .itemBuilder (fn [^m/BuildContext context i]
                             (m/Container
                              .constraints
@@ -249,15 +262,25 @@
                               (m/Column
                                .mainAxisAlignment m/MainAxisAlignment.spaceBetween
                                .children
-                               [(mgl/MongolText (get (nth tags i) "name") .style (m/TextStyle .fontSize 18))
-                                (m/Icon (.do_disturb_alt m/Icons)
-                                        .color (-> m/Colors .blue .-shade500)
-                                        .size 16)]))))))]))]))])))
+                               [(m/Expanded
+                                 .child
+                                 (m/GestureDetector
+                                  .onTap (fn []
+                                           (tag-state/add-filter-tag state (nth (if (empty? filtered-tags) tags filtered-tags) i)))
+                                  .child
+                                  (mgl/MongolText (get (nth (if (empty? filtered-tags) tags filtered-tags) i) "name") .style (m/TextStyle .fontSize 18))))
+                                (m/GestureDetector
+                                 .onTap (fn []
+                                          (tag-state/add-omitted-tag state (nth (if (empty? filtered-tags) tags filtered-tags) i)))
+                                 .child
+                                 (m/Icon (.do_disturb_alt m/Icons)
+                                         .color (-> m/Colors .blue .-shade500)
+                                         .size 16))]))))))]))]))])))
 
 (defn in-drawer-search-field []
   (f/widget
    :context ctx
-   :get [:state]
+   :get [:state :search-tag-controller]
    (m/Container
     .constraints
     (m/BoxConstraints
@@ -267,7 +290,11 @@
    (m/Padding
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
-    .onTap (fn [] (swap! state assoc :show-stacked-keyboard true))
+    .controller search-tag-controller
+    .maxLines 1
+    .onTap (fn []
+             (swap! state assoc :show-stacked-keyboard true)
+             (swap! state assoc :text-controller search-tag-controller))
     .style (m/TextStyle .fontSize 16)
     .decoration
     (m/InputDecoration

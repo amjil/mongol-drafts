@@ -34,17 +34,51 @@
                                [content id]))]
     num))
 
-(defn list-drafts [offset]
+(defn list-drafts [offset tag-in-ids tag-out-ids]
   (let [^sqf/Database db (await (sql/initialize-db))]
     (await 
      (.rawQuery
-      db 
+      db
+      (str 
       "select a.*, b.content, b.rowid as id
        from draft_info a 
           left join drafts b on a.draft_id = b.rowid 
+          where 1 = 1 " 
+         (cond
+           (and (empty? tag-in-ids)
+                (empty? tag-out-ids))
+           ""
+
+           (and (not-empty tag-in-ids) (not-empty tag-out-ids))
+           (str
+            " and draft_id in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
+            ")"
+            " and draft_id not in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
+            ")")
+
+           (not-empty tag-in-ids)
+           (str
+            " and draft_id in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
+            ")")
+
+           (not-empty tag-out-ids)
+           (str
+            " and draft_id not in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
+            ")")) "
        order by a.updated_at desc
-       limit ?, 20;"
-      [offset]))))
+       ;")))))
 
 (defn last-draft []
   (let [^sqf/Database db (await (sql/initialize-db))]
@@ -72,7 +106,7 @@
        ;"
       [id]))))
 
-(defn query-drafts [word offset]
+(defn query-drafts [word tag-in-ids tag-out-ids offset]
   (let [^sqf/Database db (await (sql/initialize-db))
         ;; Runtime error: unable to use function MATCH in the requested context
         ids (->> (.rawQuery db
@@ -91,7 +125,38 @@
          "select a.*, b.content 
          from draft_info a 
           left join drafts b on a.draft_id = b.rowid 
-         where draft_id in " ids-q " 
+         where draft_id in " ids-q 
+         (cond
+           (and (empty? tag-in-ids)
+                (empty? tag-out-ids))
+           ""
+
+           (and (not-empty tag-in-ids) (not-empty tag-out-ids))
+           (str
+            " and draft_id in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
+            " and tag_id not in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
+            ")")
+
+           (not-empty tag-in-ids)
+           (str
+            " and draft_id in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
+            ")")
+
+           (not-empty tag-out-ids)
+           (str
+            " and draft_id in 
+             (select draft_id from draft_tags 
+                where tag_id not in "
+            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
+            ")"))
+          
+         "
          order by a.updated_at desc
-         limit ?, 20;")
-        [offset])))))
+         ;"))))))

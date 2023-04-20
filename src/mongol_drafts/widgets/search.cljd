@@ -15,7 +15,7 @@
    :get [:state :search-controller]
    :watch [{{:keys [contents is-end]} :drafts} state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} search-controller]
-                (draft-state/query-drafts state edit-text))
+                (draft-state/query-drafts state edit-text false))
    (m/Positioned
     .top 0
     .left 0

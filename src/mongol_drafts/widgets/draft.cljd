@@ -16,7 +16,8 @@
    :context ctx
    :managed [^m/TextEditingController text-controller (m/TextEditingController)
              ^m/TextEditingController tag-controller (m/TextEditingController)
-             ^m/TextEditingController search-controller (m/TextEditingController)]
+             ^m/TextEditingController search-controller (m/TextEditingController)
+             ^m/TextEditingController search-tag-controller (m/TextEditingController)]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
          info (merge keyboard-options/keyboard-option {} {:width w})
@@ -34,7 +35,8 @@
    :bind {:info info :state state
           :text-controller text-controller
           :tag-controller tag-controller
-          :search-controller search-controller}
+          :search-controller search-controller
+          :search-tag-controller search-tag-controller}
    :watch [{:keys [tag-viewable
                    show-keyboard
                    show-stacked-keyboard

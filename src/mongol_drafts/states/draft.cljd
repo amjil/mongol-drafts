@@ -43,8 +43,8 @@
     (swap! state assoc-in [:draft "content"] content)))
 
 (defn list-drafts [state]
-  (let [num (-> @state :drafts :contents count)
-        drafts (await (draft-service/list-drafts num))]
+  (let [;num (-> @state :drafts :contents count)
+        drafts (await (draft-service/list-drafts num [] []))]
     (if (empty? drafts)
       (do
         (swap! state assoc-in [:drafts :is-end] true)
@@ -54,18 +54,33 @@
         (swap! state assoc-in [:drafts :contents]
                (concat (get-in @state [:drafts :contents]) drafts))))))
 
-(defn query-drafts [state q]
+(defn query-drafts [state q has-filter]
+  ;; has-filter false query without the tag filters
+  ;;            true is query with the tag filters 
   (if (empty? q)
-    (let [num (-> @state :draft :contents count)
-          drafts (await (draft-service/list-drafts num))]
+    (let [;num (-> @state :draft :contents count)
+          tag-in-ids (map #(get % "id") (:filter-tags @state))
+          tag-out-ids (map #(get % "id") (:omitted-tags @state))
+          drafts (await (draft-service/list-drafts
+                         0
+                         (if has-filter tag-in-ids [])
+                         (if has-filter tag-out-ids [])))]
+      (dart:core/print (str "out-ids = " tag-out-ids))
       (if (empty? drafts)
         (swap! state assoc-in [:drafts :is-end] true)
         (do
           (swap! state assoc-in [:drafts :is-end] false)
           (swap! state assoc-in [:drafts :contents]
                  (into [] drafts)))))
-    (let [num (-> @state :draft :contents count)
-          drafts (await (draft-service/query-drafts q num))]
+    (let [;num (-> @state :draft :contents count)
+          tag-in-ids (map #(get % "id") (:filter-tags @state))
+          tag-out-ids (map #(get % "id") (:omitted-tags @state))
+          drafts (await (draft-service/query-drafts
+                         q
+                         (if has-filter tag-in-ids [])
+                         (if has-filter tag-out-ids []) 0))]
+      (dart:core/print (str "has-filter = " has-filter " tag-in-ids = " tag-in-ids))
+      (dart:core/print (str "tag-out-ids = " tag-out-ids))
       (if (empty? drafts)
         (swap! state assoc-in [:drafts :is-end] true)
         (do
