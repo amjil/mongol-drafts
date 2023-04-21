@@ -3,13 +3,15 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [virtual-keyboard.keyboard :as keyboard]
+   [virtual-keyboard.keyboard-action :as keyboard-action]
    [virtual-keyboard.options :as keyboard-options]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.drawer :as drawer]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.widgets.tagbar :as tagbar]
-   [mongol-drafts.states.draft :as draft-state]))
+   [mongol-drafts.states.draft :as draft-state]
+   [menu-bar.menu :as menu]))
 
 (defn widget []
   (f/widget
@@ -40,12 +42,13 @@
    :watch [{:keys [tag-viewable
                    show-keyboard
                    show-stacked-keyboard
-                   show-search-diaglog]}
+                   show-search-diaglog
+                   candidates-list]}
            state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
                 (let [id (get (:draft @state) "id")
                       content (get (:draft @state) "content")]
-                  (dart:core/print (str "bg-watcher id = " id " content = " content " edit-text = " edit-text))
+                  (dart:core/print (str "id = " id " content = " content " edit-text = " edit-text))
                   (when (and (number? id) (not= edit-text content))
                     (draft-state/update-draft state id edit-text))))
    (m/Stack
@@ -58,6 +61,7 @@
           (do
             (swap! state assoc-in [:drafts :is-end] false)
             (swap! state assoc-in [:drafts :contents] [])
+            (swap! state assoc :candidates-list [])
             (draft-state/query-drafts state (:draft-search @state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
@@ -118,4 +122,11 @@
        (m/Container))
      (if (true? show-search-diaglog)
        (search/widget)
-       (m/Container))])))
+       (m/Container))
+     (m/Positioned
+      .bottom (+ keyboard-options/keyboard-default-height 20 (* 4 (+ 4 (:row-vertical-padding info))))
+      .right (/ w 4)
+      .child
+      (menu/menu {:bar {:elavation 10}
+                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked text-controller x state))}}
+                 candidates-list))])))

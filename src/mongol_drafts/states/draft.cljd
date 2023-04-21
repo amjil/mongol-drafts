@@ -16,7 +16,7 @@
         ^m/TextEditingController
         controller (:text-controller @state)]
     (cond
-      (empty? content)
+      (and (empty? content) (number? (-> result first (get "id"))))
       (do
         (swap! state assoc :draft
                (into {} (-> result last)))
@@ -65,7 +65,6 @@
                          0
                          (if has-filter tag-in-ids [])
                          (if has-filter tag-out-ids [])))]
-      (dart:core/print (str "out-ids = " tag-out-ids))
       (if (empty? drafts)
         (swap! state assoc-in [:drafts :is-end] true)
         (do
@@ -79,8 +78,6 @@
                          q
                          (if has-filter tag-in-ids [])
                          (if has-filter tag-out-ids []) 0))]
-      (dart:core/print (str "has-filter = " has-filter " tag-in-ids = " tag-in-ids))
-      (dart:core/print (str "tag-out-ids = " tag-out-ids))
       (if (empty? drafts)
         (swap! state assoc-in [:drafts :is-end] true)
         (do
@@ -99,4 +96,6 @@
     (let [^m/TextEditingController controller (:text-controller @state)]
       (.clear controller))
     (swap! state assoc :tag-on-edit false))
-  (swap! state assoc :text-controller text-controller))
+  (swap! state assoc :text-controller text-controller)
+  (when-not (empty? (:candidates-list @state))
+    (swap! state assoc :candidates-list [])))

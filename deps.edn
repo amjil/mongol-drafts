@@ -5,7 +5,9 @@
         amjil/mongol-virtual-keyboard
        ;;  {:git/url "https://github.com/amjil/mongol-virtual-keyboard.git"
        ;;   :sha "02510d06672908f340eab42d8aadc38d9876b04b"}
-        {:local/root "../mongol-virtual-keyboard"}}
+        {:local/root "../mongol-virtual-keyboard"}
+        amjil/mongol-menu-bar
+        {:local/root "../mongol-menu-bar"}}
        
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}
  :cljd/opts {:kind :flutter
