@@ -15,6 +15,8 @@
   (f/widget
    :context ctx
    :get [:state]
+   :watch [{filter-tags :filter-tags
+            omitted-tags :omitted-tags} state]
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.89))
@@ -53,13 +55,17 @@
           (fn []
             (swap! state assoc :show-drawer-search
                    (not (:show-drawer-search @state)))
-            (if (and 
+            (if (and
                  (false? (:show-drawer-search @state))
                  (true? (:show-stacked-keyboard @state)))
               (swap! state assoc :show-stacked-keyboard false))))
          (m/SizedBox .width 20)
-         (m/Icon (.cancel_outlined m/Icons)
-                 .color (-> m/Colors .blue .-shade600))
+         (m/GestureDetector
+          .onTap (fn [] 
+                   (tag-state/clear-filter state))
+          .child
+          (m/Icon (.cancel_outlined m/Icons)
+                  .color (-> m/Colors .blue .-shade600)))
          (m/SizedBox .width 20)
          (m/Icon (.pending_outlined m/Icons)
                  .color (-> m/Colors .blue .-shade600))
@@ -73,12 +79,22 @@
        [(if (true? (:show-drawer-search @state))
           (in-drawer-search-field)
           (m/Container))
-        (m/Padding
-         .padding (.fromLTRB m/EdgeInsets 8 10 8 0)
+        (m/GestureDetector
+         .onTap (fn []
+                  (dart:core/print (str "abc ")))
          .child
-         (m/GestureDetector
-          .child (m/Icon (.filter_list_outlined m/Icons))
-          .onTap (fn []  (dart:core/print "tag button >>."))))
+         (m/Column
+          .children
+          [(m/Padding
+            .padding (.fromLTRB m/EdgeInsets 8 10 8 0)
+            .child (m/Icon (.filter_list_outlined m/Icons)))
+           (m/SizedBox .height 10)
+           (mgl/MongolText
+            (clojure.string/join
+             "᠂ "
+             (concat
+              (map #(get % "name") filter-tags)
+              (map #(str "!" (get % "name")) omitted-tags))))]))
         (m/VerticalDivider)
         (m/Expanded
          .child
@@ -87,7 +103,6 @@
 (defn filtered-tag [state tag]
   (m/GestureDetector
    .onTap (fn []
-            (dart:core/print (str "filtered-tag " tag))
             (when-not (= "Any" (get tag "name"))
               (tag-state/delete-filter-tag state tag)))
    .child
@@ -127,10 +142,10 @@
             filtered-tags :filtered-tags} state]
    :bg-watcher ([^m/TextEditingValue {search-text .-text} search-tag-controller]
                 (swap! state assoc :tag-search search-text))
+   (m/Drawer)
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.75))
-   (m/Drawer)
    (m/Container
     .color (-> m/Colors .blueGrey .-shade50))
    (m/SafeArea)
@@ -150,8 +165,12 @@
                (true? (:show-stacked-keyboard @state)))
             (swap! state assoc :show-stacked-keyboard false))))
        (m/SizedBox .width 20)
-       (m/Icon (.cancel_outlined m/Icons)
-               .color (-> m/Colors .blue .-shade600))
+       (m/GestureDetector
+        .onTap (fn []
+                 (tag-state/clear-filter state))
+        .child
+        (m/Icon (.cancel_outlined m/Icons)
+                .color (-> m/Colors .blue .-shade600)))
        (m/SizedBox .width 20)
        (m/Icon (.pending_outlined m/Icons)
                .color (-> m/Colors .blue .-shade600))

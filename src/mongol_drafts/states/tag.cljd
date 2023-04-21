@@ -1,7 +1,6 @@
 (ns mongol-drafts.states.tag
   (:require
    [mongol-drafts.services.tag :as tag-service]
-   [mongol-drafts.services.draft :as draft-service]
    [mongol-drafts.states.draft :as draft-state]))
 
 (defn get-draft-tags [state]
@@ -37,9 +36,7 @@
         tags (:tags @state)
         exclude-ids (concat (map #(get % "id") tag-in-ids)
                             (map #(get % "id") tag-out-ids))]
-    (dart:core/print (str "tags = " tags))
-    (dart:core/print (str "1tags = " (remove #(some #{(get % "id")} exclude-ids)
-                                             tags)))
+    
     (swap! state assoc :filtered-tags
            (remove #(some #{(get % "id")} exclude-ids)
                    tags))))
@@ -64,4 +61,10 @@
   (swap! state assoc :omitted-tags
          (remove #(= (get % "id") (get tag "id")) (:omitted-tags @state)))
   (update-filtered-tags state)
+  (draft-state/query-drafts state (:draft-search @state) true))
+
+(defn clear-filter [state]
+  (swap! state assoc :omitted-tags [])
+  (swap! state assoc :filter-tags [])
+  (swap! state assoc :filtered-tags [])
   (draft-state/query-drafts state (:draft-search @state) true))

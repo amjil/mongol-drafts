@@ -58,7 +58,7 @@
           (do
             (swap! state assoc-in [:drafts :is-end] false)
             (swap! state assoc-in [:drafts :contents] [])
-            (draft-state/list-drafts state)
+            (draft-state/query-drafts state (:draft-search @state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
       .body
