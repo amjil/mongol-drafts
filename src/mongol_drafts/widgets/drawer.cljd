@@ -143,7 +143,7 @@
             omitted-tags :omitted-tags
             filtered-tags :filtered-tags} state]
    :bg-watcher ([^m/TextEditingValue {search-text .-text} search-tag-controller]
-                (swap! state assoc :tag-search search-text))
+                (tag-state/update-tag-search state search-text))
    (m/Drawer)
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
@@ -270,7 +270,7 @@
              .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
              .scrollDirection m.Axis/horizontal
              .padding (.fromLTRB m/EdgeInsets 8 20 8 8)
-             .itemCount (count (if (empty? filtered-tags) tags filtered-tags))
+             .itemCount (count filtered-tags)
              .itemBuilder (fn [^m/BuildContext context i]
                             (m/Container
                              .constraints
@@ -287,12 +287,12 @@
                                  .child
                                  (m/GestureDetector
                                   .onTap (fn []
-                                           (tag-state/add-filter-tag state (nth (if (empty? filtered-tags) tags filtered-tags) i)))
+                                           (tag-state/add-filter-tag state (nth filtered-tags i)))
                                   .child
-                                  (mgl/MongolText (get (nth (if (empty? filtered-tags) tags filtered-tags) i) "name") .style (m/TextStyle .fontSize 18))))
+                                  (mgl/MongolText (get (nth filtered-tags i) "name") .style (m/TextStyle .fontSize 18))))
                                 (m/GestureDetector
                                  .onTap (fn []
-                                          (tag-state/add-omitted-tag state (nth (if (empty? filtered-tags) tags filtered-tags) i)))
+                                          (tag-state/add-omitted-tag state (nth filtered-tags i)))
                                  .child
                                  (m/Icon (.do_disturb_alt m/Icons)
                                          .color (-> m/Colors .blue .-shade500)

@@ -3,6 +3,8 @@
    [mongol-drafts.services.tag :as tag-service]
    [mongol-drafts.states.draft :as draft-state]))
 
+(declare update-filtered-tags)
+
 (defn get-draft-tags [state]
   (let [draft-id (-> @state :draft (get "id"))
         tags (await (tag-service/query-draft-tags draft-id))]
@@ -24,22 +26,29 @@
 
 (defn query-tags [state q]
   (let [result (await (tag-service/query-tags q))]
-    (swap! state assoc :tags result)))
+    (swap! state assoc :tags result)
+    (update-filtered-tags state)))
 
 (defn all-tags [state]
   (let [result (await (tag-service/all-tags))]
-    (swap! state assoc :tags result)))
+    (swap! state assoc :tags result)
+    (update-filtered-tags state)))
 
 (defn update-filtered-tags [state]
   (let [tag-in-ids (:filter-tags @state)
         tag-out-ids (:omitted-tags @state)
+        tag-search (:tag-search @state)
         tags (:tags @state)
         exclude-ids (concat (map #(get % "id") tag-in-ids)
                             (map #(get % "id") tag-out-ids))]
     
     (swap! state assoc :filtered-tags
-           (remove #(some #{(get % "id")} exclude-ids)
-                   tags))))
+           (cond->> tags
+             (not-empty exclude-ids)
+             (remove #(some #{(get % "id")} exclude-ids))
+
+             (not-empty tag-search)
+             (filter #(clojure.string/starts-with? (get % "name") tag-search))))))
 
 (defn add-filter-tag [state tag]
   (swap! state update :filter-tags concat [tag])
@@ -67,4 +76,9 @@
   (swap! state assoc :omitted-tags [])
   (swap! state assoc :filter-tags [])
   (swap! state assoc :filtered-tags [])
+  (swap! state assoc :tag-search "")
   (draft-state/query-drafts state (:draft-search @state) true))
+
+(defn update-tag-search [state content]
+  (swap! state assoc :tag-search content)
+  (update-filtered-tags state))
