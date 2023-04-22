@@ -41,6 +41,7 @@ dependencies:
   sqflite: ^2.2.6
   path: ^1.8.2
   flutter_slidable: ^3.0.0
+  diff_match_patch: ^0.4.1
 
 dev_dependencies:
   flutter_test:
