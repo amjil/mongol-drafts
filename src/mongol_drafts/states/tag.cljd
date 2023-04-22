@@ -72,11 +72,13 @@
   (update-filtered-tags state)
   (draft-state/query-drafts state (:draft-search @state) true))
 
-(defn clear-filter [state]
+(defn clear-filter [state controller]
   (swap! state assoc :omitted-tags [])
   (swap! state assoc :filter-tags [])
   (swap! state assoc :filtered-tags [])
   (swap! state assoc :tag-search "")
+  (when (empty? (:tag-search @state))
+    (.clear controller))
   (draft-state/query-drafts state (:draft-search @state) true))
 
 (defn update-tag-search [state content]

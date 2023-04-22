@@ -14,9 +14,10 @@
 (defn left-drawer []
   (f/widget
    :context ctx
-   :get [:state]
+   :get [:state :search-controller]
    :watch [{filter-tags :filter-tags
-            omitted-tags :omitted-tags} state]
+            omitted-tags :omitted-tags
+            draft-search :draft-search} state]
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.89))
@@ -50,8 +51,12 @@
        (m/Row
         .children
         [(toolbar-button-normal
-          (m/Icon (.manage_search_outlined m/Icons)
+          (m/Icon (.search m/Icons)
+                  .size 18
                   .color (-> m/Colors .blue .-shade600))
+          (if (empty? draft-search)
+            (-> m.Colors/transparent)
+            (-> m/Colors .blue .-shade200))
           (fn []
             (swap! state assoc :show-drawer-search
                    (not (:show-drawer-search @state)))
@@ -62,7 +67,7 @@
          (m/SizedBox .width 20)
          (m/GestureDetector
           .onTap (fn [] 
-                   (tag-state/clear-filter state))
+                   (tag-state/clear-filter state search-controller))
           .child
           (m/Icon (.cancel_outlined m/Icons)
                   .color (-> m/Colors .blue .-shade600)))
@@ -141,7 +146,8 @@
    :watch [{tags :tags
             filter-tags :filter-tags
             omitted-tags :omitted-tags
-            filtered-tags :filtered-tags} state]
+            filtered-tags :filtered-tags
+            tag-search :tag-search} state]
    :bg-watcher ([^m/TextEditingValue {search-text .-text} search-tag-controller]
                 (tag-state/update-tag-search state search-text))
    (m/Drawer)
@@ -156,20 +162,35 @@
     [(m/Row
       .mainAxisAlignment m.MainAxisAlignment/end
       .children
-      [(toolbar-button-normal
-        (m/Icon (.manage_search_outlined m/Icons)
-                .color (-> m/Colors .blue .-shade600))
-        (fn []
-          (swap! state assoc :show-sub-drawer-search
-                 (not (:show-sub-drawer-search @state)))
-          (if (and
-               (false? (:show-sub-drawer-search @state))
-               (true? (:show-stacked-keyboard @state)))
-            (swap! state assoc :show-stacked-keyboard false))))
+      [(f/widget
+        (m/Material
+         .color (if (empty? tag-search)
+                  (-> m.Colors/transparent)
+                  (-> m/Colors .blue .-shade200))
+         .shape (m/CircleBorder
+                 .side (m/BorderSide
+                        .color (-> m/Colors .blue .-shade600)
+                        .width 2)))
+        (m/InkWell
+         .customBorder (m/CircleBorder)
+         .splashColor (-> m.Colors/blue)
+         .onTap (fn []
+                  (swap! state assoc :show-sub-drawer-search
+                         (not (:show-sub-drawer-search @state)))
+                  (if (and
+                       (false? (:show-sub-drawer-search @state))
+                       (true? (:show-stacked-keyboard @state)))
+                    (swap! state assoc :show-stacked-keyboard false))))
+        (m/Padding
+         .padding (.all m/EdgeInsets 2)
+         .child (m/Icon (.search m/Icons)
+                        .size 18
+                        .color (-> m/Colors .blue .-shade600))))
+
        (m/SizedBox .width 20)
        (m/GestureDetector
         .onTap (fn []
-                 (tag-state/clear-filter state))
+                 (tag-state/clear-filter state search-tag-controller))
         .child
         (m/Icon (.cancel_outlined m/Icons)
                 .color (-> m/Colors .blue .-shade600)))
@@ -327,11 +348,13 @@
                            .color m.Colors/blue)
               .borderRadius (.circular m/BorderRadius 10))))))
 
-(defn toolbar-button-normal [child on-press]
+(defn toolbar-button-normal [child color on-press]
   (f/widget
    (m/Material
-    .borderRadius (.circular m/BorderRadius 25)
-    .color (-> m.Colors/blue .-shade100))
+    .shape (m/CircleBorder
+            .side (m/BorderSide
+                   .color (-> m/Colors .blue .-shade600)
+                   .width 2)))
    (m/InkWell
     .customBorder (m/CircleBorder)
     .splashColor (-> m.Colors/blue)
