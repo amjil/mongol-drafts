@@ -10,7 +10,15 @@
 ;;         result (.patch_apply dmp patchs "Hello World.")]
 ;;     (dart:core/print (str "patchs = " patchs))
 ;;     (dart:core/print (str "result = " (first result)))))
-(def max-history 200)
+(def max-history 50)
+
+(defn init-history [state controller]
+  (let [selection (.-selection controller)]
+    (swap! state assoc :history/num -1)
+    (swap! state assoc :history/cursor -1)
+    (swap! state assoc :history/selections [selection])
+    (swap! state assoc :history/redo-patchs [])
+    (swap! state assoc :history/undo-patchs [])))
 
 (defn push-history [state new-content 
                     ^m/TextEditingController 
@@ -24,7 +32,7 @@
     (when-not (number? history-num)
       (swap! state assoc :history/num 0)
       (swap! state assoc :history/cursor 0))
-    
+
     ;; From UNDO some position and PUSH History will
     ;;  Cut Off Histories.
     (when (not= (:history/num @state)
@@ -49,7 +57,25 @@
 (defn redo [state 
             ^m/TextEditingController
             controller]
-  (when (not= (:history/cursor @state) max-history)
+  (when (< (:history/cursor @state) (:history/num @state))
+    (let [patch (-> @state :history/undo-patchs (nth (:history/cursor @state)))
+          text (.-text controller)
+          dmp (diff-patch/DiffMatchPatch)
+          new-content (first (.patch_apply dmp patch text))]
+      (set! (.-text controller) new-content))
+
+    (let [^m/TextSelection
+          selection (-> @state :history/selections (nth (inc (:history/cursor @state))))]
+      (set! (.-selection controller)
+            (.copyWith selection
+                       .extentOffset (.-start selection))))
+    
+    (swap! state update :history/cursor inc)))
+
+(defn undo [state 
+            ^m/TextEditingController
+            controller]
+  (when-not (pos? (:history/cursor @state))
     (let [patch (-> @state :history/undo-patchs (nth (:history/cursor @state)))
           text (.-text controller)
           dmp (diff-patch/DiffMatchPatch)
@@ -60,27 +86,6 @@
           selection (-> @state :history/selections (nth (:history/cursor @state)))]
       (set! (.-selection controller)
             (.copyWith selection
-                       .extentOffset (.-start selection))))))
-
-(defn undo [state 
-            ^m/TextEditingController
-            controller]
-  (when-not (zero? (:history/cursor @state))
-    (let [patch (-> @state :history/undo-patchs (nth (dec (:history/cursor @state))))
-          text (.-text controller)
-          dmp (diff-patch/DiffMatchPatch)
-          new-content (first (.patch_apply dmp patch text))]
-      (set! (.-text controller) new-content))
-
-    (let [^m/TextSelection
-          selection (-> @state :history/selections (nth (dec (:history/cursor @state))))]
-      (set! (.-selection controller)
-            (.copyWith selection
-                       .extentOffset (.-start selection))))))
-
-(defn clear-history [state]
-  (swap! state assoc :history/selections [])
-  (swap! state assoc :history/undo-patchs [])
-  (swap! state assoc :history/redo-patchs [])
-  (swap! state assoc :history/cursor 0)
-  (swap! state assoc :history/num 0))
+                       .extentOffset (.-start selection))))
+    
+    (swap! state update :history/cursor dec)))
