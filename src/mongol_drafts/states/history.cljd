@@ -31,6 +31,7 @@
         ^m/TextSelection
         selection (.-selection controller)
         history-num (-> @state :history/num)]
+    (dart:core/print (str "selection = " selection))
     (when-not (number? history-num)
       (swap! state assoc :history/num 0)
       (swap! state assoc :history/cursor 0))
@@ -67,11 +68,12 @@
           new-content (first (.patch_apply dmp patch text))]
       (set! (.-text controller) new-content))
 
-    ;; (let [^m/TextSelection
-    ;;       selection (-> @state :history/selections (nth (inc (:history/cursor @state))))]
-    ;;   (set! (.-selection controller)
-    ;;         (.copyWith selection
-    ;;                    .extentOffset (.-start selection))))
+    (let [^m/TextSelection
+          selection (-> @state :history/selections (nth (+ 2 (:history/cursor @state))))]
+      (set! (.-selection controller)
+            (.copyWith selection
+                       .baseOffset (.-start selection)
+                       .extentOffset (.-end selection))))
     
     (swap! state update :history/cursor inc)))
 
@@ -87,10 +89,11 @@
       (dart:core/print (str "new-content = " new-content))
       (set! (.-text controller) new-content))
 
-    ;; (let [^m/TextSelection
-    ;;       selection (-> @state :history/selections (nth (:history/cursor @state)))]
-    ;;   (set! (.-selection controller)
-    ;;         (.copyWith selection
-    ;;                    .extentOffset (.-start selection))))
+    (let [^m/TextSelection
+          selection (-> @state :history/selections (nth (:history/cursor @state)))]
+      (set! (.-selection controller)
+            (.copyWith selection
+                       .baseOffset (.-start selection)
+                       .extentOffset (.-end selection))))
 
     (swap! state update :history/cursor dec)))
