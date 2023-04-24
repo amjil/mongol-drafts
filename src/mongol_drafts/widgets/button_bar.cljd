@@ -5,7 +5,8 @@
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.states.draft :as draft-state]
-   [mongol-drafts.states.tag :as tag-state]))
+   [mongol-drafts.states.tag :as tag-state]
+   [mongol-drafts.states.history :as his-state]))
    
 (defn bar-button [child on-press]
   (m/Material
@@ -26,7 +27,16 @@
       .child (m/Row
               .mainAxisAlignment m.MainAxisAlignment/spaceAround
               .children
-              [(m/Icon (.article_outlined m/Icons))
+              [(bar-button
+                (m/Icon (.article_outlined m/Icons))
+                (fn []
+                  (dart:core/print "article icon")
+                  (dart:core/print (str "history/redo-patchs " (:history/redo-patchs @state)))
+                  (dart:core/print (str "history/undo-patchs " (:history/undo-patchs @state)))
+                  (dart:core/print (str "history/cursor " (:history/cursor @state)))
+                  (dart:core/print (str "history/num " (:history/num @state)))
+                  (dart:core/print (str "history/selections " (:history/selections @state)))
+                  ))
                (bar-button
                 (m/Icon (.add m/Icons))
                 (fn []
@@ -124,7 +134,7 @@
                        (not (:show-stacked-keyboard @state)))))))))
 (defn toolbar []
   (f/widget
-   :get [:state]
+   :get [:state :text-controller]
    (m/Container
     .color (-> m/Colors .blue .-shade50)
     .height double/infinity)
@@ -148,10 +158,12 @@
         .children
         [(toolbar-button
           (m/Icon (.redo m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] (his-state/redo state text-controller)))
          (toolbar-button
           (m/Icon (.undo m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] 
+            (his-state/undo state text-controller)
+            (dart:core/print "abca xxx")))
          (m/SizedBox .height 8)
          (toolbar-button
           (m/Icon (.arrow_back_outlined m/Icons))

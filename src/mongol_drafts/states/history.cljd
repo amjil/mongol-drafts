@@ -14,6 +14,7 @@
 
 (defn init-history [state controller]
   (let [selection (.-selection controller)]
+    (swap! state assoc :history/flag true)
     (swap! state assoc :history/num -1)
     (swap! state assoc :history/cursor -1)
     (swap! state assoc :history/selections [selection])
@@ -27,6 +28,7 @@
         dmp (diff-patch/DiffMatchPatch)
         redo-patch (.patch dmp old-content new-content)
         undo-patch (.patch dmp new-content old-content)
+        ^m/TextSelection
         selection (.-selection controller)
         history-num (-> @state :history/num)]
     (when-not (number? history-num)
@@ -58,34 +60,37 @@
             ^m/TextEditingController
             controller]
   (when (< (:history/cursor @state) (:history/num @state))
-    (let [patch (-> @state :history/undo-patchs (nth (:history/cursor @state)))
+    (swap! state assoc :history/flag false)
+    (let [patch (-> @state :history/redo-patchs (nth (inc (:history/cursor @state))))
           text (.-text controller)
           dmp (diff-patch/DiffMatchPatch)
           new-content (first (.patch_apply dmp patch text))]
       (set! (.-text controller) new-content))
 
-    (let [^m/TextSelection
-          selection (-> @state :history/selections (nth (inc (:history/cursor @state))))]
-      (set! (.-selection controller)
-            (.copyWith selection
-                       .extentOffset (.-start selection))))
+    ;; (let [^m/TextSelection
+    ;;       selection (-> @state :history/selections (nth (inc (:history/cursor @state))))]
+    ;;   (set! (.-selection controller)
+    ;;         (.copyWith selection
+    ;;                    .extentOffset (.-start selection))))
     
     (swap! state update :history/cursor inc)))
 
 (defn undo [state 
             ^m/TextEditingController
             controller]
-  (when-not (pos? (:history/cursor @state))
+  (when (>= (:history/cursor @state) 0)
+    (swap! state assoc :history/flag false)
     (let [patch (-> @state :history/undo-patchs (nth (:history/cursor @state)))
           text (.-text controller)
           dmp (diff-patch/DiffMatchPatch)
           new-content (first (.patch_apply dmp patch text))]
+      (dart:core/print (str "new-content = " new-content))
       (set! (.-text controller) new-content))
 
-    (let [^m/TextSelection
-          selection (-> @state :history/selections (nth (:history/cursor @state)))]
-      (set! (.-selection controller)
-            (.copyWith selection
-                       .extentOffset (.-start selection))))
-    
+    ;; (let [^m/TextSelection
+    ;;       selection (-> @state :history/selections (nth (:history/cursor @state)))]
+    ;;   (set! (.-selection controller)
+    ;;         (.copyWith selection
+    ;;                    .extentOffset (.-start selection))))
+
     (swap! state update :history/cursor dec)))

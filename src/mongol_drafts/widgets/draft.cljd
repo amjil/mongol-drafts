@@ -11,7 +11,8 @@
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.widgets.tagbar :as tagbar]
    [mongol-drafts.states.draft :as draft-state]
-   [menu-bar.menu :as menu]))
+   [menu-bar.menu :as menu]
+   [mongol-drafts.states.history :as his-state]))
 
 (defn widget []
   (f/widget
@@ -33,7 +34,8 @@
                              :tag-on-edit false
                              :current-layout "mn"
                              :text-controller text-controller}))
-         _ (draft-state/new-draft state)]
+         _ (draft-state/new-draft state)
+         _ (his-state/init-history state text-controller)]
    :bind {:info info :state state
           :text-controller text-controller
           :tag-controller tag-controller
@@ -46,11 +48,22 @@
                    candidates-list]}
            state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
-                (let [id (get (:draft @state) "id")
-                      content (get (:draft @state) "content")]
-                  (dart:core/print (str "id = " id " content = " content " edit-text = " edit-text))
-                  (when (and (number? id) (not= edit-text content))
-                    (draft-state/update-draft state id edit-text))))
+                ;; filter other changed event, maybe selection change
+                (when (and (some? edit-text) (not= (:editor/content @state) edit-text))
+                  (dart:core/print (str " content = " (:editor/content @state) " edit-text = " edit-text))
+                  (swap! state assoc :editor/content edit-text)
+                  (dart:core/print (str " end = " " his-flag = " (:history/flag @state)))
+
+                  (let [id (get (:draft @state) "id")]
+                    ;; (when (not-empty edit-text)
+                    (when (and (not (empty? edit-text))
+                               (true? (:history/flag @state)))
+                      (dart:core/print "history >>")
+                      (his-state/push-history state edit-text text-controller))
+                    (draft-state/update-draft state id edit-text))
+                  ;; check this is redo/undo event
+                  (when (false? (:history/flag @state))
+                    (swap! state assoc :history/flag false))))
    (m/Stack
     .children
     [(m/Scaffold
