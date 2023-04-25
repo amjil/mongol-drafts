@@ -30,13 +30,7 @@
               [(bar-button
                 (m/Icon (.article_outlined m/Icons))
                 (fn []
-                  (dart:core/print "article icon")
-                  (dart:core/print (str "history/redo-patchs " (:history/redo-patchs @state)))
-                  (dart:core/print (str "history/undo-patchs " (:history/undo-patchs @state)))
-                  (dart:core/print (str "history/cursor " (:history/cursor @state)))
-                  (dart:core/print (str "history/num " (:history/num @state)))
-                  (dart:core/print (str "history/selections " (:history/selections @state)))
-                  ))
+                  (dart:core/print "article icon")))
                (bar-button
                 (m/Icon (.add m/Icons))
                 (fn []
