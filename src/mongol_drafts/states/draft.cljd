@@ -1,7 +1,8 @@
 (ns mongol-drafts.states.draft
   (:require
    ["package:flutter/material.dart" :as m]
-   [mongol-drafts.services.draft :as draft-service]))
+   [mongol-drafts.services.draft :as draft-service]
+   [mongol-drafts.states.history :as his-state]))
 
 (defn set-current-draft [state id]
   (let [result (await (draft-service/get-draft id))
@@ -99,3 +100,29 @@
   (swap! state assoc :text-controller text-controller)
   (when-not (empty? (:candidates-list @state))
     (swap! state assoc :candidates-list [])))
+
+(defn draft-editing-listener [state edit-text text-controller]
+  (if (true? (:tictoe @state))
+    ;; TextEditingController text changed
+    (do
+      (dart:core/print "nothing")
+      (swap! state assoc :tictoe false))
+    ;; TextEditingController text & selection change
+    (do
+      (dart:core/print "something")
+      (dart:core/print (str "selection = " (.-selection text-controller)))
+      (swap! state assoc :tictoe true)
+      (when (and (some? edit-text) (not= (:editor/content @state) edit-text))
+        (dart:core/print (str " content = " (:editor/content @state) " edit-text = " edit-text))
+        (swap! state assoc :editor/content edit-text)
+        (dart:core/print (str " end = " " his-flag = " (:history/flag @state)))
+
+        (let [id (get (:draft @state) "id")]
+          (when (and (not (empty? edit-text))
+                     (true? (:history/flag @state)))
+            (dart:core/print "history >>")
+            (his-state/push-history state edit-text text-controller))
+          (update-draft state id edit-text))
+        ;; check this is redo/undo event
+        (when (false? (:history/flag @state))
+          (swap! state assoc :history/flag false))))))
