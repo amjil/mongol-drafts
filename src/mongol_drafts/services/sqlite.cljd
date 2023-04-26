@@ -25,12 +25,11 @@
                       .onUpgrade (fn [^sql/Database db old new]
                                    (when (> new old)
                                     ;;  (dart:core/print (str "sqlite oldversion = " old " newversion = " new))
-                                     ;; flag 0 normarl 1 flaged
-                                     (.execute db "ALTER TABLE draft_info ADD COLUMN flag boolean NOT NULL DEFAULT 0")
-                                     ;; status 0 normal -1 deleted 1 archived
-                                     (.execute db "ALTER TABLE draft_info ADD COLUMN status smallint NOT NULL DEFAULT 0")))
-
-                      
+                                     (when (> new 1)
+                                       ;; flag 0 normarl 1 flaged
+                                       (.execute db "ALTER TABLE draft_info ADD COLUMN flag boolean NOT NULL DEFAULT 0")
+                                       ;; status 0 normal -1 deleted 1 archived
+                                       (.execute db "ALTER TABLE draft_info ADD COLUMN status smallint NOT NULL DEFAULT 0"))))
 
                       .version 2)))
 
