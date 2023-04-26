@@ -1,5 +1,6 @@
 (ns mongol-drafts.states.tag
   (:require
+   ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.tag :as tag-service]
    [mongol-drafts.states.draft :as draft-state]))
 
@@ -72,7 +73,9 @@
   (update-filtered-tags state)
   (draft-state/query-drafts state (:draft-search @state) true))
 
-(defn clear-filter [state controller]
+(defn clear-filter [state
+                    ^m/TextEditingController
+                    controller]
   (swap! state assoc :omitted-tags [])
   (swap! state assoc :filter-tags [])
   (swap! state assoc :filtered-tags [])
