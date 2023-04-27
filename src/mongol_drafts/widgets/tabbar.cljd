@@ -25,6 +25,7 @@
                                                .bottom m.Radius/zero
                                                .top (.circular m/Radius 10))
                       .color (.-shade100 m.Colors/blueGrey))
+          .onTap (fn [i] (dart:core/print (str "abc index = " i)))
           .tabs
           [(m/Tab
             .icon

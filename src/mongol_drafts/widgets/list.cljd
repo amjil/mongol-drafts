@@ -6,9 +6,6 @@
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.states.draft :as draft-state]))
 
-(def entities 
-  ["abc" "When The Trees Grow up"])
-
 (defn widget []
   (f/widget
    :context ctx

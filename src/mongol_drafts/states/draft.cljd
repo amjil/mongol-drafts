@@ -8,6 +8,9 @@
   (let [result (await (draft-service/get-draft id))
         ^m/TextEditingController
         controller (:text-controller @state)]
+    ;; Set tictoe false to prevent when (set! (.-text controller) ....)
+    ;; to fire :bg-watcher [text-controller]
+    (swap! state assoc :tictoe false)
     (swap! state assoc :draft (into {} (-> result first)))
     (set! (.-text controller) (get (:draft @state) "content"))))
 
@@ -104,13 +107,13 @@
 (defn draft-editing-listener [state edit-text text-controller]
   (if (true? (:tictoe @state))
     ;; TextEditingController text changed
+    ;; ----- Or The Open Other draft should't catch event.
     (do
       (dart:core/print "nothing")
       (swap! state assoc :tictoe false))
     ;; TextEditingController text & selection change
     (do
       (dart:core/print "something")
-      (dart:core/print (str "selection = " (.-selection text-controller)))
       (swap! state assoc :tictoe true)
       (when (and (some? edit-text) (not= (:editor/content @state) edit-text))
         (dart:core/print (str " content = " (:editor/content @state) " edit-text = " edit-text))
