@@ -10,7 +10,7 @@
         controller (:text-controller @state)]
     ;; Set tictoe false to prevent when (set! (.-text controller) ....)
     ;; to fire :bg-watcher [text-controller]
-    (swap! state assoc :tictoe false)
+    (swap! state assoc :tictoe true)
     (swap! state assoc :draft (into {} (-> result first)))
     (set! (.-text controller) (get (:draft @state) "content"))))
 

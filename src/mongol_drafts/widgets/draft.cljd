@@ -23,7 +23,10 @@
              ^m/TextEditingController search-tag-controller (m/TextEditingController)]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
-         info (merge keyboard-options/keyboard-option {} {:width w})
+         info (merge keyboard-options/keyboard-option 
+                     {:key-cap-border-radius 6
+                      :key-container-color (-> m/Colors .blueGrey .-shade400)} 
+                     {:width w})
          state (atom (merge keyboard-options/keyboard-state
                             (draft-state/initial-states text-controller)))
          _ (draft-state/new-draft state)
@@ -59,6 +62,7 @@
       .drawer (drawer/left-drawer)
       .body
       (m/SafeArea
+       .bottom false
        .child
        (m/Column
         .children
@@ -91,7 +95,10 @@
            (m/Container
             .color (-> m/Colors .blue .-shade100)
             .child
-            (keyboard/keyboard))
+            (m/SafeArea
+             .top false
+             .child
+             (keyboard/keyboard)))
            (m/Container))])))
      (if (true? show-stacked-keyboard)
        (m/Positioned
