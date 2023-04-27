@@ -25,16 +25,7 @@
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
          info (merge keyboard-options/keyboard-option {} {:width w})
          state (atom (merge keyboard-options/keyboard-state
-                            {:tag-viewable false
-                             :show-keyboard false
-                             :show-stacked-keyboard false
-                             :show-drawer-search false
-                             :show-sub-drawer-search false
-                             :show-search-diaglog false
-                             :tag-on-edit false
-                             :current-layout "mn"
-                             :tictoe true
-                             :text-controller text-controller}))
+                            (draft-state/initial-states text-controller)))
          _ (draft-state/new-draft state)
          _ (his-state/init-history state text-controller)]
    :bind {:info info :state state

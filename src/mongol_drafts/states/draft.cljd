@@ -129,3 +129,16 @@
         ;; check this is redo/undo event
         (when (false? (:history/flag @state))
           (swap! state assoc :history/flag false))))))
+
+
+(defn initial-states [controller]
+  {:tag-viewable false
+   :show-keyboard false
+   :show-stacked-keyboard false
+   :show-drawer-search false
+   :show-sub-drawer-search false
+   :show-search-diaglog false
+   :tag-on-edit false
+   :current-layout "mn"
+   :tictoe true
+   :text-controller controller})
