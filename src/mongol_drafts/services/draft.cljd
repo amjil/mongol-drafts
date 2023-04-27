@@ -34,49 +34,57 @@
                                [content id]))]
     num))
 
-(defn list-drafts [offset tag-in-ids tag-out-ids]
+(defn list-drafts [offset tag-in-ids tag-out-ids
+                   flag status]
   (let [^sqf/Database db (await (sql/initialize-db))]
-    (await 
+    (await
      (.rawQuery
       db
-      (str 
-      "select a.*, b.content, b.rowid as id
+      (str
+       "select a.*, b.content, b.rowid as id
        from draft_info a 
           left join drafts b on a.draft_id = b.rowid 
-          where 1 = 1 " 
-         (cond
-           (and (empty? tag-in-ids)
-                (empty? tag-out-ids))
-           ""
+          where 1 = 1 "
+       (cond
+         (and (empty? tag-in-ids)
+              (empty? tag-out-ids))
+         ""
 
-           (and (not-empty tag-in-ids) (not-empty tag-out-ids))
-           (str
-            " and draft_id in 
+         (and (not-empty tag-in-ids) (not-empty tag-out-ids))
+         (str
+          " and draft_id in 
              (select draft_id from draft_tags 
                 where tag_id in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
-            ")"
-            " and draft_id not in 
+          (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
+          ")"
+          " and draft_id not in 
              (select draft_id from draft_tags 
                 where tag_id in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
-            ")")
+          (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
+          ")")
 
-           (not-empty tag-in-ids)
-           (str
-            " and draft_id in 
+         (not-empty tag-in-ids)
+         (str
+          " and draft_id in 
              (select draft_id from draft_tags 
                 where tag_id in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
-            ")")
+          (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
+          ")")
 
-           (not-empty tag-out-ids)
-           (str
-            " and draft_id not in 
+         (not-empty tag-out-ids)
+         (str
+          " and draft_id not in 
              (select draft_id from draft_tags 
                 where tag_id in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
-            ")")) "
+          (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
+          ")"))
+       (if (and (number? flag) (= 1 flag))
+         " and a.flag = true "
+         " ")
+       (if (number? status)
+         (str " and a.status = " status " ")
+         " ")
+       "
        order by a.updated_at desc
        ;")))))
 
@@ -159,9 +167,9 @@
             ")"))
          
          (if (not-empty flag)
-           (str " and flag = " flag))
+           (str " and a.flag = " flag))
          (if (not-empty status)
-           (str " and status = " status))
+           (str " and a.status = " status))
          "
          order by a.updated_at desc
          ;"))))))

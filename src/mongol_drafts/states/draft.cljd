@@ -48,7 +48,10 @@
 
 (defn list-drafts [state]
   (let [;num (-> @state :drafts :contents count)
-        drafts (await (draft-service/list-drafts num [] []))]
+        flag (:draft/flag @state)
+        status (:draft/status @state)
+        drafts (await (draft-service/list-drafts
+                       num [] [] flag status))]
     (if (empty? drafts)
       (do
         (swap! state assoc-in [:drafts :is-end] true)
@@ -65,12 +68,17 @@
     (let [;num (-> @state :draft :contents count)
           tag-in-ids (map #(get % "id") (:filter-tags @state))
           tag-out-ids (map #(get % "id") (:omitted-tags @state))
+          flag (:draft/flag @state)
+          status (:draft/status @state)
           drafts (await (draft-service/list-drafts
                          0
                          (if has-filter tag-in-ids [])
-                         (if has-filter tag-out-ids [])))]
+                         (if has-filter tag-out-ids [])
+                         flag status))]
       (if (empty? drafts)
-        (swap! state assoc-in [:drafts :is-end] true)
+        (do
+          (swap! state assoc-in [:drafts :is-end] true)
+          (swap! state assoc-in [:drafts :contents] []))
         (do
           (swap! state assoc-in [:drafts :is-end] false)
           (swap! state assoc-in [:drafts :contents]
@@ -150,34 +158,34 @@
     ;; Query Inbox drafts
     0
     (do
-      (swap! state :assoc :draft/flag nil)
-      (swap! state :assoc :draft/status 0)
+      (swap! state assoc :draft/flag nil)
+      (swap! state assoc :draft/status 0)
       (query-drafts state (:draft-search @state) true))
 
     ;; Query Flaged drafts
     1
     (do
-      (swap! state :assoc :draft/flag true)
-      (swap! state :assoc :draft/status nil)
+      (swap! state assoc :draft/flag 1)
+      (swap! state assoc :draft/status 0)
       (query-drafts state (:draft-search @state) true))
 
     ;; Query Archived drafts
     2
     (do
-      (swap! state :assoc :draft/flag nil)
-      (swap! state :assoc :draft/status 1)
+      (swap! state assoc :draft/flag nil)
+      (swap! state assoc :draft/status 1)
       (query-drafts state (:draft-search @state) true))
 
     ;; Query All drafts
-    3
-    (do
-      (swap! state :assoc :draft/flag nil)
-      (swap! state :assoc :draft/status nil)
-      (query-drafts state (:draft-search @state) true))
+    ;; 3
+    ;; (do
+    ;;   (swap! state assoc :draft/flag nil)
+    ;;   (swap! state assoc :draft/status nil)
+    ;;   (query-drafts state (:draft-search @state) true))
 
     ;; Query Deleted drafts
-    4
+    3
     (do
-      (swap! state :assoc :draft/flag nil)
-      (swap! state :assoc :draft/status -1)
+      (swap! state assoc :draft/flag nil)
+      (swap! state assoc :draft/status -1)
       (query-drafts state (:draft-search @state) true))))

@@ -4,7 +4,6 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.list :as content-list]
-   [mongol-drafts.widgets.empty :as empty-content]
    [mongol-drafts.states.draft :as draft-state]))
 
 (declare tabbar-view)
@@ -13,7 +12,7 @@
   (f/widget
    :get [:state]
    (m/DefaultTabController
-    .length 5
+    .length 4
     .child
     (m/Column
      .children
@@ -42,13 +41,13 @@
             .icon
             (m/Icon (.archive_outlined m/Icons)
                     .color (-> m/Colors .blue .-shade600)))
-           (m/Container
-            ;; .margin (.only m/EdgeInsets .left 10)
-            .child
-            (m/Tab
-             .child
-             (m/Text "All"
-                     .style (m/TextStyle .color (-> m/Colors .blue .-shade600)))))
+        ;;    (m/Container
+        ;;     ;; .margin (.only m/EdgeInsets .left 10)
+        ;;     .child
+        ;;     (m/Tab
+        ;;      .child
+        ;;      (m/Text "All"
+        ;;              .style (m/TextStyle .color (-> m/Colors .blue .-shade600)))))
            (m/Tab
             .icon
             (m/Icon (.delete_outlined m/Icons)
@@ -65,15 +64,9 @@
    (m/TabBarView
     .children
     [(content-list/widget)
-     (m/Icon (.directions_transit m/Icons)
-             .color (-> m/Colors .blue .-shade600))
-     (m/Icon (.directions_bike m/Icons)
-             .color (-> m/Colors .blue .-shade600))
-     (m/Text "All"
-             .style (m/TextStyle .color (-> m/Colors .blue .-shade600)))
-    ;; (m/Icon (.delete_outlined m/Icons)
-    ;;         .color (-> m/Colors .blue .-shade600))
-     (empty-content/empty-content-view)])))
+     (content-list/widget)
+     (content-list/widget)
+     (content-list/widget)])))
 
 ;;
 (defn tab-content-view []

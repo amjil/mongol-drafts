@@ -4,6 +4,7 @@
    ["package:mongol/mongol.dart" :as mgl]
    ["package:flutter_slidable/flutter_slidable.dart" :as slidable]
    [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.widgets.empty :as empty-content]
    [mongol-drafts.states.draft :as draft-state]))
 
 (defn widget []
@@ -12,80 +13,82 @@
    :get [:state :text-controller m/Navigator]
    :let [h (-> m/MediaQuery (.of ctx) .-size .-height)]
    :watch [{{contents :contents} :drafts} state]
-   (m.ListView/separated
-    .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
-    .scrollDirection m.Axis/horizontal
-    .padding (.fromLTRB m/EdgeInsets 20 20 8 8)
-    .itemCount (count contents)
-    .itemBuilder
-    (fn [^m/BuildContext context i]
-      (f/widget
-       (m/GestureDetector
-        .onTap (fn []
-                 (draft-state/focus-on-draft state text-controller)
-                 (draft-state/set-current-draft state (-> contents (nth i) (get "id")))
-                 (.pop navigator)))
-       (slidable/Slidable
-        .key (m/ValueKey i)
-        .direction m/Axis.vertical
-        .endActionPane
-        (slidable/ActionPane
-         .motion (slidable/BehindMotion)
-         .dismissible (slidable/DismissiblePane
-                       .onDismissed
-                       (fn []
-                         (dart:core/print "slide")))
-         .children
-         [(slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide flag"))
-                                   .backgroundColor (.green m/Colors)
-                                   .foregroundColor (.white m/Colors)
-                                   .icon (.flag m/Icons)
-                                   .label nil)
-          (slidable/SlidableAction .onPressed
-                                   (fn [context]
-                                     (let [controller (-> slidable/Slidable (.of context))]
-                                       (if (some? controller)
-                                         (.dismiss controller 
-                                                   (slidable/ResizeRequest
-                                                    (Duration .milliseconds 300)
-                                                    (fn []
-                                                      (draft-state/delete-draft state (-> contents (nth i) (get "id")))))
-                                                   .duration (Duration .milliseconds 300))))
-                                     (dart:core/print "slide delete"))
-                                   .autoClose false
-                                   .backgroundColor (.red m/Colors)
-                                   .foregroundColor (.white m/Colors)
-                                   .icon (.delete m/Icons))
-          (slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide archive"))
-                                   .backgroundColor (.blue m/Colors)
-                                   .foregroundColor (.white m/Colors)
-                                   .icon (.archive m/Icons))]))
-       (m/Container
-        .height (- h 40)
+   (if (empty? contents)
+     (empty-content/empty-content-view)
+     (m.ListView/separated
+      .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
+      .scrollDirection m.Axis/horizontal
+      .padding (.fromLTRB m/EdgeInsets 20 20 8 8)
+      .itemCount (count contents)
+      .itemBuilder
+      (fn [^m/BuildContext context i]
+        (f/widget
+         (m/GestureDetector
+          .onTap (fn []
+                   (draft-state/focus-on-draft state text-controller)
+                   (draft-state/set-current-draft state (-> contents (nth i) (get "id")))
+                   (.pop navigator)))
+         (slidable/Slidable
+          .key (m/ValueKey i)
+          .direction m/Axis.vertical
+          .endActionPane
+          (slidable/ActionPane
+           .motion (slidable/BehindMotion)
+           .dismissible (slidable/DismissiblePane
+                         .onDismissed
+                         (fn []
+                           (dart:core/print "slide")))
+           .children
+           [(slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide flag"))
+                                     .backgroundColor (.green m/Colors)
+                                     .foregroundColor (.white m/Colors)
+                                     .icon (.flag m/Icons)
+                                     .label nil)
+            (slidable/SlidableAction .onPressed
+                                     (fn [context]
+                                       (let [controller (-> slidable/Slidable (.of context))]
+                                         (if (some? controller)
+                                           (.dismiss controller
+                                                     (slidable/ResizeRequest
+                                                      (Duration .milliseconds 300)
+                                                      (fn []
+                                                        (draft-state/delete-draft state (-> contents (nth i) (get "id")))))
+                                                     .duration (Duration .milliseconds 300))))
+                                       (dart:core/print "slide delete"))
+                                     .autoClose false
+                                     .backgroundColor (.red m/Colors)
+                                     .foregroundColor (.white m/Colors)
+                                     .icon (.delete m/Icons))
+            (slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide archive"))
+                                     .backgroundColor (.blue m/Colors)
+                                     .foregroundColor (.white m/Colors)
+                                     .icon (.archive m/Icons))]))
+         (m/Container
+          .height (- h 40)
         ;; .width 48
       ;;  .constraints
       ;;  (m/BoxConstraints
       ;;   .maxWidth 40
       ;;   .height h)
-        )
-       (m/Padding
-        .padding (.only m/EdgeInsets .left 10 .right 10))
-        (if (empty? (-> contents (nth i) (get "content")))
-          (mgl/MongolText
-           "--blank--")
-          (let [^String orig-content (-> contents (nth i) (get "content"))
-                ^String content (.trim orig-content)
-                num (count content)
-                idx (if (empty? content)
-                      -1
-                      (.indexOf content "\n"))]
-            (m/Row
-             .crossAxisAlignment m.CrossAxisAlignment/start
-             .children
-             [(if (neg? idx)
-                (mgl/MongolText content .maxLines 1)
-                (mgl/MongolText (.substring content 0 idx) .maxLines 1))
-              (if (and (pos? idx) (< (inc idx) (dec num)) (not-empty (.substring content (inc idx))))
-                (mgl/MongolText (.substring content (inc idx)) .maxLines 2)
-                (m/Container))]))))))))
+          )
+         (m/Padding
+          .padding (.only m/EdgeInsets .left 10 .right 10))
+         (if (empty? (-> contents (nth i) (get "content")))
+           (mgl/MongolText
+            "--blank--")
+           (let [^String orig-content (-> contents (nth i) (get "content"))
+                 ^String content (.trim orig-content)
+                 num (count content)
+                 idx (if (empty? content)
+                       -1
+                       (.indexOf content "\n"))]
+             (m/Row
+              .crossAxisAlignment m.CrossAxisAlignment/start
+              .children
+              [(if (neg? idx)
+                 (mgl/MongolText content .maxLines 1)
+                 (mgl/MongolText (.substring content 0 idx) .maxLines 1))
+               (if (and (pos? idx) (< (inc idx) (dec num)) (not-empty (.substring content (inc idx))))
+                 (mgl/MongolText (.substring content (inc idx)) .maxLines 2)
+                 (m/Container))])))))))))
 
