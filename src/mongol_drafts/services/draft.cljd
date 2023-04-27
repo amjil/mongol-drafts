@@ -106,7 +106,8 @@
        ;"
       [id]))))
 
-(defn query-drafts [word tag-in-ids tag-out-ids offset]
+(defn query-drafts [word tag-in-ids tag-out-ids offset
+                    flag status]
   (let [^sqf/Database db (await (sql/initialize-db))
         ;; Runtime error: unable to use function MATCH in the requested context
         ids (->> (.rawQuery db
@@ -156,7 +157,11 @@
                 where tag_id not in "
             (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
             ")"))
-          
+         
+         (if (not-empty flag)
+           (str " and flag = " flag))
+         (if (not-empty status)
+           (str " and status = " status))
          "
          order by a.updated_at desc
          ;"))))))

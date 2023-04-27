@@ -12,7 +12,10 @@
 ;;     (dart:core/print (str "result = " (first result)))))
 (def max-history 50)
 
-(defn init-history [state controller]
+
+(defn init-history [state
+                    ^m/TextEditingController
+                    controller]
   (let [selection (.-selection controller)]
     (swap! state assoc :history/flag true)
     (swap! state assoc :history/num -1)

@@ -78,10 +78,13 @@
     (let [;num (-> @state :draft :contents count)
           tag-in-ids (map #(get % "id") (:filter-tags @state))
           tag-out-ids (map #(get % "id") (:omitted-tags @state))
+          flag (:draft/flag @state)
+          status (:draft/status @state)
           drafts (await (draft-service/query-drafts
                          q
                          (if has-filter tag-in-ids [])
-                         (if has-filter tag-out-ids []) 0))]
+                         (if has-filter tag-out-ids [])
+                         0 flag status))]
       (if (empty? drafts)
         (swap! state assoc-in [:drafts :is-end] true)
         (do
@@ -130,7 +133,6 @@
         (when (false? (:history/flag @state))
           (swap! state assoc :history/flag false))))))
 
-
 (defn initial-states [controller]
   {:tag-viewable false
    :show-keyboard false
@@ -142,3 +144,40 @@
    :current-layout "mn"
    :tictoe true
    :text-controller controller})
+
+(defn set-draft-status [state i]
+  (condp = i
+    ;; Query Inbox drafts
+    0
+    (do
+      (swap! state :assoc :draft/flag nil)
+      (swap! state :assoc :draft/status 0)
+      (query-drafts state (:draft-search @state) true))
+
+    ;; Query Flaged drafts
+    1
+    (do
+      (swap! state :assoc :draft/flag true)
+      (swap! state :assoc :draft/status nil)
+      (query-drafts state (:draft-search @state) true))
+
+    ;; Query Archived drafts
+    2
+    (do
+      (swap! state :assoc :draft/flag nil)
+      (swap! state :assoc :draft/status 1)
+      (query-drafts state (:draft-search @state) true))
+
+    ;; Query All drafts
+    3
+    (do
+      (swap! state :assoc :draft/flag nil)
+      (swap! state :assoc :draft/status nil)
+      (query-drafts state (:draft-search @state) true))
+
+    ;; Query Deleted drafts
+    4
+    (do
+      (swap! state :assoc :draft/flag nil)
+      (swap! state :assoc :draft/status -1)
+      (query-drafts state (:draft-search @state) true))))
