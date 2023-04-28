@@ -6,7 +6,8 @@
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
-   [mongol-drafts.states.history :as his-state]))
+   [mongol-drafts.states.history :as his-state]
+   [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
   (m/Material
@@ -174,7 +175,12 @@
          (m/SizedBox .height 8)
          (toolbar-button-normal
           (m/Icon (.date_range_outlined m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn []
+            (keyboard-action/on-key-press 
+             text-controller
+             {:key-type :string 
+              :text (.toString (.now DateTime))}
+             state)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
           #(dart:core/print "toolbar-button >>>>"))
