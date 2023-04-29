@@ -193,3 +193,10 @@
 (defn update-draft-search [state text]
   (swap! state assoc :draft-search text)
   (query-drafts state (:draft-search @state) true))
+
+(defn toggle-draft-flag [state id]
+  (let [flag (-> @state :draft (get "flag"))]
+    (if (true? flag)
+      (draft-service/unflag-draft id)
+      (draft-service/flag-draft id)))
+  (swap! state assoc-in [:draft "flag"] true))

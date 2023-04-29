@@ -34,6 +34,20 @@
                                [content id]))]
     num))
 
+(defn flag-draft [id]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        num (await (.rawUpdate db
+                               "UPDATE draft_info SET flag = true WHERE rowid = ?"
+                               [id]))]
+    num))
+
+(defn unflag-draft [id]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        num (await (.rawUpdate db
+                               "UPDATE draft_info SET flag = false WHERE rowid = ?"
+                               [id]))]
+    num))
+
 (defn list-drafts [offset tag-in-ids tag-out-ids
                    flag status]
   (let [^sqf/Database db (await (sql/initialize-db))]

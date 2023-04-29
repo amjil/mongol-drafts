@@ -3,7 +3,8 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.states.tag :as tag-state]))
+   [mongol-drafts.states.tag :as tag-state]
+   [mongol-drafts.states.draft :as draft-state]))
 
 (defn tag-text-button [text on-press]
   (f/widget
@@ -31,7 +32,8 @@
    :get [:state :text-controller :tag-controller]
    :managed [focus (m/FocusNode)]
    :watch [{:keys [tag-on-edit
-                   draft-tags]} state]
+                   draft-tags
+                   draft]} state]
    :bg-watcher ([^m/TextEditingValue {tag-edit-text .-text} tag-controller]
                 (when (and (not (empty? tag-edit-text)) (.endsWith tag-edit-text "\n"))
                   (let [text (.substring tag-edit-text 0
@@ -53,12 +55,19 @@
     .children
     (concat 
     [(m/Material
-      .color (-> m.Colors/blue .-shade200)
-      .borderRadius (.circular m/BorderRadius 25)
+      .color (if (= 1 (get draft "flag"))
+               (-> m.Colors/blue .-shade200)
+               nil)
+      .shape (m/CircleBorder
+              .side (m/BorderSide
+                     .color (-> m/Colors .blue .-shade600)
+                     .width 2))
       .child
       (m/InkWell
        .customBorder (m/CircleBorder)
-       .onTap #(dart:core/print "tag button >>.")
+       .onTap (fn []
+                (dart:core/print "tag button >>.")
+                (draft-state/toggle-draft-flag state (get draft "id")))
        .child
        (m/Padding
         .padding (.all m/EdgeInsets 2)
