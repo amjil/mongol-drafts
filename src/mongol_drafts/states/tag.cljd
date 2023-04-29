@@ -14,15 +14,15 @@
   (let [id  (await (tag-service/create-tag name))
         draft-id (-> @state :draft (get "id"))
         _ (await (tag-service/add-draft-tag draft-id id))]
-    (swap! state update :draft-tags conj
-           {"id" id "name" name "related_num" 1})))
+    (swap! state update :draft-tags concat
+           [{"id" id "name" name "related_num" 1}])))
 
 (defn delete-draft-tag [state id]
   (let [draft (:draft @state)
         tags (:draft-tags @state)
         _ (await (tag-service/delete-draft-tag (:draft_id draft) id))]
     (swap! state assoc :draft-tags 
-           (remove #(= id (:id %)) tags))))
+           (remove #(= id (get % "id")) tags))))
 
 (defn query-tags [state q]
   (let [result (await (tag-service/query-tags q))]
