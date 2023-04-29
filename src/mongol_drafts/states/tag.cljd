@@ -6,10 +6,9 @@
 
 (declare update-filtered-tags)
 
-(defn get-draft-tags [state]
-  (let [draft-id (-> @state :draft (get "id"))
-        tags (await (tag-service/query-draft-tags draft-id))]
-    (swap! state assoc :draft-tags (into [] tags))))
+(defn get-draft-tags [state id]
+  (let [tags (await (tag-service/query-draft-tags id))] 
+    (swap! state assoc :draft-tags tags)))
 
 (defn add-draft-tag [state name]
   (let [id  (await (tag-service/create-tag name))

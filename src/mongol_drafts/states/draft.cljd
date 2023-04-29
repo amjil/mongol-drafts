@@ -2,8 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.draft :as draft-service]
-   [mongol-drafts.states.history :as his-state]
-   [mongol-drafts.states.tag :as tag-state]))
+   [mongol-drafts.states.history :as his-state]))
 
 (defn set-current-draft [state id]
   (let [result (await (draft-service/get-draft id))
@@ -13,7 +12,6 @@
     ;; to fire :bg-watcher [text-controller]
     (swap! state assoc :tictoe true)
     (swap! state assoc :draft (into {} (-> result first)))
-    (tag-state/get-draft-tags state)
     (set! (.-text controller) (get (:draft @state) "content"))))
 
 (defn new-draft [state]

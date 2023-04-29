@@ -45,7 +45,7 @@
                          assoc
                          :tag-viewable
                          (not (:tag-viewable @state)))
-                  (tag-state/get-draft-tags state)
+                  (tag-state/get-draft-tags state (-> @state :draft (get "id")))
                   (if (false? (:tag-viewable @state))
                     (swap! state
                            assoc

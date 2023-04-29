@@ -5,7 +5,8 @@
    ["package:flutter_slidable/flutter_slidable.dart" :as slidable]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.empty :as empty-content]
-   [mongol-drafts.states.draft :as draft-state]))
+   [mongol-drafts.states.draft :as draft-state]
+   [mongol-drafts.states.tag :as tag-state]))
 
 (defn widget []
   (f/widget
@@ -27,6 +28,7 @@
           .onTap (fn []
                    (draft-state/focus-on-draft state text-controller)
                    (draft-state/set-current-draft state (-> contents (nth i) (get "id")))
+                   (tag-state/get-draft-tags state (-> contents (nth i) (get "id")))
                    (.pop navigator)))
          (slidable/Slidable
           .key (m/ValueKey i)
