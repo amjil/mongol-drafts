@@ -196,7 +196,7 @@
 
 (defn toggle-draft-flag [state id]
   (let [flag (-> @state :draft (get "flag"))]
-    (if (true? flag)
+    (if (= 1 flag)
       (draft-service/unflag-draft id)
-      (draft-service/flag-draft id)))
-  (swap! state assoc-in [:draft "flag"] true))
+      (draft-service/flag-draft id))
+    (swap! state assoc-in [:draft "flag"] (if (= 1 flag) 0 1))))
