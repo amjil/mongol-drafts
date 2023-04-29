@@ -8,7 +8,8 @@
    [mongol-drafts.states.draft :as draft-state]))
 
 (declare left-sub-drawer
-         in-drawer-search-field
+         in-drawer-tag-search-field
+         in-drawer-draft-search-field
          toolbar-button-normal)
 
 (defn left-drawer []
@@ -18,6 +19,8 @@
    :watch [{filter-tags :filter-tags
             omitted-tags :omitted-tags
             draft-search :draft-search} state]
+   :bg-watcher ([^m/TextEditingValue {search-text .-text} search-controller]
+                (draft-state/update-draft-search state search-text))
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.89))
@@ -82,7 +85,7 @@
        .crossAxisAlignment m.CrossAxisAlignment/start
        .children
        [(if (true? (:show-drawer-search @state))
-          (in-drawer-search-field)
+          (in-drawer-draft-search-field)
           (m/Container))
         (f/widget
          :context ctx
@@ -153,7 +156,7 @@
    (m/Drawer)
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
-              0.75))
+              0.65))
    (m/Container
     .color (-> m/Colors .blueGrey .-shade50))
    (m/SafeArea)
@@ -206,7 +209,7 @@
        .children
        [(m/SizedBox .width 10)
         (if (true? (:show-sub-drawer-search @state))
-          (in-drawer-search-field)
+          (in-drawer-tag-search-field)
           (m/Container))
         (m/Container
          .margin (.only m/EdgeInsets .top 6)
@@ -318,11 +321,46 @@
                                  (m/Icon (.do_disturb_alt m/Icons)
                                          .color (-> m/Colors .blue .-shade500)
                                          .size 16))]))))))]))]))])))
+(defn in-drawer-draft-search-field []
+  (f/widget
+   :context ctx
+   :get [:state :search-controller]
+   :watch [{show-stacked-keyboard :show-stacked-keyboard} 
+           state]
+   (m/Container
+    .constraints
+    (m/BoxConstraints
+     .minHeight 60
+     .maxHeight (- (-> m/MediaQuery (.of ctx) .-size .-height)
+                   460)))
+   (m/Padding
+    .padding (.all m/EdgeInsets 6))
+   (mgl/MongolTextField
+    .controller search-controller
+    .autofocus true
+    .showCursor (if (true? show-stacked-keyboard) true false)
+    .readOnly true
+    .maxLines 1
+    .onTap (fn []
+             (swap! state assoc :show-stacked-keyboard true)
+             (swap! state assoc :text-controller search-controller))
+    .style (m/TextStyle .fontSize 16)
+    .decoration
+    (m/InputDecoration
+     .isDense true
+     .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
+     .border (m/OutlineInputBorder
+              .borderSide (m/BorderSide
+                           .width 0.8
+                           .color m.Colors/blue)
+              .borderRadius (.circular m/BorderRadius 10))))))
 
-(defn in-drawer-search-field []
+(defn in-drawer-tag-search-field []
   (f/widget
    :context ctx
    :get [:state :search-tag-controller]
+   :watch [{show-stacked-keyboard :show-stacked-keyboard} 
+           state]
    (m/Container
     .constraints
     (m/BoxConstraints
@@ -333,6 +371,9 @@
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
     .controller search-tag-controller
+    .autofocus true
+    .showCursor (if (true? show-stacked-keyboard) true false)
+    .readOnly true
     .maxLines 1
     .onTap (fn []
              (swap! state assoc :show-stacked-keyboard true)
