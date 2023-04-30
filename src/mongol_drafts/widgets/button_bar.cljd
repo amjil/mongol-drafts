@@ -7,6 +7,7 @@
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.history :as his-state]
+   [mongol-drafts.states.selection :as selection-state]
    [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
@@ -162,10 +163,10 @@
          (m/SizedBox .height 8)
          (toolbar-button
           (m/Icon (.arrow_back_outlined m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] (selection-state/cursor-up text-controller)))
          (toolbar-button
           (m/Icon (.arrow_forward_outlined m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] (selection-state/cursor-down text-controller)))
          (toolbar-text-button
           (m/Icon (.arrow_back_outlined m/Icons))
           #(dart:core/print "toolbar-button >>>>"))

@@ -1,0 +1,22 @@
+(ns mongol-drafts.states.selection
+  (:require
+   ["package:flutter/material.dart" :as m]))
+
+(defn cursor-up [^m/TextEditingController controller]
+  (let [selection (.-selection controller)]
+    (when-not (zero? (.-start selection))
+      (let [offset (dec (.-start selection))]
+        (set! (.-selection controller)
+              (.copyWith selection
+                         .baseOffset offset
+                         .extentOffset offset))))))
+
+(defn cursor-down [^m/TextEditingController controller]
+  (let [text-length (count (.-text controller))
+        selection (.-selection controller)]
+    (when-not (= (.-start selection) text-length)
+      (let [offset (inc (.-start selection))]
+        (set! (.-selection controller)
+              (.copyWith selection
+                         .baseOffset offset
+                         .extentOffset offset))))))
