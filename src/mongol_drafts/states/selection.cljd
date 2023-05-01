@@ -20,3 +20,39 @@
               (.copyWith selection
                          .baseOffset offset
                          .extentOffset offset))))))
+
+(defn cursor-before-word [^m/TextEditingController controller]
+  (when-not (zero? (.-start (.-selection controller)))
+    (let [selection-base (dec (.-start (.-selection controller)))
+          selection (.copyWith (.-selection controller)
+                               .baseOffset selection-base
+                               .extentOffset selection-base)
+          before-text (.textBefore selection (.-text controller))
+          splited-text (clojure.string/split before-text #" |\n")
+          text (if (clojure.string/ends-with? before-text " ")
+                 (-> splited-text drop-last last)
+                 (last splited-text))
+          offset (- (.-start selection) (count text))]
+      (set! (.-selection controller)
+            (.copyWith selection
+                       .baseOffset offset
+                       .extentOffset offset)))))
+
+(defn cursor-after-word [^m/TextEditingController controller]
+  (when-not (>= (.-start (.-selection controller)) (count (.-text controller)))
+    (let [selection-base (inc (.-start (.-selection controller)))
+          selection (.copyWith (.-selection controller)
+                               .baseOffset selection-base
+                               .extentOffset selection-base)
+          after-text (.textAfter selection (.-text controller))
+          splited-text (clojure.string/split after-text #" |\n")
+          text (if (clojure.string/starts-with? after-text " ")
+                 (second splited-text)
+                 (first splited-text))
+          offset (if (clojure.string/starts-with? after-text " ")
+                   (+ 1 (.-start selection) (count text))
+                   (+ (.-start selection) (count text)))]
+      (set! (.-selection controller)
+            (.copyWith selection
+                       .baseOffset offset
+                       .extentOffset offset)))))

@@ -169,10 +169,10 @@
           (fn [] (selection-state/cursor-down text-controller)))
          (toolbar-text-button
           (m/Icon (.arrow_back_outlined m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] (selection-state/cursor-before-word text-controller)))
          (toolbar-text-button
           (m/Icon (.arrow_forward_outlined m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] (selection-state/cursor-after-word text-controller)))
          (m/SizedBox .height 8)
          (toolbar-button-normal
           (m/Icon (.date_range_outlined m/Icons))
