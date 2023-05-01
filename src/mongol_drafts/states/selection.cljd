@@ -1,6 +1,7 @@
 (ns mongol-drafts.states.selection
   (:require
-   ["package:flutter/material.dart" :as m]))
+   ["package:flutter/material.dart" :as m]
+   ["package:flutter/services.dart" :as services]))
 
 (defn cursor-up [^m/TextEditingController controller]
   (let [selection (.-selection controller)]
@@ -56,3 +57,30 @@
             (.copyWith selection
                        .baseOffset offset
                        .extentOffset offset)))))
+
+(defn select-all [^m/TextEditingController controller]
+  (set! (.-selection controller)
+        (services/TextSelection
+         .baseOffset 0
+         .extentOffset (-> controller .-text .-length))))
+
+(defn copy [^m/TextEditingController controller]
+  (let [selection (.-selection controller)
+        selected-text (.substring (.-text controller)
+                                  (.-start selection)
+                                  (.-end selection))
+        clipboard-data (services/ClipboardData .text selected-text)]
+    (services.Clipboard/setData clipboard-data)))
+
+(defn paste [^m/TextEditingController controller]
+  (let [selection (.-selection controller)
+        text (.-text controller)
+        clipboard-data (await (services.Clipboard/getData (.kTextPlain services/Clipboard)))
+        clipboard-text (.-text clipboard-data)
+        new-text (.replaceRange text (.-start selection) (.-end selection) clipboard-text)
+        new-str-length (.-length clipboard-text)]
+    (set! (.-text controller) new-text)
+    (set! (.-selection controller)
+          (.copyWith selection
+                     .baseOffset (+ (.-start selection) new-str-length)
+                     .extentOffset (+ (.-start selection) new-str-length)))))

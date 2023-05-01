@@ -184,13 +184,13 @@
              state)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] (selection-state/copy text-controller)))
          (toolbar-button-normal
           (m/Icon (.paste m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))
+          (fn [] (selection-state/paste text-controller)))
          (toolbar-button-normal
           (m/Icon (.select_all m/Icons))
-          #(dart:core/print "toolbar-button >>>>"))])))
+          (fn [] (selection-state/select-all text-controller)))])))
      (keyboard-close-button true)])))
 
 
