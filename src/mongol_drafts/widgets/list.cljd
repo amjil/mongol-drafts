@@ -26,9 +26,9 @@
         (f/widget
          (m/GestureDetector
           .onTap (fn []
+                   (swap! state assoc :edit-watcher/lock 2)
                    (draft-state/set-current-draft state (-> contents (nth i) (get "id")))
                    (draft-state/focus-on-draft state text-controller)
-                   (swap! state assoc :edit-watcher/lock 1)
                    (tag-state/get-draft-tags state (-> contents (nth i) (get "id")))
                    (.pop navigator)))
          (slidable/Slidable

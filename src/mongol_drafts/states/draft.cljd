@@ -10,10 +10,9 @@
         controller (:text-controller @state)]
     ;; Set :edit-watcher/lock false to prevent when (set! (.-text controller) ....)
     ;; to fire :bg-watcher [text-controller]
-    (swap! state assoc :edit-watcher/lock 2)
     (swap! state assoc :draft (into {} (-> result first)))
     (set! (.-text controller) (get (:draft @state) "content"))
-    (swap! state assoc :edit-watcher/lock 1)))
+    (his-state/init-history state controller)))
 
 (defn new-draft [state]
   (let [result (await (draft-service/last-draft))
@@ -114,7 +113,8 @@
     (swap! state assoc :tag-on-edit false))
   (swap! state assoc :text-controller text-controller)
   (when-not (empty? (:candidates-list @state))
-    (swap! state assoc :candidates-list [])))
+    (swap! state assoc :candidates-list []))
+  (swap! state assoc :edit-watcher/lock 1))
 
 (defn draft-editing-listener [state edit-text text-controller]
   ;; (if (true? (:edit-watcher/lock @state))
@@ -130,7 +130,7 @@
     1
     (do
       (dart:core/print "The Change Event Is For Text")
-      (swap! state assoc :edit-watcher/lock 0)
+      ;; (swap! state assoc :edit-watcher/lock 0)
       (when (and (some? edit-text) (not= (:editor/content @state) edit-text))
         (dart:core/print (str " content = " (:editor/content @state) " edit-text = " edit-text))
         (swap! state assoc :editor/content edit-text)
