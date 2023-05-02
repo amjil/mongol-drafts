@@ -8,11 +8,12 @@
   (let [result (await (draft-service/get-draft id))
         ^m/TextEditingController
         controller (:text-controller @state)]
-    ;; Set tictoe false to prevent when (set! (.-text controller) ....)
+    ;; Set :edit-watcher/lock false to prevent when (set! (.-text controller) ....)
     ;; to fire :bg-watcher [text-controller]
-    (swap! state assoc :tictoe true)
+    (swap! state assoc :edit-watcher/lock 2)
     (swap! state assoc :draft (into {} (-> result first)))
-    (set! (.-text controller) (get (:draft @state) "content"))))
+    (set! (.-text controller) (get (:draft @state) "content"))
+    (swap! state assoc :edit-watcher/lock 1)))
 
 (defn new-draft [state]
   (let [result (await (draft-service/last-draft))
@@ -116,16 +117,20 @@
     (swap! state assoc :candidates-list [])))
 
 (defn draft-editing-listener [state edit-text text-controller]
-  (if (true? (:tictoe @state))
+  ;; (if (true? (:edit-watcher/lock @state))
+  (dart:core/print (str "The edit-watcher/lock = " (:edit-watcher/lock @state)))
+  (condp = (:edit-watcher/lock @state)
     ;; TextEditingController text changed
     ;; ----- Or The Open Other draft should't catch event.
+    0
     (do
       (dart:core/print "nothing")
-      (swap! state assoc :tictoe false))
+      (swap! state assoc :edit-watcher/lock 1))
     ;; TextEditingController text & selection change
+    1
     (do
-      (dart:core/print "something")
-      (swap! state assoc :tictoe true)
+      (dart:core/print "The Change Event Is For Text")
+      (swap! state assoc :edit-watcher/lock 0)
       (when (and (some? edit-text) (not= (:editor/content @state) edit-text))
         (dart:core/print (str " content = " (:editor/content @state) " edit-text = " edit-text))
         (swap! state assoc :editor/content edit-text)
@@ -139,7 +144,9 @@
           (update-draft state id edit-text))
         ;; check this is redo/undo event
         (when (false? (:history/flag @state))
-          (swap! state assoc :history/flag false))))))
+          (swap! state assoc :history/flag false))))
+
+    (dart:core/print "Do nothing")))
 
 (defn initial-states [controller]
   {:tag-viewable false
@@ -150,7 +157,7 @@
    :show-search-diaglog false
    :tag-on-edit false
    :current-layout "mn"
-   :tictoe true
+   :edit-watcher/lock 2
    :text-controller controller})
 
 (defn set-draft-status [state i]
