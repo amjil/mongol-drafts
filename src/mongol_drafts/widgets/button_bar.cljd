@@ -32,8 +32,7 @@
               [(bar-button
                 (m/Icon (.article_outlined m/Icons))
                 (fn []
-                  (dart:core/print (str "draft info = " (:draft @state)))
-                  (dart:core/print "article icon")))
+                  (-> m/Scaffold (.of ctx) (.openDrawer))))
                (bar-button
                 (m/Icon (.add m/Icons))
                 (fn []
