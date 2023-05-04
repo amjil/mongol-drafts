@@ -14,33 +14,42 @@
    (m/DefaultTabController
     .length 4
     .child
-    (m/Column
-     .children
-     [(m/Row
-       .children
-       [(m/Expanded
-         .child
-         (m/TabBar
-          .indicator (m/BoxDecoration
-                      .borderRadius (.vertical m/BorderRadius
-                                               .bottom m.Radius/zero
-                                               .top (.circular m/Radius 10))
-                      .color (.-shade100 m.Colors/blueGrey))
-          .onTap (fn [i]
-                   (draft-state/set-draft-status global-state/state i))
-          .tabs
-          [(m/Tab
-            .icon
-            (m/Icon (.inbox_outlined m/Icons)
-                    .color (-> m/Colors .blue .-shade600)))
-           (m/Tab
-            .icon
-            (m/Icon (.flag_outlined m/Icons)
-                    .color (-> m/Colors .blue .-shade600)))
-           (m/Tab
-            .icon
-            (m/Icon (.archive_outlined m/Icons)
-                    .color (-> m/Colors .blue .-shade600)))
+    (m/Builder 
+     .builder 
+     (fn [^m/BuildContext context]
+       (let [tab-controller (.of m/DefaultTabController context)
+             _ (.addListener tab-controller
+                             (fn []
+                               (when-not (.-indexIsChanging tab-controller)
+                                 (dart:core/print "aaaaaa>>>")
+                                 (draft-state/set-draft-status global-state/state (.-index tab-controller)))))]
+         (m/Column
+          .children
+          [(m/Row
+            .children
+            [(m/Expanded
+              .child
+              (m/TabBar
+               .indicator (m/BoxDecoration
+                           .borderRadius (.vertical m/BorderRadius
+                                                    .bottom m.Radius/zero
+                                                    .top (.circular m/Radius 10))
+                           .color (.-shade100 m.Colors/blueGrey))
+               .onTap (fn [i]
+                        (draft-state/set-draft-status global-state/state i))
+               .tabs
+               [(m/Tab
+                 .icon
+                 (m/Icon (.inbox_outlined m/Icons)
+                         .color (-> m/Colors .blue .-shade600)))
+                (m/Tab
+                 .icon
+                 (m/Icon (.flag_outlined m/Icons)
+                         .color (-> m/Colors .blue .-shade600)))
+                (m/Tab
+                 .icon
+                 (m/Icon (.archive_outlined m/Icons)
+                         .color (-> m/Colors .blue .-shade600)))
         ;;    (m/Container
         ;;     ;; .margin (.only m/EdgeInsets .left 10)
         ;;     .child
@@ -48,14 +57,15 @@
         ;;      .child
         ;;      (m/Text "All"
         ;;              .style (m/TextStyle .color (-> m/Colors .blue .-shade600)))))
-           (m/Tab
-            .icon
-            (m/Icon (.delete_outlined m/Icons)
-                    .color (-> m/Colors .blue .-shade600)))]))])
+                (m/Tab
+                 .icon
+                 (m/Icon (.delete_outlined m/Icons)
+                         .color (-> m/Colors .blue .-shade600)))]))])
 
-      (m/Expanded
-       .child
-       (tabbar-view))]))))
+           (m/Expanded
+            .child
+            (tabbar-view))]))))
+    )))
 
 (defn tabbar-view []
   (m/Container
