@@ -10,6 +10,7 @@
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.widgets.tagbar :as tagbar]
+   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [menu-bar.menu :as menu]
    [mongol-drafts.states.history :as his-state]))
@@ -23,15 +24,19 @@
              ^m/TextEditingController search-tag-controller (m/TextEditingController)]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
-         info (merge keyboard-options/keyboard-option 
+         info (merge keyboard-options/keyboard-option
                      {:key-cap-border-radius 6
-                      :key-container-color (-> m/Colors .blueGrey .-shade400)} 
+                      :key-container-color (-> m/Colors .blueGrey .-shade400)}
                      {:width w})
-         state (atom (merge keyboard-options/keyboard-state
-                            (draft-state/initial-states text-controller)))
-         _ (draft-state/new-draft state)
-         _ (his-state/init-history state text-controller)]
-   :bind {:info info :state state
+        ;;  state (atom (merge keyboard-options/keyboard-state
+        ;;                     global-state/state
+        ;;                     {:text-controller text-controller}))
+
+         _ (do (swap! global-state/state merge keyboard-options/keyboard-state)
+               (swap! global-state/state assoc :text-controller text-controller))
+         _ (draft-state/new-draft global-state/state)
+         _ (his-state/init-history global-state/state text-controller)]
+   :bind {:info info :state global-state/state
           :text-controller text-controller
           :tag-controller tag-controller
           :search-controller search-controller
@@ -40,11 +45,12 @@
                    show-keyboard
                    show-stacked-keyboard
                    show-search-diaglog
-                   candidates-list]}
-           state]
+                   candidates-list
+                   edit-watcher/lock]}
+           global-state/state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
                 ;; filter other changed event, maybe selection change
-                (draft-state/draft-editing-listener state edit-text text-controller))
+                (draft-state/draft-editing-listener edit-text text-controller))
                 
    (m/Stack
     .children
@@ -52,12 +58,12 @@
       .onDrawerChanged
       (fn [c]
         (if (false? c)
-          (swap! state assoc :show-stacked-keyboard false)
+          (swap! global-state/state assoc :show-stacked-keyboard false)
           (do
-            (swap! state assoc-in [:drafts :is-end] false)
-            (swap! state assoc-in [:drafts :contents] [])
-            (swap! state assoc :candidates-list [])
-            (draft-state/query-drafts state (:draft-search @state) true)
+            (swap! global-state/state assoc-in [:drafts :is-end] false)
+            (swap! global-state/state assoc-in [:drafts :contents] [])
+            (swap! global-state/state assoc :candidates-list [])
+            (draft-state/query-drafts global-state/state (:draft-search @global-state/state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
       .body
@@ -81,7 +87,7 @@
               .child
               (mgl/MongolTextField
                .controller text-controller
-               .onTap #(draft-state/focus-on-draft state text-controller)
+               .onTap #(draft-state/focus-on-draft global-state/state text-controller)
                .decoration nil
                .maxLines 1000
                .autofocus true
@@ -127,5 +133,5 @@
       .right (/ w 4)
       .child
       (menu/menu {:bar {:elavation 10}
-                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked text-controller x state))}}
+                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked text-controller x global-state/state))}}
                  candidates-list))])))

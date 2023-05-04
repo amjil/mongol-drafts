@@ -2,6 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.draft :as draft-service]
+   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.history :as his-state]))
 
 (defn set-current-draft [state id]
@@ -116,36 +117,36 @@
     (swap! state assoc :candidates-list []))
   (swap! state assoc :edit-watcher/lock 1))
 
-(defn draft-editing-listener [state edit-text text-controller]
+(defn draft-editing-listener [edit-text text-controller]
   ;; (if (true? (:edit-watcher/lock @state))
-  (dart:core/print (str "The edit-watcher/lock = " (:edit-watcher/lock @state)))
-  (condp = (:edit-watcher/lock @state)
+  (condp = (:edit-watcher/lock @global-state/state)
     ;; TextEditingController text changed
     ;; ----- Or The Open Other draft should't catch event.
     0
     (do
       (dart:core/print "nothing")
-      (swap! state assoc :edit-watcher/lock 1))
+      (swap! global-state/state assoc :edit-watcher/lock 1))
     ;; TextEditingController text & selection change
     1
     (do
       (dart:core/print "The Change Event Is For Text")
       ;; (swap! state assoc :edit-watcher/lock 0)
-      (when (and (some? edit-text) (not= (:editor/content @state) edit-text))
-        (dart:core/print (str " content = " (:editor/content @state) " edit-text = " edit-text))
-        (swap! state assoc :editor/content edit-text)
-        (dart:core/print (str " end = " " his-flag = " (:history/flag @state)))
+      (when (and (some? edit-text) (not= (:editor/content @global-state/state) edit-text))
+        (dart:core/print (str " content = " (:editor/content @global-state/state) " edit-text = " edit-text))
+        (swap! global-state/state assoc :editor/content edit-text)
+        (dart:core/print (str " end = " " his-flag = " (:history/flag @global-state/state)))
 
-        (let [id (get (:draft @state) "id")]
+        (let [id (get (:draft @global-state/state) "id")]
           (when (and (not (empty? edit-text))
-                     (true? (:history/flag @state)))
+                     (true? (:history/flag @global-state/state)))
             (dart:core/print "history >>")
-            (his-state/push-history state edit-text text-controller))
-          (update-draft state id edit-text))
+            (his-state/push-history global-state/state edit-text text-controller))
+          (update-draft global-state/state id edit-text))
         ;; check this is redo/undo event
-        (when (false? (:history/flag @state))
-          (swap! state assoc :history/flag false))))
+        (when (false? (:history/flag @global-state/state))
+          (swap! global-state/state assoc :history/flag false))))
 
+    ;; else
     (dart:core/print "Do nothing")))
 
 (defn initial-states [controller]

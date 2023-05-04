@@ -3,6 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
+   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.draft :as draft-state]))
 
@@ -29,17 +30,17 @@
 
 (defn tagbar [controller]
   (f/widget
-   :get [:state :text-controller :tag-controller]
+   :get [:text-controller :tag-controller]
    :managed [focus (m/FocusNode)]
    :watch [{:keys [tag-on-edit
                    draft-tags
-                   draft]} state]
+                   draft]} global-state/state]
    :bg-watcher ([^m/TextEditingValue {tag-edit-text .-text} tag-controller]
                 (when (and (not (empty? tag-edit-text)) (.endsWith tag-edit-text "\n"))
                   (let [text (.substring tag-edit-text 0
                                          (dec (.-length tag-edit-text)))
                         ^m/TextEditingController controller tag-controller]
-                    (tag-state/add-draft-tag state text)
+                    (tag-state/add-draft-tag global-state/state text)
                     (.clear controller))))
    (m/Container
     .color (-> m/Colors .blue .-shade50)
@@ -67,7 +68,7 @@
        .customBorder (m/CircleBorder)
        .onTap (fn []
                 (dart:core/print "tag button >>.")
-                (draft-state/toggle-draft-flag state (get draft "id")))
+                (draft-state/toggle-draft-flag global-state/state (get draft "id")))
        .child
        (m/Padding
         .padding (.all m/EdgeInsets 2)
@@ -99,10 +100,10 @@
            .decoration nil)
           (m/GestureDetector
            .onTap (fn []
-                    (swap! state assoc :text-controller tag-controller)
-                    (swap! state assoc :tag-on-edit true)
-                    (if (false? (:show-keyboard @state))
-                      (swap! state assoc :show-keyboard true))
+                    (swap! global-state/state assoc :text-controller tag-controller)
+                    (swap! global-state/state assoc :tag-on-edit true)
+                    (if (false? (:show-keyboard @global-state/state))
+                      (swap! global-state/state assoc :show-keyboard true))
                     (.requestFocus focus))
            .child
            (m/RotatedBox
@@ -112,5 +113,5 @@
      (m/SizedBox .height 8)]
      (map #(tag-text-button 
             (get % "name")
-            (fn [] (tag-state/delete-draft-tag state (get % "id"))))
+            (fn [] (tag-state/delete-draft-tag global-state/state (get % "id"))))
           draft-tags)))))

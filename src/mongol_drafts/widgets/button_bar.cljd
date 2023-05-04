@@ -4,11 +4,14 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
+   [mongol-drafts.services.draft :as draft-services]
+   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.history :as his-state]
    [mongol-drafts.states.selection :as selection-state]
-   [virtual-keyboard.keyboard-action :as keyboard-action]))
+   [virtual-keyboard.keyboard-action :as keyboard-action]
+   [mongol-drafts.services.draft :as draft-service]))
    
 (defn bar-button [child on-press]
   (m/Material
@@ -20,7 +23,7 @@
 (defn topbar []
   (f/widget
    :context ctx
-   :get [:state :info 
+   :get [:info 
          :text-controller :search-controller]
    (m/Row
     .mainAxisAlignment m.MainAxisAlignment/spaceAround
@@ -32,23 +35,26 @@
               [(bar-button
                 (m/Icon (.article_outlined m/Icons))
                 (fn []
-                  (-> m/Scaffold (.of ctx) (.openDrawer))))
+                  ;; (-> m/Scaffold (.of ctx) (.openDrawer))
+                  (swap! global-state/state assoc :edit-watcher/lock 1)))
                (bar-button
                 (m/Icon (.add m/Icons))
                 (fn []
                   (dart:core/print "abc new draft")
-                  (draft-state/new-draft state)
-                  (draft-state/focus-on-draft state text-controller)))
+                  (swap! global-state/state assoc :edit-watcher/lock 2)
+                  (draft-state/new-draft global-state/state)
+                  (draft-state/focus-on-draft global-state/state text-controller)
+                  (swap! global-state/state assoc :edit-watcher/lock 1)))
                (bar-button
                 (m/Icon (.sell_outlined m/Icons))
                 (fn []
-                  (swap! state
+                  (swap! global-state/state
                          assoc
                          :tag-viewable
-                         (not (:tag-viewable @state)))
-                  (tag-state/get-draft-tags state (-> @state :draft (get "id")))
-                  (if (false? (:tag-viewable @state))
-                    (swap! state
+                         (not (:tag-viewable @global-state/state)))
+                  (tag-state/get-draft-tags global-state/state (-> @global-state/state :draft (get "id")))
+                  (if (false? (:tag-viewable @global-state/state))
+                    (swap! global-state/state
                            assoc
                            :text-controller
                            text-controller))))]))
@@ -63,9 +69,9 @@
                (bar-button
                 (m/Icon (.search m/Icons))
                 (fn []
-                  (swap! state assoc :show-search-diaglog true)
-                  (swap! state assoc :show-stacked-keyboard true)
-                  (swap! state assoc :show-keyboard false)
+                  (swap! global-state/state assoc :show-search-diaglog true)
+                  (swap! global-state/state assoc :show-stacked-keyboard true)
+                  (swap! global-state/state assoc :show-keyboard false)
                   (let [^m/TextEditingController controller search-controller]
                     (.clear controller))))
                (m/Icon (.view_sidebar_outlined m/Icons))]))])))
@@ -112,7 +118,6 @@
 
 (defn keyboard-close-button [flag]
   (f/widget
-   :get [:state]
    (m/Container
     .height 40
     .child
@@ -120,17 +125,17 @@
      .child (m/Icon (.keyboard_arrow_down m/Icons))
      .onTap (fn []
               (if (true? flag)
-                (swap! state
+                (swap! global-state/state
                        assoc
                        :show-keyboard
-                       (not (:show-keyboard @state)))
-                (swap! state
+                       (not (:show-keyboard @global-state/state)))
+                (swap! global-state/state
                        assoc
                        :show-stacked-keyboard
-                       (not (:show-stacked-keyboard @state)))))))))
+                       (not (:show-stacked-keyboard @global-state/state)))))))))
 (defn toolbar []
   (f/widget
-   :get [:state :text-controller]
+   :get [:text-controller]
    (m/Container
     .color (-> m/Colors .blue .-shade50)
     .height double/infinity)
@@ -154,11 +159,11 @@
         .children
         [(toolbar-button
           (m/Icon (.redo m/Icons))
-          (fn [] (his-state/redo state text-controller)))
+          (fn [] (his-state/redo global-state/state text-controller)))
          (toolbar-button
           (m/Icon (.undo m/Icons))
           (fn [] 
-            (his-state/undo state text-controller)
+            (his-state/undo global-state/state text-controller)
             (dart:core/print "abca xxx")))
          (m/SizedBox .height 8)
          (toolbar-button
@@ -181,7 +186,7 @@
              text-controller
              {:key-type :string 
               :text (.toString (.now DateTime))}
-             state)))
+             global-state/state)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
           (fn [] (selection-state/copy text-controller)))

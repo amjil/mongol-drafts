@@ -4,13 +4,13 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.list :as content-list]
+   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]))
 
 (declare tabbar-view)
 
 (defn tabbar []
   (f/widget
-   :get [:state]
    (m/DefaultTabController
     .length 4
     .child
@@ -27,7 +27,7 @@
                                                .top (.circular m/Radius 10))
                       .color (.-shade100 m.Colors/blueGrey))
           .onTap (fn [i]
-                   (draft-state/set-draft-status state i))
+                   (draft-state/set-draft-status global-state/state i))
           .tabs
           [(m/Tab
             .icon

@@ -4,6 +4,7 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.empty :as empty-content]
+   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.widgets.list :as list-content]))
 
@@ -12,10 +13,10 @@
 (defn widget []
   (f/widget
    :context ctx
-   :get [:state :search-controller]
-   :watch [{{:keys [contents is-end]} :drafts} state]
+   :get [:search-controller]
+   :watch [{{:keys [contents is-end]} :drafts} global-state/state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} search-controller]
-                (draft-state/query-drafts state edit-text false))
+                (draft-state/query-drafts global-state/state edit-text false))
    (m/Positioned
     .top 0
     .left 0
@@ -56,8 +57,8 @@
         (m/InkWell
          .customBorder (m/CircleBorder)
          .onTap (fn []
-                  (swap! state assoc :show-search-diaglog false)
-                  (swap! state assoc :show-stacked-keyboard false))
+                  (swap! global-state/state assoc :show-search-diaglog false)
+                  (swap! global-state/state assoc :show-stacked-keyboard false))
          .child (m/Icon (.cancel_outlined m/Icons)
                         .color m/Colors.blue.shade600
                         .size 36)))])
@@ -70,7 +71,7 @@
 (defn search-field []
   (f/widget
    :context ctx
-   :get [:state :search-controller]
+   :get [:search-controller]
    (m/Expanded)
    (m/Padding
     .padding (.all m/EdgeInsets 6))
@@ -78,8 +79,8 @@
     .controller search-controller
     .autofocus true
     .onTap (fn []
-             (swap! state assoc :show-stacked-keyboard true)
-             (swap! state assoc :text-controller search-controller))
+             (swap! global-state/state assoc :show-stacked-keyboard true)
+             (swap! global-state/state assoc :text-controller search-controller))
     .style (m/TextStyle .fontSize 16)
     .decoration
     (m/InputDecoration

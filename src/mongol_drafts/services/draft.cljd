@@ -1,6 +1,7 @@
 (ns mongol-drafts.services.draft
   (:require
    ["package:sqflite/sqflite.dart" :as sqf]
+   ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.sqlite :as sql]))
 
 (defn create-draft [v]
@@ -34,17 +35,35 @@
                                [content id]))]
     num))
 
+(defn test-draft [ctx]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        sql (str "SELECT COUNT (*) AS CNTREC
+                   FROM pragma_table_info (?)
+                   WHERE name= ?")
+        result1 (await (.rawQuery db sql ["draft_info" "status"]))
+        result2 (await (.rawQuery db sql ["draft_info" "flag"]))]
+    (-> m/ScaffoldMessenger
+        (.of ctx)
+        (.showSnackBar (m/SnackBar .content (m/Text (str " result1 " result1 " result2 = " result2)))))))
+
+(defn test-table-exits [ctx]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        result (await (.rawQuery db "SELECT name FROM sqlite_master WHERE type='table' AND name='drafts';"))]
+    (-> m/ScaffoldMessenger
+        (.of ctx)
+        (.showSnackBar (m/SnackBar .content (m/Text (str result)))))))
+
 (defn flag-draft [id]
   (let [^sqf/Database db (await (sql/initialize-db))
         num (await (.rawUpdate db
-                               "UPDATE draft_info SET flag = true WHERE rowid = ?"
+                               "UPDATE draft_info SET flag = 1 WHERE rowid = ?"
                                [id]))]
     num))
 
 (defn unflag-draft [id]
   (let [^sqf/Database db (await (sql/initialize-db))
         num (await (.rawUpdate db
-                               "UPDATE draft_info SET flag = false WHERE rowid = ?"
+                               "UPDATE draft_info SET flag = 0 WHERE rowid = ?"
                                [id]))]
     num))
 
@@ -93,7 +112,7 @@
           (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
           ")"))
        (if (and (number? flag) (= 1 flag))
-         " and a.flag = true "
+         " and a.flag = 1 "
          " ")
        (if (number? status)
          (str " and a.status = " status " ")
@@ -130,6 +149,7 @@
 
 (defn query-drafts [word tag-in-ids tag-out-ids offset
                     flag status]
+  ;; (dart:core/print (str "query-drafts services flag = " flag))
   (let [^sqf/Database db (await (sql/initialize-db))
         ;; Runtime error: unable to use function MATCH in the requested context
         ids (->> (.rawQuery db
@@ -148,7 +168,7 @@
          "select a.*, b.content 
          from draft_info a 
           left join drafts b on a.draft_id = b.rowid 
-         where draft_id in " ids-q 
+         where draft_id in " ids-q
          (cond
            (and (empty? tag-in-ids)
                 (empty? tag-out-ids))
@@ -179,10 +199,10 @@
                 where tag_id not in "
             (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
             ")"))
-         
-         (if (not-empty flag)
-           (str " and a.flag = " flag))
-         (if (not-empty status)
+
+         (if (number? flag)
+           (str " and a.flag = 1"))
+         (if (number? status)
            (str " and a.status = " status))
          "
          order by a.updated_at desc

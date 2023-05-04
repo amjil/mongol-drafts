@@ -5,15 +5,16 @@
    ["package:flutter_slidable/flutter_slidable.dart" :as slidable]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.empty :as empty-content]
+   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]))
 
 (defn widget []
   (f/widget
    :context ctx
-   :get [:state :text-controller m/Navigator]
+   :get [:text-controller m/Navigator]
    :let [h (-> m/MediaQuery (.of ctx) .-size .-height)]
-   :watch [{{contents :contents} :drafts} state]
+   :watch [{{contents :contents} :drafts} global-state/state]
    (if (empty? contents)
      (empty-content/empty-content-view)
      (m.ListView/separated
@@ -26,10 +27,11 @@
         (f/widget
          (m/GestureDetector
           .onTap (fn []
-                   (swap! state assoc :edit-watcher/lock 2)
-                   (draft-state/set-current-draft state (-> contents (nth i) (get "id")))
-                   (draft-state/focus-on-draft state text-controller)
-                   (tag-state/get-draft-tags state (-> contents (nth i) (get "id")))
+                   (swap! global-state/state assoc :edit-watcher/lock 2)
+                   (draft-state/set-current-draft global-state/state (-> contents (nth i) (get "id")))
+                   (draft-state/focus-on-draft global-state/state text-controller)
+                   (tag-state/get-draft-tags global-state/state (-> contents (nth i) (get "id")))
+                   (swap! global-state/state assoc :edit-watcher/lock 1)
                    (.pop navigator)))
          (slidable/Slidable
           .key (m/ValueKey i)
@@ -55,7 +57,7 @@
                                                      (slidable/ResizeRequest
                                                       (Duration .milliseconds 300)
                                                       (fn []
-                                                        (draft-state/delete-draft state (-> contents (nth i) (get "id")))))
+                                                        (draft-state/delete-draft global-state/state (-> contents (nth i) (get "id")))))
                                                      .duration (Duration .milliseconds 300))))
                                        (dart:core/print "slide delete"))
                                      .autoClose false
