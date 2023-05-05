@@ -32,7 +32,11 @@
                    (draft-state/focus-on-draft global-state/state text-controller)
                    (tag-state/get-draft-tags global-state/state (-> contents (nth i) (get "id")))
                    (swap! global-state/state assoc :edit-watcher/lock 1)
-                   (.pop navigator)))
+                   (if (true? (:show-search-diaglog @global-state/state))
+                     (do
+                       (swap! global-state/state assoc :show-search-diaglog false)
+                       (swap! global-state/state assoc :show-stacked-keyboard false))
+                     (.pop navigator))))
          (slidable/Slidable
           .key (m/ValueKey i)
           .direction m/Axis.vertical
