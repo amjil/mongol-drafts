@@ -15,31 +15,34 @@
    (m/RotatedBox
     .quarterTurns 1)
    (m/Material
-    .color (-> m.Colors/blue .-shade200))
+    .borderRadius (.circular m/BorderRadius 10)
+    .color (-> m.Colors/blueGrey .-shade200))
    (m/InkWell
     .onTap on-press)
    (m/Padding
-    .padding (.all m/EdgeInsets 6)
+    .padding (.all m/EdgeInsets 4)
     .child child)))
 
 (defn toolbar-button-normal [child on-press]
   (f/widget
    (m/Material
-    .color (-> m.Colors/blue .-shade200))
+    .borderRadius (.circular m/BorderRadius 10)
+    .color (-> m.Colors/blueGrey .-shade200))
    (m/InkWell
     .onTap on-press)
    (m/Padding
-    .padding (.all m/EdgeInsets 6)
+    .padding (.all m/EdgeInsets 4)
     .child child)))
 
 (defn toolbar-text-button [child on-press]
   (f/widget
    (m/Material
-    .color (-> m.Colors/blue .-shade200))
+    .borderRadius (.circular m/BorderRadius 10)
+    .color (-> m.Colors/blueGrey .-shade200))
    (m/InkWell
     .onTap on-press)
    (m/Padding
-    .padding (.all m/EdgeInsets 6))
+    .padding (.all m/EdgeInsets 4))
    (m/Row
     .children [(m/Column
                 .children
@@ -54,10 +57,10 @@
   (f/widget
    :get [:text-controller]
    (m/Container
-    .color (-> m/Colors .blue .-shade50)
+    .color (-> m/Colors .blueGrey .-shade50)
     .height double/infinity)
    (m/Padding
-    .padding (.all m/EdgeInsets 5))
+    .padding (.all m/EdgeInsets 4))
    (m/Column
     .children
     [(m/GestureDetector

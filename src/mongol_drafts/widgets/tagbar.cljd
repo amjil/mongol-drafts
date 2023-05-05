@@ -10,8 +10,8 @@
 (defn tag-text-button [text on-press]
   (f/widget
    (m/Material
-    .borderRadius (.circular m/BorderRadius 25)
-    .color (-> m.Colors/blue .-shade200))
+    .borderRadius (.circular m/BorderRadius 10)
+    .color (-> m.Colors/blueGrey .-shade200))
    (m/InkWell
     .customBorder (m/CircleBorder)
     .onTap on-press)
@@ -43,7 +43,7 @@
                     (tag-state/add-draft-tag global-state/state text)
                     (.clear controller))))
    (m/Container
-    .color (-> m/Colors .blue .-shade50)
+    .color (-> m/Colors .blueGrey .-shade50)
     .height double/infinity)
    (m/Padding
     .padding (.all m/EdgeInsets 4))
@@ -57,12 +57,12 @@
     (concat 
     [(m/Material
       .color (if (= 1 (get draft "flag"))
-               (-> m.Colors/blue .-shade200)
+               (-> m.Colors/blueGrey .-shade200)
                nil)
       .shape (m/CircleBorder
               .side (m/BorderSide
-                     .color (-> m/Colors .blue .-shade600)
-                     .width 2))
+                     .color (-> m/Colors .blueGrey .-shade600)
+                     .width 1))
       .child
       (m/InkWell
        .customBorder (m/CircleBorder)
@@ -83,7 +83,7 @@
                     .borderRadius
                     (.all m/BorderRadius (.circular m/Radius 10))
                     .border
-                    (.all m/Border .color m.Colors/blue .width 0.8))
+                    (.all m/Border .color m.Colors/blueGrey .width 0.8))
        .child
        (m/Padding
         .padding (.all m/EdgeInsets 8)
