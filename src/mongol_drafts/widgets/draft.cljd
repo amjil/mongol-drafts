@@ -119,7 +119,7 @@
         (m/IntrinsicHeight
          .child
          (m/Container
-          .color (-> m/Colors .blueGrey .-shade300)
+          .color (-> m/Colors .blueGrey .-shade100)
           .child
           (m/SafeArea
            .top false

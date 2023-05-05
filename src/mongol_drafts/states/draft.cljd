@@ -95,7 +95,9 @@
                          (if has-filter tag-out-ids [])
                          0 flag status))]
       (if (empty? drafts)
-        (swap! state assoc-in [:drafts :is-end] true)
+        (do
+          (swap! state assoc-in [:drafts :is-end] true)
+          (swap! state assoc-in [:drafts :contents] []))
         (do
           (swap! state assoc-in [:drafts :is-end] false)
           (swap! state assoc-in [:drafts :contents]

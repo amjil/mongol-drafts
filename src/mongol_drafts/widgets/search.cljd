@@ -20,15 +20,13 @@
    (m/Positioned
     .top 0
     .left 0
-    .right 0)
+    .right 0
+    .bottom 360)
    (m/Material)
-   (m/SafeArea)
+   (m/SafeArea .bottom false)
    (m/Container
-    ;; .color (-> m/Colors .red)
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
               60)
-    .height (- (-> m/MediaQuery (.of ctx) .-size .-height)
-               410)
     .decoration (m/BoxDecoration
                  .color (-> m/Colors .blueGrey .-shade50)
                  .borderRadius
@@ -78,6 +76,10 @@
    (mgl/MongolTextField
     .controller search-controller
     .autofocus true
+    .showCursor true
+    .readOnly true
+    .maxLines 1
+    .minLines 1
     .onTap (fn []
              (swap! global-state/state assoc :show-stacked-keyboard true)
              (swap! global-state/state assoc :text-controller search-controller))
@@ -98,4 +100,9 @@
               .borderSide (m/BorderSide
                            .width 0.8
                            .color m.Colors/blueGrey)
-              .borderRadius (.circular m/BorderRadius 10))))))
+              .borderRadius (.circular m/BorderRadius 10))
+     .focusedBorder (m/OutlineInputBorder
+                     .borderSide (m/BorderSide
+                                  .width 0.8
+                                  .color m.Colors/blueGrey)
+                     .borderRadius (.circular m/BorderRadius 10))))))

@@ -28,9 +28,9 @@
          (m/GestureDetector
           .onTap (fn []
                    (swap! global-state/state assoc :edit-watcher/lock 2)
-                   (draft-state/set-current-draft global-state/state (-> contents (nth i) (get "id")))
+                   (draft-state/set-current-draft global-state/state (-> contents (nth i) (get "draft_id")))
                    (draft-state/focus-on-draft global-state/state text-controller)
-                   (tag-state/get-draft-tags global-state/state (-> contents (nth i) (get "id")))
+                   (tag-state/get-draft-tags global-state/state (-> contents (nth i) (get "draft_id")))
                    (swap! global-state/state assoc :edit-watcher/lock 1)
                    (if (true? (:show-search-diaglog @global-state/state))
                      (do
