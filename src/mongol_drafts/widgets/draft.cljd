@@ -10,6 +10,7 @@
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.widgets.tagbar :as tagbar]
+   [mongol-drafts.widgets.toolbar :as toolbar]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [menu-bar.menu :as menu]
@@ -98,7 +99,7 @@
                .readOnly true
                .style (m/TextStyle .fontSize 20))))
             (if (true? show-keyboard)
-              (button-bar/toolbar)
+              (toolbar/toolbar)
               (m/Container))]))
          (if (true? show-keyboard)
            (m/Container

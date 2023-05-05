@@ -71,45 +71,7 @@
                     (.clear controller))))
                (m/Icon (.view_sidebar_outlined m/Icons))]))])))
 
-(defn toolbar-button [child on-press]
-  (f/widget
-   (m/RotatedBox
-    .quarterTurns 1)
-   (m/Material
-    .color (-> m.Colors/blue .-shade200))
-   (m/InkWell
-    .onTap on-press)
-   (m/Padding
-    .padding (.all m/EdgeInsets 6)
-    .child child)))
 
-(defn toolbar-button-normal [child on-press]
-  (f/widget
-   (m/Material
-    .color (-> m.Colors/blue .-shade200))
-   (m/InkWell
-    .onTap on-press)
-   (m/Padding
-    .padding (.all m/EdgeInsets 6)
-    .child child)))
-
-(defn toolbar-text-button [child on-press]
-  (f/widget
-   (m/Material
-    .color (-> m.Colors/blue .-shade200))
-   (m/InkWell
-    .onTap on-press)
-   (m/Padding
-    .padding (.all m/EdgeInsets 6))
-   (m/Row
-    .children [(m/Column
-                .children
-                [(m/RotatedBox
-                  .quarterTurns 1
-                  .child child)
-                 (m/RotatedBox
-                  .quarterTurns 1
-                  .child (m/Text "word"))])])))
 
 (defn keyboard-close-button [flag]
   (f/widget
@@ -128,70 +90,7 @@
                        assoc
                        :show-stacked-keyboard
                        (not (:show-stacked-keyboard @global-state/state)))))))))
-(defn toolbar []
-  (f/widget
-   :get [:text-controller]
-   (m/Container
-    .color (-> m/Colors .blue .-shade50)
-    .height double/infinity)
-   (m/Padding
-    .padding (.all m/EdgeInsets 5))
-   (m/Column
-    .children
-    [(m/GestureDetector
-      .child (m/Icon (.menu m/Icons))
-      .onTap (fn []
-               (dart:core/print "menu button >>")))
-     (m/Expanded
-      .child
-      (m/SingleChildScrollView
-       .scrollDirection m.Axis/vertical
-       .child
-       (m/Wrap
-        .crossAxisAlignment m.WrapCrossAlignment/center
-        .direction m.Axis/vertical
-        .spacing 5
-        .children
-        [(toolbar-button
-          (m/Icon (.redo m/Icons))
-          (fn [] (his-state/redo global-state/state text-controller)))
-         (toolbar-button
-          (m/Icon (.undo m/Icons))
-          (fn [] 
-            (his-state/undo global-state/state text-controller)
-            (dart:core/print "abca xxx")))
-         (m/SizedBox .height 8)
-         (toolbar-button
-          (m/Icon (.arrow_back_outlined m/Icons))
-          (fn [] (selection-state/cursor-up text-controller)))
-         (toolbar-button
-          (m/Icon (.arrow_forward_outlined m/Icons))
-          (fn [] (selection-state/cursor-down text-controller)))
-         (toolbar-text-button
-          (m/Icon (.arrow_back_outlined m/Icons))
-          (fn [] (selection-state/cursor-before-word text-controller)))
-         (toolbar-text-button
-          (m/Icon (.arrow_forward_outlined m/Icons))
-          (fn [] (selection-state/cursor-after-word text-controller)))
-         (m/SizedBox .height 8)
-         (toolbar-button-normal
-          (m/Icon (.date_range_outlined m/Icons))
-          (fn []
-            (keyboard-action/on-key-press 
-             text-controller
-             {:key-type :string 
-              :text (.toString (.now DateTime))}
-             global-state/state)))
-         (toolbar-button-normal
-          (m/Icon (.copy m/Icons))
-          (fn [] (selection-state/copy text-controller)))
-         (toolbar-button-normal
-          (m/Icon (.paste m/Icons))
-          (fn [] (selection-state/paste text-controller)))
-         (toolbar-button-normal
-          (m/Icon (.select_all m/Icons))
-          (fn [] (selection-state/select-all text-controller)))])))
-     (keyboard-close-button true)])))
+
 
 
 ;;;
