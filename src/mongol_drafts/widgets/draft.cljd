@@ -26,7 +26,10 @@
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
          info (merge keyboard-options/keyboard-option
                      {:key-cap-border-radius 6
-                      :key-container-color (-> m/Colors .blueGrey .-shade400)}
+                      :key-container-color (-> m/Colors .grey .-shade200)
+                      :action-keys-container-color (-> m/Colors .blueGrey .-shade400)
+                      :action-text-color m.Colors/black
+                      }
                      {:width w})
         ;;  state (atom (merge keyboard-options/keyboard-state
         ;;                     global-state/state
@@ -99,7 +102,7 @@
               (m/Container))]))
          (if (true? show-keyboard)
            (m/Container
-            .color (-> m/Colors .blue .-shade100)
+            .color (-> m/Colors .blueGrey .-shade100)
             .child
             (m/SafeArea
              .top false
@@ -115,7 +118,7 @@
         (m/IntrinsicHeight
          .child
          (m/Container
-          .color (-> m/Colors .blue .-shade100)
+          .color (-> m/Colors .blueGrey .-shade300)
           .child
           (m/SafeArea
            .top false
@@ -132,6 +135,7 @@
       .bottom (+ keyboard-options/keyboard-default-height 20 (* 4 (+ 4 (:row-vertical-padding info))))
       .right (/ w 4)
       .child
-      (menu/menu {:bar {:elavation 10}
+      (menu/menu {:bar {:elavation 10
+                        :background-color (.-shade100 m.Colors/grey)}
                   :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked text-controller x global-state/state))}}
                  candidates-list))])))
