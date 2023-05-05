@@ -21,7 +21,7 @@
             omitted-tags :omitted-tags
             draft-search :draft-search} global-state/state]
    :bg-watcher ([^m/TextEditingValue {search-text .-text} search-controller]
-                (draft-state/update-draft-search global-state/state search-text))
+                (draft-state/query-drafts global-state/state search-text true))
    (m/SizedBox
     .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
               0.89))
@@ -57,10 +57,10 @@
         [(toolbar-button-normal
           (m/Icon (.search m/Icons)
                   .size 18
-                  .color (-> m/Colors .blue .-shade600))
+                  .color (-> m/Colors .blueGrey .-shade600))
           (if (empty? draft-search)
             (-> m.Colors/transparent)
-            (-> m/Colors .blue .-shade200))
+            (-> m/Colors .blueGrey .-shade200))
           (fn []
             (swap! global-state/state assoc :show-drawer-search
                    (not (:show-drawer-search @global-state/state)))
@@ -71,7 +71,8 @@
          (m/SizedBox .width 20)
          (m/GestureDetector
           .onTap (fn [] 
-                   (tag-state/clear-filter global-state/state search-controller))
+                   (tag-state/clear-filter global-state/state search-controller)
+                   (draft-state/query-drafts global-state/state "" false))
           .child
           (m/Icon (.cancel_outlined m/Icons)
                   .color (-> m/Colors .blue .-shade600)))
@@ -393,13 +394,14 @@
 (defn toolbar-button-normal [child color on-press]
   (f/widget
    (m/Material
+    .color color
     .shape (m/CircleBorder
             .side (m/BorderSide
-                   .color (-> m/Colors .blue .-shade600)
+                   .color (-> m/Colors .blueGrey .-shade600)
                    .width 2)))
    (m/InkWell
     .customBorder (m/CircleBorder)
-    .splashColor (-> m.Colors/blue)
+    .splashColor (-> m.Colors/blueGrey)
     .onTap on-press)
    (m/Padding
     .padding (.all m/EdgeInsets 2)

@@ -65,6 +65,7 @@
 (defn query-drafts [state q has-filter]
   ;; has-filter false query without the tag filters
   ;;            true is query with the tag filters 
+  (swap! state assoc :draft-search q)
   (if (empty? q)
     (let [;num (-> @state :draft :contents count)
           tag-in-ids (map #(get % "id") (:filter-tags @state))
@@ -199,10 +200,6 @@
       (swap! state assoc :draft/flag nil)
       (swap! state assoc :draft/status -1)
       (query-drafts state (:draft-search @state) true))))
-
-(defn update-draft-search [state text]
-  (swap! state assoc :draft-search text)
-  (query-drafts state (:draft-search @state) true))
 
 (defn toggle-draft-flag [state id]
   (let [flag (-> @state :draft (get "flag"))]
