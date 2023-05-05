@@ -1,17 +1,13 @@
 (ns mongol-drafts.widgets.button-bar
   (:require
    ["package:flutter/material.dart" :as m]
-   ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.widgets.search :as search]
-   [mongol-drafts.services.draft :as draft-services]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.history :as his-state]
    [mongol-drafts.states.selection :as selection-state]
-   [virtual-keyboard.keyboard-action :as keyboard-action]
-   [mongol-drafts.services.draft :as draft-service]))
+   [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
   (m/Material
@@ -35,8 +31,7 @@
               [(bar-button
                 (m/Icon (.article_outlined m/Icons))
                 (fn []
-                  ;; (-> m/Scaffold (.of ctx) (.openDrawer))
-                  (swap! global-state/state assoc :edit-watcher/lock 1)))
+                  (-> m/Scaffold (.of ctx) (.openDrawer))))
                (bar-button
                 (m/Icon (.add m/Icons))
                 (fn []

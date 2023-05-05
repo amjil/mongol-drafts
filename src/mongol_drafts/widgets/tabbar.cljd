@@ -1,7 +1,6 @@
 (ns mongol-drafts.widgets.tabbar
   (:require
    ["package:flutter/material.dart" :as m]
-   ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.list :as content-list]
    [mongol-drafts.states.global :as global-state]

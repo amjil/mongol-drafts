@@ -9,5 +9,6 @@
     :show-sub-drawer-search false
     :show-search-diaglog false
     :tag-on-edit false
-    :current-layout "mn"
+    :current-layout "mg"
+    ;; lock for bg-watcher text-controller
     :edit-watcher/lock 2}))
