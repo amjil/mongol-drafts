@@ -34,13 +34,12 @@
         (swap! state assoc :draft (into {} result))
         (.clear controller)))))
 
-(defn delete-draft [state id]
-  (let [result (await (draft-service/delete-draft id))]
-    (if (= 1 result)
-      (let [new-drafts (->> (get-in @state [:drafts :contents])
-                            (remove #(if (= get % "id") id)))]
-        (swap! state assoc-in [:drafts :contents]
-               new-drafts)))))
+(defn delete-draft [state i]
+  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
+    (draft-service/delete-draft id)
+    (swap! state assoc-in [:drafts :contents]
+           (remove #(= id (get % "draft_id"))
+                   (get-in @state [:drafts :contents])))))
 
 (defn update-draft [state id content]
   (let [result (await (draft-service/update-draft id content))
@@ -224,9 +223,25 @@
         (draft-service/flag-draft (get draft "draft_id"))
         (swap! state assoc-in [:drafts :contents i] (assoc (into {} draft) "flag" 1))))))
 
-(defn recycle-draft [id]
-  (draft-service/recycle-draft id))
+(defn recycle-draft [state i]
+  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
+    (draft-service/recycle-draft id)
+    (swap! state assoc-in [:drafts :contents]
+           (remove #(= id (get % "draft_id"))
+                   (get-in @state [:drafts :contents])))))
 
-(defn archive-draft [id]
-  (draft-service/archive-draft id))
+(defn archive-draft [state i]
+  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
+    (draft-service/archive-draft id)
+    (swap! state assoc-in [:drafts :contents]
+           (remove #(= id (get % "draft_id"))
+                   (get-in @state [:drafts :contents])))))
+
+(defn inbox-draft [state i]
+  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
+    (dart:core/print (str "draft = " (-> @state :drafts :contents (nth i))))
+    (draft-service/inbox-draft id)
+    (swap! state assoc-in [:drafts :contents]
+           (remove #(= id (get % "draft_id"))
+                   (get-in @state [:drafts :contents])))))
 
