@@ -164,42 +164,44 @@
    :edit-watcher/lock 2
    :text-controller controller})
 
-(defn set-draft-status [state i]
-  (condp = i
-    ;; Query Inbox drafts
-    0
-    (do
-      (swap! state assoc :draft/flag nil)
-      (swap! state assoc :draft/status 0)
-      (query-drafts state (:draft-search @state) true))
+(defn set-draft-search-status [state i]
+  (when-not (= i (:draft/tabbar-index @state))
+    (swap! state assoc :draft/tabbar-index i)
+    (condp = i
+      ;; Query Inbox drafts
+      0
+      (do
+        (swap! state assoc :draft/flag nil)
+        (swap! state assoc :draft/status 0)
+        (query-drafts state (:draft-search @state) true))
 
-    ;; Query Flaged drafts
-    1
-    (do
-      (swap! state assoc :draft/flag 1)
-      (swap! state assoc :draft/status 0)
-      (query-drafts state (:draft-search @state) true))
+      ;; Query Flaged drafts
+      1
+      (do
+        (swap! state assoc :draft/flag 1)
+        (swap! state assoc :draft/status 0)
+        (query-drafts state (:draft-search @state) true))
 
-    ;; Query Archived drafts
-    2
-    (do
-      (swap! state assoc :draft/flag nil)
-      (swap! state assoc :draft/status 1)
-      (query-drafts state (:draft-search @state) true))
+      ;; Query Archived drafts
+      2
+      (do
+        (swap! state assoc :draft/flag nil)
+        (swap! state assoc :draft/status 1)
+        (query-drafts state (:draft-search @state) true))
 
-    ;; Query All drafts
-    ;; 3
-    ;; (do
-    ;;   (swap! state assoc :draft/flag nil)
-    ;;   (swap! state assoc :draft/status nil)
-    ;;   (query-drafts state (:draft-search @state) true))
+      ;; Query All drafts
+      ;; 3
+      ;; (do
+      ;;   (swap! state assoc :draft/flag nil)
+      ;;   (swap! state assoc :draft/status nil)
+      ;;   (query-drafts state (:draft-search @state) true))
 
-    ;; Query Deleted drafts
-    3
-    (do
-      (swap! state assoc :draft/flag nil)
-      (swap! state assoc :draft/status -1)
-      (query-drafts state (:draft-search @state) true))))
+      ;; Query Deleted drafts
+      3
+      (do
+        (swap! state assoc :draft/flag nil)
+        (swap! state assoc :draft/status -1)
+        (query-drafts state (:draft-search @state) true)))))
 
 (defn toggle-draft-flag [state id]
   (let [flag (-> @state :draft (get "flag"))]
