@@ -210,6 +210,20 @@
       (draft-service/flag-draft id))
     (swap! state assoc-in [:draft "flag"] (if (= 1 flag) 0 1))))
 
+(defn toggle-drafts-item-flag [state i]
+  (let [draft (-> @state :drafts :contents (nth i))]
+    (if (= 1 (get draft "flag"))
+      (do
+        (draft-service/unflag-draft (get draft "draft_id"))
+        (if (= 1 (:draft/tabbar-index @state))
+          (swap! state assoc-in [:drafts :contents]
+                 (remove #(= (get draft "draft_id") (get % "draft_id"))
+                         (get-in @state [:drafts :contents])))
+          (swap! state assoc-in [:drafts :contents i] (assoc (into {} draft) "flag" 0))))
+      (do
+        (draft-service/flag-draft (get draft "draft_id"))
+        (swap! state assoc-in [:drafts :contents i] (assoc (into {} draft) "flag" 1))))))
+
 (defn recycle-draft [id]
   (draft-service/recycle-draft id))
 

@@ -46,10 +46,11 @@
            .dismissible (slidable/DismissiblePane
                          .onDismissed
                          (fn []
-                           (draft-state/toggle-draft-flag global-state/state (-> contents (nth i) (get "id")))))
+                           (dart:core/print "slide")))
            .children
            [(slidable/SlidableAction .onPressed
-                                     (fn [_])
+                                     (fn [_]
+                                       (draft-state/toggle-drafts-item-flag global-state/state i))
                                      .backgroundColor (.green m/Colors)
                                      .foregroundColor (.white m/Colors)
                                      .icon (.flag m/Icons)
@@ -69,7 +70,17 @@
                                      .backgroundColor (.red m/Colors)
                                      .foregroundColor (.white m/Colors)
                                      .icon (.delete m/Icons))
-            (slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide archive"))
+            (slidable/SlidableAction .onPressed
+                                     (fn [context]
+                                       (let [controller (-> slidable/Slidable (.of context))]
+                                         (if (some? controller)
+                                           (.dismiss controller
+                                                     (slidable/ResizeRequest
+                                                      (Duration .milliseconds 300)
+                                                      (fn []
+                                                        (draft-state/archive-draft (-> contents (nth i) (get "id")))))
+                                                     .duration (Duration .milliseconds 300))))
+                                       (dart:core/print "slide delete"))
                                      .backgroundColor (.blue m/Colors)
                                      .foregroundColor (.white m/Colors)
                                      .icon (.archive m/Icons))]))
