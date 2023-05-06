@@ -48,42 +48,53 @@
                          (fn []
                            (dart:core/print "slide")))
            .children
-           [(slidable/SlidableAction .onPressed
-                                     (fn [_]
-                                       (draft-state/toggle-drafts-item-flag global-state/state i))
-                                     .backgroundColor (.green m/Colors)
-                                     .foregroundColor (.white m/Colors)
-                                     .icon (.flag m/Icons)
-                                     .label nil)
-            (slidable/SlidableAction .onPressed
-                                     (fn [context]
-                                       (let [controller (-> slidable/Slidable (.of context))]
-                                         (if (some? controller)
-                                           (.dismiss controller
-                                                     (slidable/ResizeRequest
-                                                      (Duration .milliseconds 300)
-                                                      (fn []
-                                                        (draft-state/delete-draft global-state/state (-> contents (nth i) (get "id")))))
-                                                     .duration (Duration .milliseconds 300))))
-                                       (dart:core/print "slide delete"))
-                                     .autoClose false
-                                     .backgroundColor (.red m/Colors)
-                                     .foregroundColor (.white m/Colors)
-                                     .icon (.delete m/Icons))
-            (slidable/SlidableAction .onPressed
-                                     (fn [context]
-                                       (let [controller (-> slidable/Slidable (.of context))]
-                                         (if (some? controller)
-                                           (.dismiss controller
-                                                     (slidable/ResizeRequest
-                                                      (Duration .milliseconds 300)
-                                                      (fn []
-                                                        (draft-state/archive-draft (-> contents (nth i) (get "id")))))
-                                                     .duration (Duration .milliseconds 300))))
-                                       (dart:core/print "slide delete"))
-                                     .backgroundColor (.blue m/Colors)
-                                     .foregroundColor (.white m/Colors)
-                                     .icon (.archive m/Icons))]))
+           [(if-not (= 3 (:draft/tabbar-index @global-state/state))
+              (slidable/SlidableAction .onPressed
+                                       (fn [_]
+                                         (draft-state/toggle-drafts-item-flag global-state/state i))
+                                       .backgroundColor (.green m/Colors)
+                                       .foregroundColor (.white m/Colors)
+                                       .icon (.flag m/Icons)
+                                       .label nil)
+              (m/Container))
+            (if (some #{(:draft/tabbar-index @global-state/state)} [2 3])
+              (slidable/SlidableAction .onPressed
+                                       (fn [_]
+                                         (draft-state/inbox-draft global-state/state i)
+                                         (dart:core/print "slide inbox111"))
+                                       .backgroundColor (.blue m/Colors)
+                                       .foregroundColor (.white m/Colors)
+                                       .icon (.inbox_outlined m/Icons))
+              (m/Container))
+            (if (not= (:draft/tabbar-index @global-state/state) 3)
+              (slidable/SlidableAction .onPressed
+                                       (fn [context]
+                                         (draft-state/recycle-draft global-state/state i)
+                                         (dart:core/print "slide delete"))
+                                       .autoClose false
+                                       .backgroundColor (.red m/Colors)
+                                       .foregroundColor (.white m/Colors)
+                                       .icon (.delete m/Icons))
+              (m/Container))
+
+            (if (some #{(:draft/tabbar-index @global-state/state)} [0 1])
+              (slidable/SlidableAction .onPressed
+                                       (fn [_]
+                                         (draft-state/archive-draft global-state/state i)
+                                         (dart:core/print "slide archive"))
+                                       .backgroundColor (.blue m/Colors)
+                                       .foregroundColor (.white m/Colors)
+                                       .icon (.archive m/Icons))
+              (m/Container))
+            (if (= (:draft/tabbar-index @global-state/state) 3)
+              (slidable/SlidableAction .onPressed
+                                       (fn [_]
+                                         (draft-state/delete-draft global-state/state i)
+                                         (dart:core/print "slide archive"))
+                                       .backgroundColor (.red m/Colors)
+                                       .foregroundColor (.white m/Colors)
+                                       .icon (.delete_forever m/Icons))
+              (m/Container))]))
          (m/Container
           .height (- h 40)
           .constraints
