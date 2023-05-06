@@ -46,9 +46,10 @@
            .dismissible (slidable/DismissiblePane
                          .onDismissed
                          (fn []
-                           (dart:core/print "slide")))
+                           (draft-state/toggle-draft-flag global-state/state (-> contents (nth i) (get "id")))))
            .children
-           [(slidable/SlidableAction .onPressed (fn [_] (dart:core/print "slide flag"))
+           [(slidable/SlidableAction .onPressed
+                                     (fn [_])
                                      .backgroundColor (.green m/Colors)
                                      .foregroundColor (.white m/Colors)
                                      .icon (.flag m/Icons)
@@ -74,30 +75,35 @@
                                      .icon (.archive m/Icons))]))
          (m/Container
           .height (- h 40)
-        ;; .width 48
-      ;;  .constraints
-      ;;  (m/BoxConstraints
-      ;;   .maxWidth 40
-      ;;   .height h)
-          )
+          .constraints
+          (m/BoxConstraints
+           .minWidth 50))
          (m/Padding
           .padding (.only m/EdgeInsets .left 10 .right 10))
-         (if (empty? (-> contents (nth i) (get "content")))
-           (mgl/MongolText
-            "--blank--")
-           (let [^String orig-content (-> contents (nth i) (get "content"))
-                 ^String content (.trim orig-content)
-                 num (count content)
-                 idx (if (empty? content)
-                       -1
-                       (.indexOf content "\n"))]
-             (m/Row
-              .crossAxisAlignment m.CrossAxisAlignment/start
-              .children
-              [(if (neg? idx)
-                 (mgl/MongolText content .maxLines 1)
-                 (mgl/MongolText (.substring content 0 idx) .maxLines 1))
-               (if (and (pos? idx) (< (inc idx) (dec num)) (not-empty (.substring content (inc idx))))
-                 (mgl/MongolText (.substring content (inc idx)) .maxLines 2)
-                 (m/Container))])))))))))
+         (m/Column
+          .mainAxisAlignment m.MainAxisAlignment/spaceBetween
+          .children
+          [(if (empty? (-> contents (nth i) (get "content")))
+             (mgl/MongolText
+              "--blank--")
+             (let [^String orig-content (-> contents (nth i) (get "content"))
+                   ^String content (.trim orig-content)
+                   num (count content)
+                   idx (if (empty? content)
+                         -1
+                         (.indexOf content "\n"))]
+               (m/Row
+                .crossAxisAlignment m.CrossAxisAlignment/start
+                .children
+                [(if (neg? idx)
+                   (mgl/MongolText content .maxLines 1)
+                   (mgl/MongolText (.substring content 0 idx) .maxLines 1))
+                 (if (and (pos? idx) (< (inc idx) (dec num)) (not-empty (.substring content (inc idx))))
+                   (mgl/MongolText (.substring content (inc idx)) .maxLines 2)
+                   (m/Container))])))
+           (if (= 1 (-> contents (nth i) (get "flag")))
+             (m/Icon (.flag m/Icons)
+                     .size 12
+                     .color m.Colors/red)
+             (m/Container))])))))))
 
