@@ -28,9 +28,8 @@
          info (merge keyboard-options/keyboard-option
                      {:key-cap-border-radius 6
                       :key-container-color (-> m/Colors .grey .-shade200)
-                      :action-keys-container-color (-> m/Colors .blueGrey .-shade400)
-                      :action-text-color m.Colors/black
-                      }
+                      :action-keys-container-color (-> m/Colors .blueGrey .-shade300)
+                      :action-text-color m.Colors/black}
                      {:width w})
         ;;  state (atom (merge keyboard-options/keyboard-state
         ;;                     global-state/state
@@ -62,7 +61,9 @@
       .onDrawerChanged
       (fn [c]
         (if (false? c)
-          (swap! global-state/state assoc :show-stacked-keyboard false)
+          (do
+            (swap! global-state/state assoc :show-stacked-keyboard false)
+            (draft-state/focus-on-draft global-state/state text-controller))
           (do
             (swap! global-state/state assoc-in [:drafts :is-end] false)
             (swap! global-state/state assoc-in [:drafts :contents] [])
