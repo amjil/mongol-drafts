@@ -67,6 +67,20 @@
                                [id]))]
     num))
 
+(defn recycle-draft [id]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        num (await (.rawUpdate db
+                               "UPDATE draft_info SET status = -1 WHERE rowid = ?"
+                               [id]))]
+    num))
+
+(defn archive-draft [id]
+  (let [^sqf/Database db (await (sql/initialize-db))
+        num (await (.rawUpdate db
+                               "UPDATE draft_info SET status = 1 WHERE rowid = ?"
+                               [id]))]
+    num))
+  
 (defn list-drafts [offset tag-in-ids tag-out-ids
                    flag status]
   (let [^sqf/Database db (await (sql/initialize-db))]
