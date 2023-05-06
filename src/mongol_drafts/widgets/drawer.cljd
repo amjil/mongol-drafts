@@ -23,8 +23,8 @@
    :bg-watcher ([^m/TextEditingValue {search-text .-text} search-controller]
                 (draft-state/query-drafts global-state/state search-text true))
    (m/SizedBox
-    .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
-              0.89))
+    .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
+              40))
    (m/Drawer)
    (m/Scaffold
     .onDrawerChanged
@@ -155,10 +155,8 @@
             tag-search :tag-search} global-state/state]
    :bg-watcher ([^m/TextEditingValue {search-text .-text} search-tag-controller]
                 (tag-state/update-tag-search global-state/state search-text))
-   (m/Drawer)
-   (m/SizedBox
-    .width (* (-> m/MediaQuery (.of ctx) .-size .-width)
-              0.65))
+   (m/Drawer
+    .width (- (-> m/MediaQuery (.of ctx) .-size .-width) 80)) 
    (m/Container
     .color (-> m/Colors .blueGrey .-shade50))
    (m/SafeArea)

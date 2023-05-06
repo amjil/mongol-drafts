@@ -98,7 +98,7 @@
                .autofocus true
                .showCursor (if (true? show-keyboard) true false)
                .readOnly true
-               .style (m/TextStyle .fontSize 20))))
+               .style (m/TextStyle .fontSize 18 .height 1.8))))
             (if (true? show-keyboard)
               (toolbar/toolbar)
               (m/Container))]))
