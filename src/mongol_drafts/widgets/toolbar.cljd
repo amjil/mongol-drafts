@@ -15,7 +15,7 @@
    (m/RotatedBox
     .quarterTurns 1)
    (m/Material
-    .borderRadius (.circular m/BorderRadius 10)
+    .borderRadius (.circular m/BorderRadius 6)
     .color (-> m.Colors/blueGrey .-shade200))
    (m/InkWell
     .onTap on-press)
@@ -26,7 +26,7 @@
 (defn toolbar-button-normal [child on-press]
   (f/widget
    (m/Material
-    .borderRadius (.circular m/BorderRadius 10)
+    .borderRadius (.circular m/BorderRadius 6)
     .color (-> m.Colors/blueGrey .-shade200))
    (m/InkWell
     .onTap on-press)
@@ -37,7 +37,7 @@
 (defn toolbar-text-button [child on-press]
   (f/widget
    (m/Material
-    .borderRadius (.circular m/BorderRadius 10)
+    .borderRadius (.circular m/BorderRadius 6)
     .color (-> m.Colors/blueGrey .-shade200))
    (m/InkWell
     .onTap on-press)
