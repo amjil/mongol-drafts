@@ -19,57 +19,54 @@
 (defn topbar []
   (f/widget
    :context ctx
-   :get [:info 
+   :get [:info
          :text-controller :search-controller]
+   :watch [{char-count :editor/chars
+            word-count :editor/words}
+           global-state/state]
    (m/Row
     .mainAxisAlignment m.MainAxisAlignment/spaceAround
     .children
-    [(m/Expanded
-      .child (m/Row
-              .mainAxisAlignment m.MainAxisAlignment/spaceAround
-              .children
-              [(bar-button
-                (m/Icon (.article_outlined m/Icons))
-                (fn []
-                  (-> m/Scaffold (.of ctx) (.openDrawer))))
-               (bar-button
-                (m/Icon (.add m/Icons))
-                (fn []
-                  (dart:core/print "abc new draft")
-                  (swap! global-state/state assoc :edit-watcher/lock 2)
-                  (draft-state/new-draft global-state/state)
-                  (draft-state/focus-on-draft global-state/state text-controller)
-                  (swap! global-state/state assoc :edit-watcher/lock 1)))
-               (bar-button
-                (m/Icon (.sell_outlined m/Icons))
-                (fn []
-                  (swap! global-state/state
-                         assoc
-                         :tag-viewable
-                         (not (:tag-viewable @global-state/state)))
-                  (tag-state/get-draft-tags global-state/state (-> @global-state/state :draft (get "id")))
-                  (if (false? (:tag-viewable @global-state/state))
-                    (swap! global-state/state
-                           assoc
-                           :text-controller
-                           text-controller))))]))
-     (m/Container
-      .width (/ (:width info) 3)
-      .height 30)
-     (m/Expanded
-      .child (m/Row
-              .mainAxisAlignment m.MainAxisAlignment/spaceAround
-              .children
-              [(m/Icon (.arrow_drop_down m/Icons))
-               (bar-button
-                (m/Icon (.search m/Icons))
-                (fn []
-                  (swap! global-state/state assoc :show-search-diaglog true)
-                  (swap! global-state/state assoc :show-stacked-keyboard true)
-                  (swap! global-state/state assoc :show-keyboard false)
-                  (let [^m/TextEditingController controller search-controller]
-                    (.clear controller))))
-               (m/Icon (.view_sidebar_outlined m/Icons))]))])))
+    [(bar-button
+      (m/Icon (.article_outlined m/Icons))
+      (fn []
+        (-> m/Scaffold (.of ctx) (.openDrawer))))
+     (bar-button
+      (m/Icon (.add m/Icons))
+      (fn []
+        (dart:core/print "abc new draft")
+        (swap! global-state/state assoc :edit-watcher/lock 2)
+        (draft-state/new-draft global-state/state)
+        (draft-state/focus-on-draft global-state/state text-controller)
+        (swap! global-state/state assoc :edit-watcher/lock 1)))
+     (bar-button
+      (m/Icon (.sell_outlined m/Icons))
+      (fn []
+        (swap! global-state/state
+               assoc
+               :tag-viewable
+               (not (:tag-viewable @global-state/state)))
+        (tag-state/get-draft-tags global-state/state (-> @global-state/state :draft (get "id")))
+        (when (false? (:tag-viewable @global-state/state))
+          (swap! global-state/state
+                 assoc
+                 :text-controller
+                 text-controller))))
+     (m/SizedBox .width 20)
+     (m/Text
+      (str char-count "c" word-count "w"))
+     (bar-button
+      (m/Icon (.arrow_drop_down m/Icons))
+      (fn [] nil))
+     (bar-button
+      (m/Icon (.search m/Icons))
+      (fn []
+        (swap! global-state/state assoc :show-search-diaglog true)
+        (swap! global-state/state assoc :show-stacked-keyboard true)
+        (swap! global-state/state assoc :show-keyboard false)
+        (let [^m/TextEditingController controller search-controller]
+          (.clear controller))))
+     (m/Icon (.view_sidebar_outlined m/Icons))])))
 
 
 

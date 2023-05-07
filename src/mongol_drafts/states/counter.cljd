@@ -1,0 +1,12 @@
+(ns mongol-drafts.states.counter
+  (:require 
+   [clojure.string :as str]))
+
+(defn count-contents [state content]
+  (if (empty? content)
+    (do
+      (swap! state assoc :editor/chars 0)
+      (swap! state assoc :editor/words 0))
+    (do
+      (swap! state assoc :editor/chars (count content))
+      (swap! state assoc :editor/words (count (str/split content #" |\n"))))))

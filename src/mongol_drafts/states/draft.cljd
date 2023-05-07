@@ -3,7 +3,8 @@
    ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.draft :as draft-service]
    [mongol-drafts.states.global :as global-state]
-   [mongol-drafts.states.history :as his-state]))
+   [mongol-drafts.states.history :as his-state]
+   [mongol-drafts.states.counter :as counter-state]))
 
 (defn set-current-draft [state id]
   (let [result (await (draft-service/get-draft id))
@@ -13,6 +14,7 @@
     ;; to fire :bg-watcher [text-controller]
     (swap! state assoc :draft (into {} (-> result first)))
     (set! (.-text controller) (get (:draft @state) "content"))
+    (counter-state/count-contents state (get (:draft @state) "content"))
     (his-state/init-history state controller)))
 
 (defn new-draft [state]
@@ -44,7 +46,8 @@
 (defn update-draft [state id content]
   (let [result (await (draft-service/update-draft id content))
         draft (:draft @state)]
-    (swap! state assoc-in [:draft "content"] content)))
+    (swap! state assoc-in [:draft "content"] content)
+    (counter-state/count-contents state content)))
 
 (defn list-drafts [state]
   (let [;num (-> @state :drafts :contents count)
