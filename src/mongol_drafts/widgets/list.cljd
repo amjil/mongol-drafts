@@ -71,7 +71,6 @@
                                        (fn [context]
                                          (draft-state/recycle-draft global-state/state i)
                                          (dart:core/print "slide delete"))
-                                       .autoClose false
                                        .backgroundColor (.red m/Colors)
                                        .foregroundColor (.white m/Colors)
                                        .icon (.delete m/Icons))
