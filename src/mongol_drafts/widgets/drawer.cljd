@@ -225,22 +225,22 @@
            (m/Container
             .padding (.all m/EdgeInsets 2)
             .decoration (m/BoxDecoration
-                         .color (-> m/Colors .blue .-shade100)
+                         .color (-> m/Colors .blueGrey .-shade100)
                          .borderRadius
                          (.all m/BorderRadius (.circular m/Radius 6))
                          .border
-                         (.all m/Border .color m.Colors/blue .width 1))
+                         (.all m/Border .color m.Colors/blueGrey .width 1))
             .child
             (m/Column
              .children
              [(m/Container
                .padding (.symmetric m/EdgeInsets .horizontal 2 .vertical 12)
                .decoration (m/BoxDecoration
-                            .color (-> m/Colors .blue .-shade300)
+                            .color (-> m/Colors .blueGrey .-shade300)
                             .borderRadius
                             (.all m/BorderRadius (.circular m/Radius 6))
                             .border
-                            (.all m/Border .color m.Colors/blue .width 1))
+                            (.all m/Border .color m.Colors/blueGrey .width 1))
                .child
                (mgl/MongolText "All"))
 
