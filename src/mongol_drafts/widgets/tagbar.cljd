@@ -86,7 +86,7 @@
                     (.all m/Border .color m.Colors/blueGrey .width 0.8))
        .child
        (m/Padding
-        .padding (.all m/EdgeInsets 8)
+        .padding (.all m/EdgeInsets 5)
         .child
         (if (and (true? tag-on-edit))
           (mgl/MongolTextField
@@ -94,7 +94,7 @@
            .controller controller
            .showCursor true
            .readOnly true
-           .style (m/TextStyle .fontSize 12)
+           .style (m/TextStyle .fontSize 14)
            .maxLines 1
            .minLines 1
            .decoration nil)
