@@ -18,7 +18,7 @@
    (if (empty? contents)
      (empty-content/empty-content-view)
      (m.ListView/separated
-      .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
+      .separatorBuilder (fn [_ i] (m/VerticalDivider .width 1))
       .scrollDirection m.Axis/horizontal
       .padding (.fromLTRB m/EdgeInsets 20 20 8 8)
       .itemCount (count contents)

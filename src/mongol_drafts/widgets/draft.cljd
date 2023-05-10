@@ -31,14 +31,6 @@
                       :action-keys-container-color (-> m/Colors .blueGrey .-shade300)
                       :action-text-color m.Colors/black}
                      {:width w})
-        ;;  window 
-        ;;  (-> m/WidgetsBinding
-        ;;      .instance .-window)
-        ;;  _ (set!
-        ;;     (.-onPlatformBrightnessChanged window)
-        ;;     (fn []
-        ;;       (dart:core/print (str "brightnes = " (.-platformBrightness window)))
-        ;;       (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))))
 
          _ (draft-state/new-draft global-state/state text-controller)]
    :bind {:info info :state global-state/state
@@ -106,7 +98,7 @@
               (m/Container))]))
          (if (true? show-keyboard)
            (m/Container
-            .color (-> m/Colors .blueGrey .-shade100)
+            .color (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer)
             .child
             (m/SafeArea
              .top false
@@ -122,7 +114,7 @@
         (m/IntrinsicHeight
          .child
          (m/Container
-          .color (-> m/Colors .blueGrey .-shade100)
+          .color (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer)
           .child
           (m/SafeArea
            .top false
@@ -140,6 +132,7 @@
       .right (/ w 4)
       .child
       (menu/menu {:bar {:elavation 10
-                        :background-color (.-shade100 m.Colors/grey)}
+                        :background-color
+                        (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
                   :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked text-controller x global-state/state))}}
                  candidates-list))])))

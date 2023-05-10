@@ -35,8 +35,7 @@
     .drawer
     (left-sub-drawer))
    .body
-   (m/Container
-    .color (-> m/Colors .blueGrey .-shade50))
+   (m/Container)
    (m/SafeArea)
    (m/Column
     .children
@@ -45,21 +44,18 @@
       [(m/Row
         .children
         [(m/SizedBox .width 10)
-         (m/Icon (.arrow_circle_down m/Icons)
-                 .color (-> m/Colors .blue .-shade600))
+         (m/Icon (.arrow_circle_down m/Icons))
          (m/SizedBox .width 20)
-         (m/Icon (.add_outlined m/Icons)
-                 .color (-> m/Colors .blue .-shade600))])
+         (m/Icon (.add_outlined m/Icons))])
        (m/Spacer)
        (m/Row
         .children
         [(toolbar-button-normal
           (m/Icon (.search m/Icons)
-                  .size 18
-                  .color (-> m/Colors .blueGrey .-shade600))
+                  .size 18)
           (if (empty? draft-search)
             (-> m.Colors/transparent)
-            (-> m/Colors .blueGrey .-shade200))
+            (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
           (fn []
             (swap! global-state/state assoc :show-drawer-search
                    (not (:show-drawer-search @global-state/state)))
@@ -73,11 +69,9 @@
                    (tag-state/clear-filter global-state/state search-controller)
                    (draft-state/query-drafts global-state/state "" false))
           .child
-          (m/Icon (.cancel_outlined m/Icons)
-                  .color (-> m/Colors .blue .-shade600)))
+          (m/Icon (.cancel_outlined m/Icons)))
          (m/SizedBox .width 20)
-         (m/Icon (.pending_outlined m/Icons)
-                 .color (-> m/Colors .blue .-shade600))
+         (m/Icon (.pending_outlined m/Icons))
          (m/SizedBox .width 10)])])
      (m/Divider)
      (m/Expanded
@@ -122,7 +116,6 @@
     .child
     (m/Column
      .children [(m/Icon (.sell_rounded m/Icons)
-                        .color (-> m/Colors .blue .-shade500)
                         .size 16)
                 (m/SizedBox .height 4)
                 (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
@@ -138,7 +131,6 @@
     .child
     (m/Column
      .children [(m/Icon (.do_disturb_alt m/Icons)
-                        .color (-> m/Colors .blue .-shade500)
                         .size 16)
                 (m/SizedBox .height 4)
                 (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
@@ -156,8 +148,7 @@
                 (tag-state/update-tag-search global-state/state search-text))
    (m/Drawer
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width) 80)) 
-   (m/Container
-    .color (-> m/Colors .blueGrey .-shade50))
+   (m/Container)
    (m/SafeArea)
    (m/Column
     .children
@@ -168,14 +159,14 @@
         (m/Material
          .color (if (empty? tag-search)
                   (-> m.Colors/transparent)
-                  (-> m/Colors .blue .-shade200))
+                  (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
          .shape (m/CircleBorder
                  .side (m/BorderSide
-                        .color (-> m/Colors .blue .-shade600)
+                        ;; .color (-> m/Colors .blue .-shade600)
                         .width 2)))
         (m/InkWell
          .customBorder (m/CircleBorder)
-         .splashColor (-> m.Colors/blue)
+        ;;  .splashColor (-> m.Colors/blue)
          .onTap (fn []
                   (swap! global-state/state assoc :show-sub-drawer-search
                          (not (:show-sub-drawer-search @global-state/state)))
@@ -186,19 +177,16 @@
         (m/Padding
          .padding (.all m/EdgeInsets 2)
          .child (m/Icon (.search m/Icons)
-                        .size 18
-                        .color (-> m/Colors .blue .-shade600))))
+                        .size 18)))
 
        (m/SizedBox .width 20)
        (m/GestureDetector
         .onTap (fn []
                  (tag-state/clear-filter global-state/state search-tag-controller))
         .child
-        (m/Icon (.cancel_outlined m/Icons)
-                .color (-> m/Colors .blue .-shade600)))
+        (m/Icon (.cancel_outlined m/Icons)))
        (m/SizedBox .width 20)
-       (m/Icon (.pending_outlined m/Icons)
-               .color (-> m/Colors .blue .-shade600))
+       (m/Icon (.pending_outlined m/Icons))
        (m/SizedBox .width 10)])
      (m/Divider)
      (m/Expanded
@@ -224,22 +212,24 @@
            (m/Container
             .padding (.all m/EdgeInsets 2)
             .decoration (m/BoxDecoration
-                         .color (-> m/Colors .blueGrey .-shade100)
                          .borderRadius
                          (.all m/BorderRadius (.circular m/Radius 6))
                          .border
-                         (.all m/Border .color m.Colors/blueGrey .width 1))
+                         (.all m/Border
+                               .width 1))
             .child
             (m/Column
              .children
              [(m/Container
                .padding (.symmetric m/EdgeInsets .horizontal 2 .vertical 12)
                .decoration (m/BoxDecoration
-                            .color (-> m/Colors .blueGrey .-shade300)
+                            ;; .color (-> m/Colors .blueGrey .-shade300)
                             .borderRadius
                             (.all m/BorderRadius (.circular m/Radius 6))
                             .border
-                            (.all m/Border .color m.Colors/blueGrey .width 1))
+                            (.all m/Border 
+                                  ;; .color m.Colors/blueGrey 
+                                  .width 1))
                .child
                (mgl/MongolText "All"))
 
@@ -266,7 +256,7 @@
                 .crossAxisAlignment m/CrossAxisAlignment.stretch
                 .children
                 [(m/Container
-                  .color (-> m/Colors .grey .-shade100)
+                  .color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
                   .child
                   (m/Row
                    .crossAxisAlignment m/CrossAxisAlignment.start
@@ -276,7 +266,7 @@
                      (map #(filtered-tag global-state/state %) filter-tags))))
                  (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
                  (m/Container
-                  .color (-> m/Colors .grey .-shade100)
+                  .color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
                   .child
                   (m/Row
                    .crossAxisAlignment m/CrossAxisAlignment.start
@@ -290,7 +280,7 @@
             .flex 4
             .child
             (m.ListView/separated
-             .separatorBuilder (fn [_ i] (m/VerticalDivider .color m.Colors/white .width 1))
+             .separatorBuilder (fn [_ i] (m/VerticalDivider .width 1))
              .scrollDirection m.Axis/horizontal
              .padding (.fromLTRB m/EdgeInsets 8 20 8 8)
              .itemCount (count filtered-tags)
@@ -318,7 +308,6 @@
                                           (tag-state/add-omitted-tag global-state/state (nth filtered-tags i)))
                                  .child
                                  (m/Icon (.do_disturb_alt m/Icons)
-                                         .color (-> m/Colors .blue .-shade500)
                                          .size 16))]))))))]))]))])))
 (defn in-drawer-draft-search-field []
   (f/widget
@@ -350,8 +339,7 @@
      .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
      .border (m/OutlineInputBorder
               .borderSide (m/BorderSide
-                           .width 0.8
-                           .color m.Colors/blue)
+                           .width 0.8)
               .borderRadius (.circular m/BorderRadius 10))))))
 
 (defn in-drawer-tag-search-field []
@@ -384,8 +372,7 @@
      .contentPadding (.fromLTRB m/EdgeInsets 10 20 10 20)
      .border (m/OutlineInputBorder
               .borderSide (m/BorderSide
-                           .width 0.8
-                           .color m.Colors/blue)
+                           .width 0.8)
               .borderRadius (.circular m/BorderRadius 10))))))
 
 (defn toolbar-button-normal [child color on-press]
@@ -394,7 +381,6 @@
     .color color
     .shape (m/CircleBorder
             .side (m/BorderSide
-                   .color (-> m/Colors .blueGrey .-shade600)
                    .width 2)))
    (m/InkWell
     .customBorder (m/CircleBorder)

@@ -19,7 +19,7 @@
 
 (defn new-draft [state controller]
   ;; some initial states & function althogh here
-  (when-not (= m/Brightness (.runtimeType (:theme/brightness @state)))
+  (when-not (= m/Brightness (.-runtimeType (:theme/brightness @state)))
     (let [window (-> m/WidgetsBinding .instance .-window)]
       (set!
        (.-onPlatformBrightnessChanged window)

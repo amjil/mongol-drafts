@@ -11,7 +11,8 @@
   (f/widget
    (m/Material
     .borderRadius (.circular m/BorderRadius 10)
-    .color (-> m.Colors/blueGrey .-shade200))
+    ;; .color (-> m.Colors/blueGrey .-shade200)
+    )
    (m/InkWell
     .customBorder (m/CircleBorder)
     .onTap on-press)
@@ -30,6 +31,7 @@
 
 (defn tagbar [controller]
   (f/widget
+   :context ctx
    :get [:text-controller :tag-controller]
    :managed [focus (m/FocusNode)]
    :watch [{:keys [tag-on-edit
@@ -43,7 +45,7 @@
                     (tag-state/add-draft-tag global-state/state text)
                     (.clear controller))))
    (m/Container
-    .color (-> m/Colors .blueGrey .-shade50)
+    .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer)
     .height double/infinity)
    (m/Padding
     .padding (.all m/EdgeInsets 4))
@@ -54,64 +56,63 @@
     .direction m.Axis/vertical
     .spacing 5
     .children
-    (concat 
-    [(m/Material
-      .color (if (= 1 (get draft "flag"))
-               (-> m.Colors/blueGrey .-shade200)
-               nil)
-      .shape (m/CircleBorder
-              .side (m/BorderSide
-                     .color (-> m/Colors .blueGrey .-shade600)
-                     .width 1))
-      .child
-      (m/InkWell
-       .customBorder (m/CircleBorder)
-       .onTap (fn []
-                (dart:core/print "tag button >>.")
-                (draft-state/toggle-draft-flag global-state/state (get draft "id")))
+    (concat
+     [(m/Material
+       .color (if (= 1 (get draft "flag"))
+                (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer)
+                nil)
+       .shape (m/CircleBorder
+               .side (m/BorderSide
+                      .width 1))
        .child
-       (m/Padding
-        .padding (.all m/EdgeInsets 2)
-        .child (m/Icon (.flag m/Icons)))))
-     (m/SizedBox .height 4)
-     (m/IntrinsicHeight
-      .child
-      (m/Container
-       .constraints (m/BoxConstraints .minHeight 50)
-       .alignment m.Alignment/center
-       .decoration (m/BoxDecoration
-                    .borderRadius
-                    (.all m/BorderRadius (.circular m/Radius 10))
-                    .border
-                    (.all m/Border .color m.Colors/blueGrey .width 0.8))
-       .child
-       (m/Padding
-        .padding (.all m/EdgeInsets 5)
+       (m/InkWell
+        .customBorder (m/CircleBorder)
+        .onTap (fn []
+                 (dart:core/print "tag button >>.")
+                 (draft-state/toggle-draft-flag global-state/state (get draft "id")))
         .child
-        (if (and (true? tag-on-edit))
-          (mgl/MongolTextField
-           .focusNode focus
-           .controller controller
-           .showCursor true
-           .readOnly true
-           .style (m/TextStyle .fontSize 14)
-           .maxLines 1
-           .minLines 1
-           .decoration nil)
-          (m/GestureDetector
-           .onTap (fn []
-                    (swap! global-state/state assoc :text-controller tag-controller)
-                    (swap! global-state/state assoc :tag-on-edit true)
-                    (if (false? (:show-keyboard @global-state/state))
-                      (swap! global-state/state assoc :show-keyboard true))
-                    (.requestFocus focus))
-           .child
-           (m/RotatedBox
-            .quarterTurns 1
+        (m/Padding
+         .padding (.all m/EdgeInsets 2)
+         .child (m/Icon (.flag m/Icons)))))
+      (m/SizedBox .height 4)
+      (m/IntrinsicHeight
+       .child
+       (m/Container
+        .constraints (m/BoxConstraints .minHeight 50)
+        .alignment m.Alignment/center
+        .decoration (m/BoxDecoration
+                     .borderRadius
+                     (.all m/BorderRadius (.circular m/Radius 10))
+                     .border
+                     (.all m/Border .width 0.8))
+        .child
+        (m/Padding
+         .padding (.all m/EdgeInsets 5)
+         .child
+         (if (and (true? tag-on-edit))
+           (mgl/MongolTextField
+            .focusNode focus
+            .controller controller
+            .showCursor true
+            .readOnly true
+            .style (m/TextStyle .fontSize 14)
+            .maxLines 1
+            .minLines 1
+            .decoration nil)
+           (m/GestureDetector
+            .onTap (fn []
+                     (swap! global-state/state assoc :text-controller tag-controller)
+                     (swap! global-state/state assoc :tag-on-edit true)
+                     (if (false? (:show-keyboard @global-state/state))
+                       (swap! global-state/state assoc :show-keyboard true))
+                     (.requestFocus focus))
             .child
-            (m/Text "+ tag" .style (m/TextStyle .fontSize 12))))))))
-     (m/SizedBox .height 8)]
-     (map #(tag-text-button 
+            (m/RotatedBox
+             .quarterTurns 1
+             .child
+             (m/Text "+ tag" .style (m/TextStyle .fontSize 12))))))))
+      (m/SizedBox .height 8)]
+     (map #(tag-text-button
             (get % "name")
             (fn [] (tag-state/delete-draft-tag global-state/state (get % "id"))))
           draft-tags)))))

@@ -10,11 +10,12 @@
 
 (defn tabbar []
   (f/widget
+   :context ctx
    (m/DefaultTabController
     .length 4
     .child
-    (m/Builder 
-     .builder 
+    (m/Builder
+     .builder
      (fn [^m/BuildContext context]
        (let [tab-controller (.of m/DefaultTabController context)
              _ (.addListener tab-controller
@@ -32,22 +33,22 @@
                            .borderRadius (.vertical m/BorderRadius
                                                     .bottom m.Radius/zero
                                                     .top (.circular m/Radius 10))
-                           .color (.-shade100 m.Colors/blueGrey))
+                           .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer))
                .onTap (fn [i]
                         (draft-state/set-draft-search-status global-state/state i))
                .tabs
                [(m/Tab
                  .icon
                  (m/Icon (.inbox_outlined m/Icons)
-                         .color (-> m/Colors .blue .-shade600)))
+                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))
                 (m/Tab
                  .icon
                  (m/Icon (.flag_outlined m/Icons)
-                         .color (-> m/Colors .blue .-shade600)))
+                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))
                 (m/Tab
                  .icon
                  (m/Icon (.archive_outlined m/Icons)
-                         .color (-> m/Colors .blue .-shade600)))
+                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))
         ;;    (m/Container
         ;;     ;; .margin (.only m/EdgeInsets .left 10)
         ;;     .child
@@ -58,23 +59,25 @@
                 (m/Tab
                  .icon
                  (m/Icon (.delete_outlined m/Icons)
-                         .color (-> m/Colors .blue .-shade600)))]))])
+                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))]))])
 
            (m/Expanded
             .child
-            (tabbar-view))]))))
-    )))
+            (tabbar-view))])))))))
 
 (defn tabbar-view []
-  (m/Container
-   .color (.-shade100 m.Colors/blueGrey)
-   .child
-   (m/TabBarView
-    .children
-    [(content-list/widget)
-     (content-list/widget)
-     (content-list/widget)
-     (content-list/widget)])))
+  (f/widget
+   :context ctx
+   (m/Container
+    .color
+    (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer)
+    .child
+    (m/TabBarView
+     .children
+     [(content-list/widget)
+      (content-list/widget)
+      (content-list/widget)
+      (content-list/widget)]))))
 
 ;;
 (defn tab-content-view []

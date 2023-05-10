@@ -28,11 +28,10 @@
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
               60)
     .decoration (m/BoxDecoration
-                 .color (-> m/Colors .blueGrey .-shade50)
                  .borderRadius
                  (.all m/BorderRadius (.circular m/Radius 6))
                  .border
-                 (.all m/Border .color m.Colors/blueGrey .width 0.2))
+                 (.all m/Border .width 0.2))
     .margin (.only m/EdgeInsets .left 6 .right 6))
    (m/Row
     .mainAxisAlignment m.MainAxisAlignment/spaceBetween
@@ -46,7 +45,6 @@
         (m/InkWell
          .customBorder (m/CircleBorder)
          .child (m/Icon (.search_outlined m/Icons)
-                        .color (-> m/Colors .blueGrey .-shade600)
                         .size 36)))
        (search-field)
        (m/Material
@@ -58,7 +56,6 @@
                   (swap! global-state/state assoc :show-search-diaglog false)
                   (swap! global-state/state assoc :show-stacked-keyboard false))
          .child (m/Icon (.cancel_outlined m/Icons)
-                        .color m/Colors.blueGrey.shade600
                         .size 36)))])
      (m/Expanded
       .child
@@ -71,8 +68,8 @@
    :context ctx
    :get [:search-controller]
    (m/Expanded)
-   (m/Padding
-    .padding (.all m/EdgeInsets 6))
+  ;;  (m/Padding
+  ;;   .padding (.all m/EdgeInsets 0))
    (mgl/MongolTextField
     .controller search-controller
     .autofocus true
@@ -94,15 +91,16 @@
                    .icon (m/Icon (.clear m/Icons)))
      .isDense true
      ;;  Todo : when hintText is present Text cursor position error
-     ;;  .hintText "Search"
-     ;;  .contentPadding (.fromLTRB m/EdgeInsets 0 20 0 20)
-     .border (m/OutlineInputBorder
-              .borderSide (m/BorderSide
-                           .width 0.8
-                           .color m.Colors/blueGrey)
-              .borderRadius (.circular m/BorderRadius 10))
-     .focusedBorder (m/OutlineInputBorder
-                     .borderSide (m/BorderSide
-                                  .width 0.8
-                                  .color m.Colors/blueGrey)
-                     .borderRadius (.circular m/BorderRadius 10))))))
+      ;; .hintText "Search"
+      ;; .contentPadding (.fromLTRB m/EdgeInsets 0 20 0 20)
+    ;;  .border (m/OutlineInputBorder
+    ;;           .borderSide (m/BorderSide
+    ;;                        .width 0.2
+    ;;                        .color m.Colors/blueGrey)
+    ;;           .borderRadius (.circular m/BorderRadius 10))
+    ;;  .focusedBorder (m/OutlineInputBorder
+    ;;                  .borderSide (m/BorderSide
+    ;;                               .width 0.2
+    ;;                               .color m.Colors/blueGrey)
+    ;;                  .borderRadius (.circular m/BorderRadius 10))
+     ))))

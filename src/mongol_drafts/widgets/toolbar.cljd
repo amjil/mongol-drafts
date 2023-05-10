@@ -12,11 +12,12 @@
 
 (defn toolbar-button [child on-press]
   (f/widget
+   :context ctx
    (m/RotatedBox
     .quarterTurns 1)
    (m/Material
     .borderRadius (.circular m/BorderRadius 6)
-    .color (-> m.Colors/blueGrey .-shade200))
+    .color (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
    (m/InkWell
     .onTap on-press)
    (m/Padding
@@ -25,9 +26,10 @@
 
 (defn toolbar-button-normal [child on-press]
   (f/widget
+   :context ctx
    (m/Material
     .borderRadius (.circular m/BorderRadius 6)
-    .color (-> m.Colors/blueGrey .-shade200))
+    .color (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
    (m/InkWell
     .onTap on-press)
    (m/Padding
@@ -36,9 +38,10 @@
 
 (defn toolbar-text-button [child on-press]
   (f/widget
+   :context ctx
    (m/Material
     .borderRadius (.circular m/BorderRadius 6)
-    .color (-> m.Colors/blueGrey .-shade200))
+    .color (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
    (m/InkWell
     .onTap on-press)
    (m/Padding
@@ -55,9 +58,10 @@
 
 (defn toolbar []
   (f/widget
+   :context ctx
    :get [:text-controller]
    (m/Container
-    .color (-> m/Colors .blueGrey .-shade50)
+    .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer)
     .height double/infinity)
    (m/Padding
     .padding (.all m/EdgeInsets 4))

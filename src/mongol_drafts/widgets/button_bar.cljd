@@ -7,9 +7,7 @@
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.history :as his-state]
    [mongol-drafts.states.selection :as selection-state]
-   [virtual-keyboard.keyboard-action :as keyboard-action]
-   )
-  )
+   [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
   (m/Material

@@ -11,7 +11,10 @@
            .primary m.Colors/black
            .onPrimary m.Colors/black
            .primaryVariant m.Colors/black
-           .secondary m.Colors/red)
+           .secondary m.Colors/red
+           .primaryContainer (-> m/Colors .blueGrey .-shade50)
+           .secondaryContainer (-> m/Colors .blueGrey .-shade100)
+           .tertiaryContainer (-> m/Colors .grey .-shade200))
    .cardTheme (m/CardTheme .color (-> m/Colors .white))
    .iconTheme (m/IconThemeData .color (-> m/Colors .blueGrey .-shade600))
 ;;    .textTheme (m/TextTheme
