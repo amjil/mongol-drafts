@@ -1,0 +1,41 @@
+(ns mongol-drafts.widgets.theme
+  (:require 
+   ["package:flutter/material.dart" :as m]))
+
+(def default-light-theme 
+  (m/ThemeData
+   .fontFamily "MongolianBaiZheng"
+   .scaffoldBackgroundColor (-> m/Colors .white)
+   .colorScheme
+   (.light m/ColorScheme
+           .primary m.Colors/black
+           .onPrimary m.Colors/black
+           .primaryVariant m.Colors/black
+           .secondary m.Colors/red)
+   .cardTheme (m/CardTheme .color (-> m/Colors .white))
+   .iconTheme (m/IconThemeData .color (-> m/Colors .blueGrey .-shade600))
+;;    .textTheme (m/TextTheme
+;;                .titleMedium (m/TextStyle .color m.Colors/white
+;;                                          .fontSize 20.0)
+;;                .bodyText1 (m/TextStyle .color m.Colors/white70
+;;                                        .fontSize 18.0))
+   ))
+
+(def default-dark-theme
+  (m/ThemeData
+   .fontFamily "MongolianBaiZheng"
+   .scaffoldBackgroundColor m.Colors/black
+   .colorScheme
+   (.light m/ColorScheme
+           .primary m.Colors/white
+           .onPrimary m.Colors/white
+           .primaryVariant m.Colors/white
+           .secondary m.Colors/red)
+   .cardTheme (m/CardTheme .color m.Colors/black)
+   .iconTheme (m/IconThemeData .color m.Colors/white54)
+;;    .textTheme (m/TextTheme
+;;                .titleMedium (m/TextStyle .color m.Colors/white
+;;                                        .fontSize 20.0)
+;;                .bodyText1 (m/TextStyle .color m.Colors/white70
+;;                                          .fontSize 18.0))
+   ))

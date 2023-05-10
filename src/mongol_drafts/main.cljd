@@ -3,16 +3,17 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
-   [mongol-drafts.widgets.draft :as draft]))
+   [mongol-drafts.widgets.draft :as draft]
+   [mongol-drafts.widgets.theme :as theme]))
 
 (defn main []
   (m/runApp
    (m/MaterialApp
     .title "Welcome to Flutter"
-    .theme (m/ThemeData .primarySwatch m.Colors/blue
-                        .fontFamily "MongolianBaiZheng")
+    .theme theme/default-light-theme
+    .darkTheme theme/default-dark-theme
+    ;;  .theme (m/ThemeData .primarySwatch m.Colors/blue
+    ;;                      .fontFamily "MongolianBaiZheng")
+    .debugShowCheckedModeBanner false
     .home
-    (draft/widget)
-    
-
-    .debugShowCheckedModeBanner false)))
+    (draft/widget))))
