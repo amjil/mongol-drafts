@@ -1,0 +1,25 @@
+(ns mongol-drafts.services.shared-preferences
+  (:require 
+   ["package:shared_preferences/shared_preferences.dart" :as sp]))
+
+(defn get-value [info]
+  (let [prefs (await (sp.SharedPreferences/getInstance))]
+    (condp = (:type info)
+      :string (await (.getString prefs (:key info)))
+      :int (await (.getInt prefs (:key info)))
+      :bool (await (.getBool prefs (:key info)))
+      :double (await (.getDouble prefs (:key info)))
+      :list (await (.getStringList prefs (:key info))))))
+
+(defn set-value [info]
+  (let [prefs (await (sp.SharedPreferences/getInstance))]
+    (condp = (:type info)
+      :string (await (.setString prefs (:key info) (:value info)))
+      :int (await (.setInt prefs (:key info) (:value info)))
+      :bool (await (.setBool prefs (:key info) (:value info)))
+      :double (await (.setDouble prefs (:key info) (:value info)))
+      :list (await (.setStringList prefs (:key info) (:value info))))))
+
+(defn remove-value [k]
+  (let [prefs (await (sp.SharedPreferences/getInstance))]
+    (await (.remove prefs k))))
