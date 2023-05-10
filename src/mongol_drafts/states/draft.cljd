@@ -17,7 +17,19 @@
     (counter-state/count-contents state (get (:draft @state) "content"))
     (his-state/init-history state controller)))
 
-(defn new-draft [state]
+(defn new-draft [state controller]
+  ;; some initial states & function althogh here
+  (when-not (= m/Brightness (.runtimeType (:theme/brightness @state)))
+    (let [window (-> m/WidgetsBinding .instance .-window)]
+      (set!
+       (.-onPlatformBrightnessChanged window)
+       (fn []
+         (dart:core/print (str "brightnes = " (.-platformBrightness window)))
+         (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))))))
+
+  (if (nil? (:text-controller @state))
+    (swap! global-state/state assoc :text-controller controller))
+  ;;;;;;;;
   (let [result (await (draft-service/last-draft))
         content (-> result first (get "content"))
         ^m/TextEditingController

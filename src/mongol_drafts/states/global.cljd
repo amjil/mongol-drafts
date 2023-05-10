@@ -1,17 +1,19 @@
 (ns mongol-drafts.states.global
   (:require 
-   ["package:flutter/material.dart" :as m]))
+   ["package:flutter/material.dart" :as m]
+   [virtual-keyboard.options :as keyboard-options]))
 
 (def state
   (atom
-   {:tag-viewable false
-    :show-keyboard false
-    :show-stacked-keyboard false
-    :show-drawer-search false
-    :show-sub-drawer-search false
-    :show-search-diaglog false
-    :tag-on-edit false
-    :current-layout "mg"
-    ;; lock for bg-watcher text-controller
-    :edit-watcher/lock 2
-    :draft/tabbar-index 0}))
+   (merge keyboard-options/keyboard-state
+          {:tag-viewable false
+           :show-keyboard false
+           :show-stacked-keyboard false
+           :show-drawer-search false
+           :show-sub-drawer-search false
+           :show-search-diaglog false
+           :tag-on-edit false
+           :current-layout "mg"
+           ;; lock for bg-watcher text-controller
+           :edit-watcher/lock 2
+           :draft/tabbar-index 0})))
