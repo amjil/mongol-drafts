@@ -31,6 +31,13 @@
                       :action-keys-container-color (-> m/Colors .blueGrey .-shade300)
                       :action-text-color m.Colors/black}
                      {:width w})
+         window (-> m/WidgetsBinding
+                    .instance .-window)
+         _ (set!
+            (.-onPlatformBrightnessChanged window)
+            (fn []
+              (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))))
+
         ;;  state (atom (merge keyboard-options/keyboard-state
         ;;                     global-state/state
         ;;                     {:text-controller text-controller}))

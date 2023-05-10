@@ -22,10 +22,9 @@
             draft-search :draft-search} global-state/state]
    :bg-watcher ([^m/TextEditingValue {search-text .-text} search-controller]
                 (draft-state/query-drafts global-state/state search-text true))
-   (m/SizedBox
+   (m/Drawer
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
               40))
-   (m/Drawer)
    (m/Scaffold
     .onDrawerChanged
     (fn [c]
