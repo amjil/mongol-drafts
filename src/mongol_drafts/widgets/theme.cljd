@@ -5,13 +5,13 @@
 (def default-light-theme 
   (m/ThemeData
    .fontFamily "MongolianBaiZheng"
-   .scaffoldBackgroundColor (-> m/Colors .white)
+   .scaffoldBackgroundColor (-> m/Colors .black)
    .colorScheme
    (.light m/ColorScheme
-           .primary m.Colors/black
-           .onPrimary m.Colors/black
-           .primaryVariant m.Colors/black
-           .secondary m.Colors/red
+         ;;   .primary m.Colors/black
+         ;;   .onPrimary m.Colors/black
+         ;;   .primaryVariant m.Colors/black
+         ;;   .secondary m.Colors/red
            .primaryContainer (-> m/Colors .blueGrey .-shade50)
            .secondaryContainer (-> m/Colors .blueGrey .-shade100)
            .tertiaryContainer (-> m/Colors .grey .-shade200))
@@ -27,15 +27,18 @@
 (def default-dark-theme
   (m/ThemeData
    .fontFamily "MongolianBaiZheng"
-   .scaffoldBackgroundColor m.Colors/black
+   .scaffoldBackgroundColor (-> m/Colors .black45)
    .colorScheme
-   (.light m/ColorScheme
-           .primary m.Colors/white
-           .onPrimary m.Colors/white
-           .primaryVariant m.Colors/white
-           .secondary m.Colors/red)
-   .cardTheme (m/CardTheme .color m.Colors/black)
-   .iconTheme (m/IconThemeData .color m.Colors/white54)
+   (.dark m/ColorScheme
+          .primary m.Colors/blueGrey
+          .onPrimary m.Colors/white
+          .primaryVariant m.Colors/white
+          .secondary m.Colors/red
+          .primaryContainer (-> m/Colors .grey .-shade900)
+          .secondaryContainer (-> m/Colors .grey .-shade800)
+          .tertiaryContainer (-> m/Colors .grey .-shade700))
+   .cardTheme (m/CardTheme .color m.Colors/blueGrey)
+   .iconTheme (m/IconThemeData .color (-> m/Colors .yellowAccent .-shade700))
 ;;    .textTheme (m/TextTheme
 ;;                .titleMedium (m/TextStyle .color m.Colors/white
 ;;                                        .fontSize 20.0)

@@ -54,7 +54,12 @@
                   .child child)
                  (m/RotatedBox
                   .quarterTurns 1
-                  .child (m/Text "word"))])])))
+                  .child
+                  (m/Text "word"
+                          .style
+                          (m/TextStyle 
+                           .color 
+                           (-> m/Theme (.of ctx) .-iconTheme .-color))))])])))
 
 (defn toolbar []
   (f/widget

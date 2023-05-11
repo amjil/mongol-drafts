@@ -11,10 +11,17 @@
    
 (defn bar-button [child on-press]
   (m/Material
+   .shape (m/CircleBorder
+           .side (m/BorderSide
+                  .width 2))
    .child
    (m/InkWell
+    .customBorder (m/CircleBorder)
     .onTap on-press
-    .child child)))
+    .child
+    (m/Padding
+     .padding (.all m/EdgeInsets 2)
+     .child child))))
 
 (defn topbar []
   (f/widget

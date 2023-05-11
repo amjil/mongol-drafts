@@ -162,7 +162,6 @@
                   (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
          .shape (m/CircleBorder
                  .side (m/BorderSide
-                        ;; .color (-> m/Colors .blue .-shade600)
                         .width 2)))
         (m/InkWell
          .customBorder (m/CircleBorder)
