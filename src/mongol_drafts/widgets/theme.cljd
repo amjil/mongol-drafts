@@ -12,6 +12,7 @@
            .onPrimary m.Colors/black
            .primaryVariant m.Colors/black
            .secondary m.Colors/red
+           .tertiary (-> m/Colors .blueGrey .-shade600)
            .primaryContainer (-> m/Colors .blueGrey .-shade50)
            .secondaryContainer (-> m/Colors .blueGrey .-shade100)
            .tertiaryContainer (-> m/Colors .grey .-shade200))
@@ -32,8 +33,9 @@
    (.dark m/ColorScheme
           .primary m.Colors/blueGrey
           .onPrimary m.Colors/white
-          .primaryVariant m.Colors/white
+          .primaryVariant m.Colors/white30
           .secondary m.Colors/red
+          .tertiary (-> m/Colors .black45)
           .primaryContainer (-> m/Colors .grey .-shade900)
           .secondaryContainer (-> m/Colors .grey .-shade800)
           .tertiaryContainer (-> m/Colors .grey .-shade700))

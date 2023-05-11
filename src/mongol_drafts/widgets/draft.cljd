@@ -27,9 +27,10 @@
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
          info (merge keyboard-options/keyboard-option
                      {:key-cap-border-radius 6
-                      :key-container-color (-> m/Colors .grey .-shade200)
-                      :action-keys-container-color (-> m/Colors .blueGrey .-shade300)
-                      :action-text-color m.Colors/black}
+                      :key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
+                      :action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
+                      :action-text-color (-> m/Theme (.of ctx) .-colorScheme .-primaryVariant)
+                      :-text-color (-> m/Theme (.of ctx) .-colorScheme .-primaryVariant)}
                      {:width w})
 
          _ (draft-state/new-draft global-state/state text-controller)]
