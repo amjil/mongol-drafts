@@ -157,11 +157,13 @@
       .children
       [(f/widget
         (m/Material
-         .color (if (empty? tag-search)
-                  (-> m.Colors/transparent)
-                  (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
+         .color (if (or (not (empty? tag-search))
+                        (true? (:show-sub-drawer-search @global-state/state)))
+                  (-> m/Theme (.of ctx) .-colorScheme .-outlineVariant)
+                  (-> m.Colors/transparent))
          .shape (m/CircleBorder
                  .side (m/BorderSide
+                        .color (-> m/Theme (.of ctx) .-iconTheme .-color)
                         .width 2)))
         (m/InkWell
          .customBorder (m/CircleBorder)
@@ -376,10 +378,12 @@
 
 (defn toolbar-button-normal [child color on-press]
   (f/widget
+   :context ctx
    (m/Material
     .color color
     .shape (m/CircleBorder
             .side (m/BorderSide
+                   .color (-> m/Theme (.of ctx) .-iconTheme .-color)
                    .width 2)))
    (m/InkWell
     .customBorder (m/CircleBorder)
