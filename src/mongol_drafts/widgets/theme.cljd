@@ -33,7 +33,7 @@
    (.dark m/ColorScheme
           .primary m.Colors/blueGrey
           .onPrimary m.Colors/white
-          .primaryVariant m.Colors/white30
+          .primaryVariant m.Colors/white60
           .secondary m.Colors/red
           .tertiary (-> m/Colors .black45)
           .primaryContainer (-> m/Colors .grey .-shade900)

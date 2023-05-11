@@ -30,7 +30,8 @@
                       :key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
                       :action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
                       :action-text-color (-> m/Theme (.of ctx) .-colorScheme .-primaryVariant)
-                      :-text-color (-> m/Theme (.of ctx) .-colorScheme .-primaryVariant)}
+                      :key-text-color (-> m/Theme (.of ctx) .-colorScheme .-primaryVariant)
+                      :long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
                      {:width w})
 
          _ (draft-state/new-draft global-state/state text-controller)]
