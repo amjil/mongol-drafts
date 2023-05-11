@@ -10,18 +10,18 @@
    [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
-  (m/Material
-   .shape (m/CircleBorder
-           .side (m/BorderSide
-                  .width 2))
-   .child
-   (m/InkWell
-    .customBorder (m/CircleBorder)
-    .onTap on-press
+  (f/widget
+   :context ctx
+   (m/Material
+    .color (-> m/Theme (.of ctx) .-scaffoldBackgroundColor)
     .child
-    (m/Padding
-     .padding (.all m/EdgeInsets 2)
-     .child child))))
+    (m/InkWell
+     .customBorder (m/CircleBorder)
+     .onTap on-press
+     .child
+     (m/Padding
+      .padding (.all m/EdgeInsets 2)
+      .child child)))))
 
 (defn topbar []
   (f/widget
