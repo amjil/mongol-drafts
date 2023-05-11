@@ -58,9 +58,6 @@
     .children
     (concat
      [(m/Material
-       .color (if (= 1 (get draft "flag"))
-                (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer)
-                nil)
        .shape (m/CircleBorder
                .side (m/BorderSide
                       .width 1))
@@ -73,7 +70,10 @@
         .child
         (m/Padding
          .padding (.all m/EdgeInsets 2)
-         .child (m/Icon (.flag m/Icons)))))
+         .child (m/Icon (.flag m/Icons)
+                        .color (if (= 1 (get draft "flag"))
+                                 (-> m/Theme (.of ctx) .-colorScheme .-secondary)
+                                 nil)))))
       (m/SizedBox .height 4)
       (m/IntrinsicHeight
        .child
