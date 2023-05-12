@@ -1,5 +1,5 @@
 name: mongol_drafts
-description: A new Flutter project.
+description: A Mongolian Drafts project.
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -44,6 +44,7 @@ dependencies:
   diff_match_patch: ^0.4.1
   path_provider: ^2.0.14
   shared_preferences: ^2.1.1
+  vibration: ^1.7.5
 
 dev_dependencies:
   flutter_test:
