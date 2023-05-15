@@ -30,6 +30,7 @@ This Mongolian Flutter App is made possible by the following projects:
 - [suragch/mongol-library](https://github.com/suragch/mongol-library) - A library to allow vertical script Mongolian in Android apps
 
 ## Run Example
+Use flutter version 3.7.5
 1. Install the `clj` command.
 2. clone menu-bar repo `git clone https://github.com/amjil/mongl-menu-bar`.
 3. clone menu-bar repo `git clone https://github.com/amjil/mongl-virtual-keyboard`.
