@@ -149,7 +149,7 @@
       (dart:core/print "The Change Event Is For Text")
       ;; (swap! state assoc :edit-watcher/lock 0)
       (when (and (some? edit-text) (not= (:editor/content @global-state/state) edit-text))
-        (dart:core/print (str " content = " (:editor/content @global-state/state) " edit-text = " edit-text))
+        ;; (dart:core/print (str " content = " (:editor/content @global-state/state) " edit-text = " edit-text))
         (swap! global-state/state assoc :editor/content edit-text)
         (dart:core/print (str " end = " " his-flag = " (:history/flag @global-state/state)))
 
