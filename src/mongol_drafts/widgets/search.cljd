@@ -67,6 +67,7 @@
   (f/widget
    :context ctx
    :get [:search-controller]
+   :watch [{:keys [show-system-keyboard]} global-state/state]
    (m/Expanded)
   ;;  (m/Padding
   ;;   .padding (.all m/EdgeInsets 0))
@@ -74,7 +75,7 @@
     .controller search-controller
     .autofocus true
     .showCursor true
-    .readOnly true
+    .readOnly (if show-system-keyboard false true)
     .maxLines 1
     .minLines 1
     .onTap (fn []

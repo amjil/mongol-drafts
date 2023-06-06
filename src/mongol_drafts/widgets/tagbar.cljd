@@ -36,7 +36,8 @@
    :managed [focus (m/FocusNode)]
    :watch [{:keys [tag-on-edit
                    draft-tags
-                   draft]} global-state/state]
+                   draft
+                   show-system-keyboard]} global-state/state]
    :bg-watcher ([^m/TextEditingValue {tag-edit-text .-text} tag-controller]
                 (when (and (not (empty? tag-edit-text)) (.endsWith tag-edit-text "\n"))
                   (let [text (.substring tag-edit-text 0
@@ -94,9 +95,9 @@
             .focusNode focus
             .controller controller
             .showCursor true
-            .readOnly true
+            .readOnly (if show-system-keyboard false true)
             .style (m/TextStyle .fontSize 14)
-            .maxLines 1
+            .maxLines 2
             .minLines 1
             .decoration nil)
            (m/GestureDetector

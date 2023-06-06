@@ -314,7 +314,8 @@
   (f/widget
    :context ctx
    :get [:search-controller]
-   :watch [{show-stacked-keyboard :show-stacked-keyboard} 
+   :watch [{show-stacked-keyboard :show-stacked-keyboard
+            show-system-keyboard :show-system-keyboard} 
            global-state/state]
    (m/Container
     .constraints
@@ -328,7 +329,7 @@
     .controller search-controller
     .autofocus true
     .showCursor (if (true? show-stacked-keyboard) true false)
-    .readOnly true
+    .readOnly (if show-system-keyboard false true)
     .maxLines 1
     .onTap (fn []
              (swap! global-state/state assoc :show-stacked-keyboard true)
@@ -347,7 +348,8 @@
   (f/widget
    :context ctx
    :get [:search-tag-controller]
-   :watch [{show-stacked-keyboard :show-stacked-keyboard} 
+   :watch [{show-stacked-keyboard :show-stacked-keyboard
+            show-system-keyboard :show-system-keyboard} 
            global-state/state]
    (m/Container
     .constraints
@@ -361,7 +363,7 @@
     .controller search-tag-controller
     .autofocus true
     .showCursor (if (true? show-stacked-keyboard) true false)
-    .readOnly true
+    .readOnly (if show-system-keyboard false true)
     .maxLines 1
     .onTap (fn []
              (swap! global-state/state assoc :show-stacked-keyboard true)
