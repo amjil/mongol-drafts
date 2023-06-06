@@ -32,8 +32,8 @@ This Mongolian Flutter App is made possible by the following projects:
 ## Run Example
 Use flutter version 3.7.5
 1. Install the `clj` command.
-2. clone menu-bar repo `git clone https://github.com/amjil/mongl-menu-bar`.
-3. clone menu-bar repo `git clone https://github.com/amjil/mongl-virtual-keyboard`.
+2. clone menu-bar repo `git clone https://github.com/amjil/mongol-menu-bar`.
+3. clone menu-bar repo `git clone https://github.com/amjil/mongol-virtual-keyboard`.
 4. clone menu-bar repo `git clone https://github.com/amjil/mongol-dratfs`.
 5. Into the drafts folder `cd mongol-drafts`
 5. Init the example `clj -M:cljd init`
