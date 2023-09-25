@@ -12,7 +12,7 @@
            :show-drawer-search false
            :show-sub-drawer-search false
            :show-search-diaglog false
-           :show-system-keyboard true
+           :show-system-keyboard false
            :tag-on-edit false
            :current-layout "mg"
            ;; lock for bg-watcher text-controller

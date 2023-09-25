@@ -10,7 +10,7 @@
    (.light m/ColorScheme
            .primary m.Colors/black
            .onPrimary m.Colors/black
-           .primaryVariant m.Colors/black
+           .surface m.Colors/black
            .outlineVariant (-> m/Colors .yellowAccent .-shade400)
            .secondary m.Colors/red
            .tertiary (-> m/Colors .blueGrey .-shade600)
@@ -34,7 +34,7 @@
    (.dark m/ColorScheme
           .primary m.Colors/blueGrey
           .onPrimary m.Colors/white
-          .primaryVariant m.Colors/white60
+           .surface m.Colors/white60
           .outlineVariant (-> m/Colors .yellowAccent)
           .secondary m.Colors/red
           .tertiary (-> m/Colors .black45)

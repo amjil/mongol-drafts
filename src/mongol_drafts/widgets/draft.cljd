@@ -26,13 +26,13 @@
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          h  (-> m/MediaQuery (.of ctx) .-size .-height)
          info (merge keyboard-options/keyboard-option
-                     {:key-cap-border-radius 6
-                      :key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-                      :action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
-                      :action-text-color (-> m/Theme (.of ctx) .-colorScheme .-primaryVariant)
-                      :key-text-color (-> m/Theme (.of ctx) .-colorScheme .-primaryVariant)
-                      :long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
-                     {:width w})
+                     {:keyboard/key-cap-border-radius 6
+                      :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
+                      :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
+                      :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
+                      :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
+                      :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
+                     {:keyboard/width w})
 
          _ (draft-state/new-draft global-state/state text-controller)]
    :bind {:info info :state global-state/state
@@ -45,8 +45,8 @@
                    show-stacked-keyboard
                    show-system-keyboard
                    show-search-diaglog
-                   candidates-list
-                   edit-watcher/lock]}
+                   edit-watcher/lock]
+            candidates-list :keyboard/candidates-list}
            global-state/state]
    :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
                 ;; filter other changed event, maybe selection change
@@ -64,7 +64,7 @@
           (do
             (swap! global-state/state assoc-in [:drafts :is-end] false)
             (swap! global-state/state assoc-in [:drafts :contents] [])
-            (swap! global-state/state assoc :candidates-list [])
+            (swap! global-state/state assoc :keyboard/candidates-list [])
             (draft-state/query-drafts global-state/state (:draft-search @global-state/state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
@@ -131,11 +131,11 @@
        (search/widget)
        (m/Container))
      (m/Positioned
-      .bottom (+ keyboard-options/keyboard-default-height 20 (* 4 (+ 4 (:row-vertical-padding info))))
+      .bottom (+ keyboard-options/keyboard-default-height 20 (* 4 (+ 4 (:keyboard/row-vertical-padding info))))
       .right (/ w 4)
       .child
       (menu/menu {:bar {:elavation 10
                         :background-color
                         (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
-                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked text-controller x global-state/state))}}
+                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked x global-state/state))}}
                  candidates-list))])))

@@ -9,7 +9,7 @@
 (defn set-current-draft [state id]
   (let [result (await (draft-service/get-draft id))
         ^m/TextEditingController
-        controller (:text-controller @state)]
+        controller (:keyboard/text-controller @state)]
     ;; Set :edit-watcher/lock false to prevent when (set! (.-text controller) ....)
     ;; to fire :bg-watcher [text-controller]
     (swap! state assoc :draft (into {} (-> result first)))
@@ -27,13 +27,13 @@
          (dart:core/print (str "brightnes = " (.-platformBrightness window)))
          (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))))))
 
-  (if (nil? (:text-controller @state))
-    (swap! global-state/state assoc :text-controller controller))
+  (if (nil? (:keyboard/text-controller @state))
+    (swap! global-state/state assoc :keyboard/text-controller controller))
   ;;;;;;;;
   (let [result (await (draft-service/last-draft))
         content (-> result first (get "content"))
         ^m/TextEditingController
-        controller (:text-controller @state)]
+        controller (:keyboard/text-controller @state)]
     (cond
       (and (empty? content) (number? (-> result first (get "id"))))
       (do
@@ -126,12 +126,12 @@
 (defn focus-on-draft [state text-controller]
   (swap! state assoc :show-keyboard true)
   (when (true? (:tag-on-edit @state))
-    (let [^m/TextEditingController controller (:text-controller @state)]
+    (let [^m/TextEditingController controller (:keyboard/text-controller @state)]
       (.clear controller))
     (swap! state assoc :tag-on-edit false))
-  (swap! state assoc :text-controller text-controller)
-  (when-not (empty? (:candidates-list @state))
-    (swap! state assoc :candidates-list []))
+  (swap! state assoc :keyboard/text-controller text-controller)
+  (when-not (empty? (:keyboard/candidates-list @state))
+    (swap! state assoc :keyboard/candidates-list []))
   (swap! state assoc :edit-watcher/lock 1))
 
 (defn draft-editing-listener [edit-text text-controller]
@@ -176,7 +176,7 @@
    :tag-on-edit false
    :current-layout "mn"
    :edit-watcher/lock 2
-   :text-controller controller})
+   :keyboard/text-controller controller})
 
 (defn set-draft-search-status [state i]
   (when-not (= i (:draft/tabbar-index @state))
