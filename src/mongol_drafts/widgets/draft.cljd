@@ -137,5 +137,5 @@
       (menu/menu {:bar {:elavation 10
                         :background-color
                         (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
-                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked x global-state/state))}}
+                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked x global-state/state info))}}
                  candidates-list))])))
