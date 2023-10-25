@@ -4,9 +4,18 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.draft :as draft]
-   [mongol-drafts.widgets.theme :as theme]))
+   [mongol-drafts.widgets.theme :as theme]
+   [mongol-drafts.states.global :as global-state]))
 
 (defn main []
+  (m.WidgetsFlutterBinding/ensureInitialized)
+  (let [window (-> m/WidgetsBinding .instance .-window)]
+    (set!
+     (.-onPlatformBrightnessChanged window)
+     (fn []
+      ;;  (dart:core/print (str "brightnes = " (.-platformBrightness window)))
+       (swap! global-state/state assoc :theme/brightness (.-platformBrightness window)))))
+
   (m/runApp
    (m/MaterialApp
     .title "Welcome to Flutter"
