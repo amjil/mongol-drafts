@@ -64,7 +64,7 @@
 (defn toolbar []
   (f/widget
    :context ctx
-   :get [:keyboard/text-controller]
+   :get [:keyboard/text-controller :info]
    (m/Container
     .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer)
     .height double/infinity)
@@ -114,7 +114,8 @@
             (keyboard-action/on-key-press
              {:key-type :string
               :text (.toString (.now DateTime))}
-             global-state/state)))
+             global-state/state
+             info)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
           (fn [] (selection-state/copy text-controller)))

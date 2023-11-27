@@ -1,7 +1,7 @@
 (ns mongol-drafts.main
   (:require
    ["package:flutter/material.dart" :as m]
-   ["package:mongol/mongol.dart" :as mgl]
+   ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
    [cljd.flutter.alpha2 :as f]
    [mongol-drafts.widgets.draft :as draft]
    [mongol-drafts.widgets.theme :as theme]
@@ -10,19 +10,31 @@
 (defn main []
   (m.WidgetsFlutterBinding/ensureInitialized)
   (let [window (-> m/WidgetsBinding .instance .-window)]
+    (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))
     (set!
      (.-onPlatformBrightnessChanged window)
      (fn []
       ;;  (dart:core/print (str "brightnes = " (.-platformBrightness window)))
        (swap! global-state/state assoc :theme/brightness (.-platformBrightness window)))))
 
-  (m/runApp
-   (m/MaterialApp
-    .title "Welcome to Flutter"
-    .theme theme/default-light-theme
-    .darkTheme theme/default-dark-theme
-    ;;  .theme (m/ThemeData .primarySwatch m.Colors/blue
-    ;;                      .fontFamily "MongolianBaiZheng")
-    .debugShowCheckedModeBanner false
-    .home
-    (draft/widget))))
+   (m/runApp
+    (f/widget
+     :watch [{brightness :theme/brightness} global-state/state]
+    ;;  (adaptive/AdaptiveTheme
+    ;;   .light theme/default-light-theme
+    ;;   .dark theme/default-dark-theme
+    ;;   .initial theme/default-light-theme
+    ;;   .builder
+    ;;   (fn [theme dark-theme]
+        (m/MaterialApp
+         .title "Welcome to Flutter"
+        ;;  .theme theme
+        ;;  .darkTheme dark-theme
+         .theme theme/default-light-theme
+         .darkTheme theme/default-dark-theme
+         .debugShowCheckedModeBanner false
+         .home
+         (draft/widget))
+    ;;  )
+    ;; )
+    )))
