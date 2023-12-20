@@ -114,8 +114,7 @@
             (keyboard-action/on-key-press
              {:key-type :string
               :text (.toString (.now DateTime))}
-             global-state/state
-             info)))
+             global-state/state)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
           (fn [] (selection-state/copy text-controller)))
