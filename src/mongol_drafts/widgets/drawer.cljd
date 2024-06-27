@@ -2,7 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [cljd.flutter.alpha2 :as f]
+   [cljd.flutter :as f]
    [mongol-drafts.widgets.tabbar :as tabbar]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.tag :as tag-state]
@@ -16,12 +16,11 @@
 (defn left-drawer []
   (f/widget
    :context ctx
-   :get [:search-controller]
    :watch [{filter-tags :filter-tags
             omitted-tags :omitted-tags
-            draft-search :draft-search} global-state/state]
-   :bg-watcher ([^m/TextEditingValue {search-text .-text} search-controller]
-                (draft-state/query-drafts global-state/state search-text true))
+            show-drawer-search :show-drawer-search} global-state/state]
+   :managed [^m/TextEditingController
+             draft-search-controller (m/TextEditingController)]
    (m/Drawer
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
               40))
@@ -31,7 +30,7 @@
       (when (false? c)
         (swap! global-state/state assoc :show-stacked-keyboard false))
       (when (true? c)
-        (tag-state/all-tags global-state/state)))
+        (tag-state/all-tags)))
     .drawer
     (left-sub-drawer))
    .body
@@ -53,21 +52,19 @@
         [(toolbar-button-normal
           (m/Icon (.search m/Icons)
                   .size 18)
-          (if (empty? draft-search)
-            (-> m.Colors/transparent)
-            (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
           (fn []
             (swap! global-state/state assoc :show-drawer-search
                    (not (:show-drawer-search @global-state/state)))
-            (if (and
-                 (false? (:show-drawer-search @global-state/state))
-                 (true? (:show-stacked-keyboard @global-state/state)))
+            (when (and
+                   (false? (:show-drawer-search @global-state/state))
+                   (true? (:show-stacked-keyboard @global-state/state)))
               (swap! global-state/state assoc :show-stacked-keyboard false))))
          (m/SizedBox .width 20)
          (m/GestureDetector
-          .onTap (fn [] 
-                   (tag-state/clear-filter global-state/state search-controller)
-                   (draft-state/query-drafts global-state/state "" false))
+          .onTap (fn []
+                   (.clear draft-search-controller)
+                   (tag-state/clear-filter)
+                   (draft-state/query-drafts "" false))
           .child
           (m/Icon (.cancel_outlined m/Icons)))
          (m/SizedBox .width 20)
@@ -79,8 +76,8 @@
       (m/Row
        .crossAxisAlignment m.CrossAxisAlignment/start
        .children
-       [(if (true? (:show-drawer-search @global-state/state))
-          (in-drawer-draft-search-field)
+       [(if (true? show-drawer-search)
+          (in-drawer-draft-search-field draft-search-controller)
           (m/Container))
         (f/widget
          :context ctx
@@ -105,11 +102,11 @@
          .child
          (tabbar/tabbar))]))])))
 ;;
-(defn filtered-tag [state tag]
+(defn filtered-tag [tag]
   (m/GestureDetector
    .onTap (fn []
             (when-not (= "Any" (get tag "name"))
-              (tag-state/delete-filter-tag state tag)))
+              (tag-state/delete-filter-tag tag)))
    .child
    (m/Padding
     .padding (.all m/EdgeInsets 10)
@@ -124,7 +121,7 @@
   (m/GestureDetector
    .onTap (fn []
             (when-not (= "none" (get tag "name"))
-              (tag-state/delete-omitted-tag state tag)))
+              (tag-state/delete-omitted-tag tag)))
    .child
    (m/Padding
     .padding (.all m/EdgeInsets 10)
@@ -138,15 +135,14 @@
 (defn left-sub-drawer []
   (f/widget
    :context ctx
-   :get [:search-tag-controller]
    :watch [{tags :tags
             filter-tags :filter-tags
             omitted-tags :omitted-tags
             filtered-tags :filtered-tags
-            tag-search :tag-search} global-state/state]
-   :bg-watcher ([^m/TextEditingValue {search-text .-text} search-tag-controller]
-                (tag-state/update-tag-search global-state/state search-text))
+            tag-search :tag-search
+            show-sub-drawer-search :show-sub-drawer-search} global-state/state]
    (m/Drawer
+    .backgroundColor (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width) 80)) 
    (m/Container)
    (m/SafeArea)
@@ -157,8 +153,8 @@
       .children
       [(f/widget
         (m/Material
-         .color (if (or (not (empty? tag-search))
-                        (true? (:show-sub-drawer-search @global-state/state)))
+         .color (if (or (not-empty tag-search)
+                        (true? show-sub-drawer-search))
                   (-> m/Theme (.of ctx) .-colorScheme .-outlineVariant)
                   (-> m.Colors/transparent))
          .shape (m/CircleBorder
@@ -171,9 +167,9 @@
          .onTap (fn []
                   (swap! global-state/state assoc :show-sub-drawer-search
                          (not (:show-sub-drawer-search @global-state/state)))
-                  (if (and
-                       (false? (:show-sub-drawer-search @global-state/state))
-                       (true? (:show-stacked-keyboard @global-state/state)))
+                  (when (and
+                         (false? show-sub-drawer-search)
+                         (true? (:show-stacked-keyboard @global-state/state)))
                     (swap! global-state/state assoc :show-stacked-keyboard false))))
         (m/Padding
          .padding (.all m/EdgeInsets 2)
@@ -183,7 +179,7 @@
        (m/SizedBox .width 20)
        (m/GestureDetector
         .onTap (fn []
-                 (tag-state/clear-filter global-state/state search-tag-controller))
+                 (tag-state/clear-filter))
         .child
         (m/Icon (.cancel_outlined m/Icons)))
        (m/SizedBox .width 20)
@@ -263,8 +259,8 @@
                    .crossAxisAlignment m/CrossAxisAlignment.start
                    .children
                    (if (empty? filter-tags)
-                     [(filtered-tag global-state/state {"name" "Any"})]
-                     (map #(filtered-tag global-state/state %) filter-tags))))
+                     [(filtered-tag {"name" "Any"})]
+                     (map #(filtered-tag %) filter-tags))))
                  (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
                  (m/Container
                   .color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
@@ -301,22 +297,20 @@
                                  .child
                                  (m/GestureDetector
                                   .onTap (fn []
-                                           (tag-state/add-filter-tag global-state/state (nth filtered-tags i)))
+                                           (tag-state/add-filter-tag (nth filtered-tags i)))
                                   .child
                                   (mgl/MongolText (get (nth filtered-tags i) "name") .style (m/TextStyle .fontSize 18))))
                                 (m/GestureDetector
                                  .onTap (fn []
-                                          (tag-state/add-omitted-tag global-state/state (nth filtered-tags i)))
+                                          (tag-state/add-omitted-tag (nth filtered-tags i)))
                                  .child
                                  (m/Icon (.do_disturb_alt m/Icons)
                                          .size 16))]))))))]))]))])))
-(defn in-drawer-draft-search-field []
+
+(defn in-drawer-draft-search-field 
+  [^m/TextEditingController draft-search-controller]
   (f/widget
    :context ctx
-   :get [:search-controller]
-   :watch [{show-stacked-keyboard :show-stacked-keyboard
-            show-system-keyboard :show-system-keyboard} 
-           global-state/state]
    (m/Container
     .constraints
     (m/BoxConstraints
@@ -326,14 +320,12 @@
    (m/Padding
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
-    .controller search-controller
+    .controller draft-search-controller
+    .onChanged (fn [x] (draft-state/query-drafts x false))
     .autofocus true
-    .showCursor (if (true? show-stacked-keyboard) true false)
-    .readOnly (if show-system-keyboard false true)
     .maxLines 1
     .onTap (fn []
-             (swap! global-state/state assoc :show-stacked-keyboard true)
-             (swap! global-state/state assoc :text-controller search-controller))
+             (swap! global-state/state assoc :show-stacked-keyboard true))
     .style (m/TextStyle .fontSize 16)
     .decoration
     (m/InputDecoration
@@ -347,10 +339,6 @@
 (defn in-drawer-tag-search-field []
   (f/widget
    :context ctx
-   :get [:search-tag-controller]
-   :watch [{show-stacked-keyboard :show-stacked-keyboard
-            show-system-keyboard :show-system-keyboard} 
-           global-state/state]
    (m/Container
     .constraints
     (m/BoxConstraints
@@ -360,14 +348,12 @@
    (m/Padding
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
-    .controller search-tag-controller
+    .onChanged (fn [x] 
+                 (tag-state/update-tag-search x))
     .autofocus true
-    .showCursor (if (true? show-stacked-keyboard) true false)
-    .readOnly (if show-system-keyboard false true)
     .maxLines 1
     .onTap (fn []
-             (swap! global-state/state assoc :show-stacked-keyboard true)
-             (swap! global-state/state assoc :text-controller search-tag-controller))
+             (swap! global-state/state assoc :show-stacked-keyboard true))
     .style (m/TextStyle .fontSize 16)
     .decoration
     (m/InputDecoration
@@ -378,11 +364,14 @@
                            .width 0.8)
               .borderRadius (.circular m/BorderRadius 10))))))
 
-(defn toolbar-button-normal [child color on-press]
+(defn toolbar-button-normal [child on-press]
   (f/widget
    :context ctx
+   :watch [{show-drawer-search :show-drawer-search} global-state/state]
    (m/Material
-    .color color
+    .color (if (true? show-drawer-search)
+             (-> m.Colors/transparent)
+             (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
     .shape (m/CircleBorder
             .side (m/BorderSide
                    .color (-> m/Theme (.of ctx) .-iconTheme .-color)

@@ -3,74 +3,52 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [virtual-keyboard.keyboard :as keyboard]
+   [virtual-keyboard.input-control :as control]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [virtual-keyboard.options :as keyboard-options]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.drawer :as drawer]
-   [cljd.flutter.alpha2 :as f]
+   [cljd.flutter :as f]
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.widgets.tagbar :as tagbar]
    [mongol-drafts.widgets.toolbar :as toolbar]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
-   [menu-bar.menu :as menu]
-   [mongol-drafts.states.history :as his-state]))
+   [menu-bar.menu :as menu]))
 
 (defn widget []
   (f/widget
    :context ctx
-   :managed [^m/TextEditingController text-controller (m/TextEditingController)
-             ^m/TextEditingController tag-controller (m/TextEditingController)
-             ^m/TextEditingController search-controller (m/TextEditingController)
-             ^m/TextEditingController search-tag-controller (m/TextEditingController)]
+   :get [:info]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
-         h  (-> m/MediaQuery (.of ctx) .-size .-height)
-         info (merge keyboard-options/keyboard-option
-                     {:keyboard/key-cap-border-radius 6
-                      :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-                      :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
-                      :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                      :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                      :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
-                     {:keyboard/width w})
-
-         _ (draft-state/new-draft global-state/state text-controller)]
-   :bind {:info info :state global-state/state
-          :text-controller text-controller
-          :tag-controller tag-controller
-          :search-controller search-controller
-          :search-tag-controller search-tag-controller}
+         _ (draft-state/new-draft)]
+   :managed [^m/TextEditingController text-controller (m/TextEditingController)]
+   :bind {:text-controller text-controller}
    :watch [{:keys [tag-viewable
                    show-keyboard
                    show-stacked-keyboard
                    show-system-keyboard
-                   show-search-diaglog
-                   edit-watcher/lock]
+                   show-search-diaglog]
             candidates-list :keyboard/candidates-list}
-           global-state/state]
-   :bg-watcher ([^m/TextEditingValue {edit-text .-text} text-controller]
-                ;; filter other changed event, maybe selection change
-                (draft-state/draft-editing-listener edit-text text-controller))
-                
+           global-state/state
+           visible control/visible]
    (m/Stack
     .children
     [(m/Scaffold
       .onDrawerChanged
       (fn [c]
         (if (false? c)
-          (do
-            (swap! global-state/state assoc :show-stacked-keyboard false)
-            (draft-state/focus-on-draft global-state/state text-controller))
+          (swap! global-state/state assoc :show-stacked-keyboard false)
           (do
             (swap! global-state/state assoc-in [:drafts :is-end] false)
             (swap! global-state/state assoc-in [:drafts :contents] [])
             (swap! global-state/state assoc :keyboard/candidates-list [])
-            (draft-state/query-drafts global-state/state (:draft-search @global-state/state) true)
+            (draft-state/query-drafts (:draft-search @global-state/state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
       .body
       (m/SafeArea
-       .bottom false
+      ;;  .bottom false
        .child
        (m/Column
         .children
@@ -80,7 +58,7 @@
           (m/Row
            .children
            [(if (true? tag-viewable)
-              (tagbar/tagbar tag-controller)
+              (tagbar/tagbar)
               (m/Container))
             (m/Expanded
              .child
@@ -89,12 +67,12 @@
               .child
               (mgl/MongolTextField
                .controller text-controller
-               .onTap #(draft-state/focus-on-draft global-state/state text-controller)
+               .onChanged (fn [x]
+                            (draft-state/update-draft x))
+               .onTap (fn [] (draft-state/focus-on-draft))
                .decoration nil
                .maxLines 1000
                .autofocus true
-               .showCursor (if (true? show-keyboard) true false)
-               .readOnly (if (true? show-system-keyboard) false true)
                .style (m/TextStyle .fontSize 18 .height 1.8))))
             (if (true? show-keyboard)
               (toolbar/toolbar)
@@ -106,7 +84,9 @@
             (m/SafeArea
              .top false
              .child
-             (keyboard/keyboard)))
+             (m/IntrinsicHeight
+              .child
+              (keyboard/keyboard))))
            (m/Container))])))
      (if (and (true? show-stacked-keyboard) (false? show-system-keyboard))
        (m/Positioned

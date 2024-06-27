@@ -51,7 +51,7 @@ app.*.map.json
 /linux
 /web
 /ios
-/lib
+/lib/cljd-out
 /test
 /.lsp
 /.clj-kondo
@@ -60,6 +60,24 @@ app.*.map.json
 pubspec.lock
 analysis_options.yaml
 .metadata
+# ClojureDart
+.cpcache/
+.clojuredart/
+lib/cljd-out/
+test/cljd-out/
+
+# ClojureDart
+.cpcache/
+.clojuredart/
+lib/cljd-out/
+test/cljd-out/
+
+# ClojureDart
+.cpcache/
+.clojuredart/
+lib/cljd-out/
+test/cljd-out/
+
 # ClojureDart
 .cpcache/
 .clojuredart/

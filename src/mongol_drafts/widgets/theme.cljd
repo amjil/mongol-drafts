@@ -1,6 +1,46 @@
 (ns mongol-drafts.widgets.theme
   (:require 
-   ["package:flutter/material.dart" :as m]))
+   ["package:flutter/material.dart" :as m]
+   ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
+   [mongol-drafts.services.pref :as pref]))
+   
+(declare default-light-theme default-light-theme)
+
+(defn set-dark [ctx]
+  (pref/set-int "theme-setting" 1)
+  (-> adaptive/AdaptiveTheme
+      (.of ctx)
+      .setDark))
+
+(defn set-light [ctx]
+  (pref/set-int "theme-setting" 0)
+  (-> adaptive/AdaptiveTheme
+      (.of ctx)
+      .setLight))
+
+(defn set-system [ctx]
+  (pref/set-int "theme-setting" 2)
+  (-> adaptive/AdaptiveTheme
+      (.of ctx)
+      .setSystem))
+
+(defn is-dark-mode [ctx]
+  (= (-> m/Theme
+         (.of ctx)
+         .-brightness)
+     m.Brightness/dark))
+
+(defn initial-theme []
+  (let [theme-setting (await (pref/get-int "theme-setting"))]
+    (cond
+      (nil? theme-setting)
+      adaptive.AdaptiveThemeMode/system
+
+      :else
+      (condp = theme-setting
+        0 adaptive.AdaptiveThemeMode/light
+        1 adaptive.AdaptiveThemeMode/dark
+        adaptive.AdaptiveThemeMode/system))))
 
 (def default-light-theme 
   (m/ThemeData
@@ -34,7 +74,7 @@
    (.dark m/ColorScheme
           .primary m.Colors/blueGrey
           .onPrimary m.Colors/white
-           .surface m.Colors/white60
+          .surface m.Colors/white60
           .outlineVariant (-> m/Colors .yellowAccent)
           .secondary m.Colors/red
           .tertiary (-> m/Colors .black45)

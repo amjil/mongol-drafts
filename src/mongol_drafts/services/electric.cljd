@@ -1,0 +1,51 @@
+(ns mongol-drafts.services.electric
+  (:require
+   ["package:uuid/uuid.dart" :as uuid]
+   ["package:mongol_drafts/database/drift/database.dart" :as drift]
+   ["package:mongol_drafts/database/electric.dart" :as electric]
+   ["package:drift/drift.dart" :as dr]
+   [mongol-drafts.states.global :as gs]))
+
+(defn init-db []
+  (await (drift/initDriftDatabase)))
+
+(def elec (atom nil))
+(def db (atom nil))
+
+(def auth-token "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhZTFiYWQ4YS01NDgwLTQ0OWItYmY4Mi05ZmQzMGJjZDI3YjYiLCJleHAiOjE3MjY0OTEyMTIsImlhdCI6MTUxNjIzOTAyMn0.g_mIOof38owms-fU7QMMdeITxrHMsOPFTDsX-YCisGYsbEor9dOoWpxJNKe4X3a0BZTkluJVEjHqNc3qy_qA9Lnn-pFjAoU5KzFdyz8A31IesfUeg1uAkhhH7m8WllMmuEsfgKPNIITh-G_P59hO0tVLD4-AE4L3EA9HyxMeZ5oLeWEgoPVxhYsTCCCki6C8CEGiIHjgwvdkeSlsdrq20uT0komAH7g3ENC92L20mlO3YvZp6tG_YBlzsBsCWCv4QsoNBwZ0EW4aQLCBZAjwPIZYY5FS19T8SRNXkPsjgJyaUd1tfotH5Lg6nxaJLzA2hM4yMNq0v1nRY4dQf9biq2VdGLySXMkwWptU6Ee8rDR8kyuhouMxQboZxLuP6bx3L-3SkMWA_rj7Y2n8C0z36dWMTI0xQ0QBBuxht8XSpKNymExuTeT-MYZOT1YeQSb8aiRl9K5C7BTIZi4XZzV7Iwh9X5Ph7VkjKMH3jHbLp0ixZQ84-pN9cBf7hZTqYwtviqLUTXxudofaP0vCkWlGXMPQcTeIrcHicLiJHLHZIhA334GzUYLZcpsCbY3z_v0D97UqzW2LqLPeyY2J2lGgJNJu2Zr9pFOS5tF3_g5QPLM5IXC5RkMc32iw1nw-isKgMvsEi-6RMk_RsOcQ4EB0SMASUchsnGCrFyxRPn-SH6s")
+
+(defn set-electric []
+  (let [d (await (init-db))
+        notes-electric (await (electric/startElectricDrift "drafts-app" d))
+        result (await
+                (.get
+                 (.customSelect
+                  d
+                  "SELECT id, name
+                   FROM workspaces 
+                   WHERE name = 'default'
+                   ;")))]
+    (if (empty? result)
+      (let [uuid (.v4 (uuid/Uuid))
+            ^#/(List dr/Variable)
+            vars (into [] [(dr/Variable uuid) (dr/Variable "default")
+                           (dr/Variable "ae1bad8a-5480-449b-bf82-9fd30bcd27b6")])]
+        (await
+         (.customInsert
+          d
+          "INSERT INTO workspaces (id, name, electric_user_id) values (?, ?, ?)"
+          .variables vars))
+        (swap! gs/state assoc :workspace {:id uuid :name "default"}))
+      (let [workspace (-> result last .-data)]
+        (swap! gs/state assoc :workspace {:id (get workspace "id")
+                                          :name "default"})))
+    ;; (await
+    ;;  (.connect notes-electric auth-token))
+    ;; (let [shape (await (.syncTable notes-electric (.-tags d)))]
+    ;;   (await (.-synced shape)))
+    ;; (let [shape (await (.syncTable notes-electric (.-drafts d)))]
+    ;;   (await (.-synced shape)))
+    ;; (let [shape (await (.syncTable notes-electric (.-draftTags d)))]
+    ;;   (await (.-synced shape)))
+    ;; (reset! db d)
+    (reset! elec notes-electric)))

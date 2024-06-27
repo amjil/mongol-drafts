@@ -3,7 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    ["package:flutter_slidable/flutter_slidable.dart" :as slidable]
-   [cljd.flutter.alpha2 :as f]
+   [cljd.flutter :as f]
    [mongol-drafts.widgets.empty :as empty-content]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
@@ -12,7 +12,7 @@
 (defn widget []
   (f/widget
    :context ctx
-   :get [:text-controller m/Navigator]
+   :get [m/Navigator :text-controller]
    :let [h (-> m/MediaQuery (.of ctx) .-size .-height)]
    :watch [{{contents :contents} :drafts} global-state/state]
    (if (empty? contents)
@@ -27,16 +27,14 @@
         (f/widget
          (m/GestureDetector
           .onTap (fn []
-                   (swap! global-state/state assoc :edit-watcher/lock 2)
-                   (draft-state/set-current-draft global-state/state (-> contents (nth i) (get "draft_id")))
-                   (draft-state/focus-on-draft global-state/state text-controller)
-                   (tag-state/get-draft-tags global-state/state (-> contents (nth i) (get "draft_id")))
-                   (swap! global-state/state assoc :edit-watcher/lock 1)
+                   (draft-state/set-current-draft text-controller (-> contents (nth i) (get "id")))
                    (if (true? (:show-search-diaglog @global-state/state))
                      (do
                        (swap! global-state/state assoc :show-search-diaglog false)
                        (swap! global-state/state assoc :show-stacked-keyboard false))
-                     (.pop navigator))))
+                     (.pop navigator))
+                   (draft-state/focus-on-draft)
+                   (tag-state/get-draft-tags global-state/state (-> contents (nth i) (get "id")))))
          (slidable/Slidable
           .key (m/ValueKey i)
           .direction m/Axis.vertical
@@ -51,47 +49,52 @@
            [(if-not (= 3 (:draft/tabbar-index @global-state/state))
               (slidable/SlidableAction .onPressed
                                        (fn [_]
-                                         (draft-state/toggle-drafts-item-flag global-state/state i))
+                                         (draft-state/toggle-drafts-item-flag i))
                                        .backgroundColor (.green m/Colors)
                                        .foregroundColor (.white m/Colors)
+                                       .padding (m.EdgeInsets/all 0)
                                        .icon (.flag m/Icons)
                                        .label nil)
               (m/Container))
             (if (some #{(:draft/tabbar-index @global-state/state)} [2 3])
               (slidable/SlidableAction .onPressed
                                        (fn [_]
-                                         (draft-state/inbox-draft global-state/state i)
+                                         (draft-state/inbox-draft i)
                                          (dart:core/print "slide inbox111"))
                                        .backgroundColor (.blue m/Colors)
                                        .foregroundColor (.white m/Colors)
+                                       .padding (m.EdgeInsets/all 0)
                                        .icon (.inbox_outlined m/Icons))
               (m/Container))
             (if (not= (:draft/tabbar-index @global-state/state) 3)
               (slidable/SlidableAction .onPressed
                                        (fn [context]
-                                         (draft-state/recycle-draft global-state/state i)
+                                         (draft-state/recycle-draft i)
                                          (dart:core/print "slide delete"))
                                        .backgroundColor (.red m/Colors)
                                        .foregroundColor (.white m/Colors)
+                                       .padding (m.EdgeInsets/all 0)
                                        .icon (.delete m/Icons))
               (m/Container))
 
             (if (some #{(:draft/tabbar-index @global-state/state)} [0 1])
               (slidable/SlidableAction .onPressed
                                        (fn [_]
-                                         (draft-state/archive-draft global-state/state i)
+                                         (draft-state/archive-draft i)
                                          (dart:core/print "slide archive"))
                                        .backgroundColor (.blue m/Colors)
                                        .foregroundColor (.white m/Colors)
+                                       .padding (m.EdgeInsets/all 0)
                                        .icon (.archive m/Icons))
               (m/Container))
             (if (= (:draft/tabbar-index @global-state/state) 3)
               (slidable/SlidableAction .onPressed
                                        (fn [_]
-                                         (draft-state/delete-draft global-state/state i)
+                                         (draft-state/delete-draft i)
                                          (dart:core/print "slide archive"))
                                        .backgroundColor (.red m/Colors)
                                        .foregroundColor (.white m/Colors)
+                                       .padding (m.EdgeInsets/all 0)
                                        .icon (.delete_forever m/Icons))
               (m/Container))]))
          (m/Container
@@ -108,21 +111,9 @@
              (mgl/MongolText
               "--blank--")
              (let [^String orig-content (-> contents (nth i) (get "content"))
-                   ^String content (.trim orig-content)
-                   num (count content)
-                   idx (if (empty? content)
-                         -1
-                         (.indexOf content "\n"))]
-               (m/Row
-                .crossAxisAlignment m.CrossAxisAlignment/start
-                .children
-                [(if (neg? idx)
-                   (mgl/MongolText content .maxLines 1)
-                   (mgl/MongolText (.substring content 0 idx) .maxLines 1))
-                 (if (and (pos? idx) (< (inc idx) (dec num)) (not-empty (.substring content (inc idx))))
-                   (mgl/MongolText (.substring content (inc idx)) .maxLines 2)
-                   (m/Container))])))
-           (if (= 1 (-> contents (nth i) (get "flag")))
+                   ^String content (.trim orig-content)]
+               (mgl/MongolText content .maxLines 1)))
+           (if (true? (-> contents (nth i) (get "flag")))
              (m/Icon (.flag m/Icons)
                      .size 12
                      .color m.Colors/red)

@@ -5,16 +5,13 @@
 
 (def state
   (atom
-   (merge keyboard-options/keyboard-state
-          {:tag-viewable false
-           :show-keyboard false
-           :show-stacked-keyboard false
-           :show-drawer-search false
-           :show-sub-drawer-search false
-           :show-search-diaglog false
-           :show-system-keyboard false
-           :tag-on-edit false
-           :current-layout "mg"
-           ;; lock for bg-watcher text-controller
-           :edit-watcher/lock 2
-           :draft/tabbar-index 0})))
+   {:tag-viewable false
+    :show-keyboard false
+    :show-stacked-keyboard false
+    :show-drawer-search false
+    :show-sub-drawer-search false
+    :show-search-diaglog false
+    :show-system-keyboard false
+    :tag-on-edit false
+    :current-layout "mg"
+    :draft/tabbar-index 0}))

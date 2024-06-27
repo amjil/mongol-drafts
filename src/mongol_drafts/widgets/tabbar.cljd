@@ -1,9 +1,8 @@
 (ns mongol-drafts.widgets.tabbar
   (:require
    ["package:flutter/material.dart" :as m]
-   [cljd.flutter.alpha2 :as f]
+   [cljd.flutter :as f]
    [mongol-drafts.widgets.list :as content-list]
-   [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]))
 
 (declare tabbar-view)
@@ -21,7 +20,7 @@
              _ (.addListener tab-controller
                              (fn []
                                (when-not (.-indexIsChanging tab-controller)
-                                 (draft-state/set-draft-search-status global-state/state (.-index tab-controller)))))]
+                                 (draft-state/set-draft-search-status (.-index tab-controller)))))]
          (m/Column
           .children
           [(m/Row
@@ -34,32 +33,38 @@
                                                     .bottom m.Radius/zero
                                                     .top (.circular m/Radius 10))
                            .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer))
+               .isScrollable true
                .onTap (fn [i]
-                        (draft-state/set-draft-search-status global-state/state i))
+                        (draft-state/set-draft-search-status i))
                .tabs
                [(m/Tab
                  .icon
-                 (m/Icon (.inbox_outlined m/Icons)
-                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))
+                 (m/Padding
+                  .padding (m.EdgeInsets/symmetric .horizontal 10)
+                  .child
+                  (m/Icon (.inbox_outlined m/Icons)
+                          .color (-> m/Theme (.of ctx) .-iconTheme .-color))))
                 (m/Tab
                  .icon
-                 (m/Icon (.flag_outlined m/Icons)
-                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))
+                 (m/Padding
+                  .padding (m.EdgeInsets/symmetric .horizontal 10)
+                  .child
+                  (m/Icon (.flag_outlined m/Icons)
+                          .color (-> m/Theme (.of ctx) .-iconTheme .-color))))
                 (m/Tab
                  .icon
-                 (m/Icon (.archive_outlined m/Icons)
-                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))
-        ;;    (m/Container
-        ;;     ;; .margin (.only m/EdgeInsets .left 10)
-        ;;     .child
-        ;;     (m/Tab
-        ;;      .child
-        ;;      (m/Text "All"
-        ;;              .style (m/TextStyle .color (-> m/Colors .blue .-shade600)))))
+                 (m/Padding
+                  .padding (m.EdgeInsets/symmetric .horizontal 10)
+                  .child
+                  (m/Icon (.archive_outlined m/Icons)
+                          .color (-> m/Theme (.of ctx) .-iconTheme .-color))))
                 (m/Tab
                  .icon
-                 (m/Icon (.delete_outlined m/Icons)
-                         .color (-> m/Theme (.of ctx) .-iconTheme .-color)))]))])
+                 (m/Padding
+                  .padding (m.EdgeInsets/symmetric .horizontal 10)
+                  .child
+                  (m/Icon (.delete_outlined m/Icons)
+                          .color (-> m/Theme (.of ctx) .-iconTheme .-color))))]))])
 
            (m/Expanded
             .child
@@ -78,7 +83,3 @@
       (content-list/widget)
       (content-list/widget)
       (content-list/widget)]))))
-
-;;
-(defn tab-content-view []
-  nil)

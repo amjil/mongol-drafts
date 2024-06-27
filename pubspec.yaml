@@ -20,7 +20,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: '>=3.4.3 <4.0.0'
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -36,18 +36,23 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.6
-  mongol: ^6.0.1
+  mongol: ^8.0.0
   mongol_code: ^0.3.0
-  sqflite: ^2.3.0
-  path: ^1.8.3
-  flutter_slidable: ^3.0.0
-  diff_match_patch: ^0.4.1
-  path_provider: ^2.0.14
-  shared_preferences: ^2.2.1
-  vibration: ^1.8.1
+  flutter_slidable: ^3.1.0
+  shared_preferences: ^2.2.3
+  vibration: ^1.9.0
+  uuid: ^4.4.0
   flutter_keyboard_visibility: ^5.4.1
   http: ^1.1.0
-  adaptive_theme: ^3.4.1
+  adaptive_theme: ^3.6.0
+  undo_textfield: ^0.0.7
+    
+  drift: 2.18.0
+  sqlite3_flutter_libs: ^0.5.23
+  path_provider: ^2.1.3
+  path: ^1.9.0
+  electricsql: ^0.8.0
+  electricsql_flutter: ^0.8.0
 
 dev_dependencies:
   flutter_test:
@@ -59,6 +64,10 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^2.0.0
+  drift_dev: ^2.18.0
+  build_runner: ^2.4.9
+  electricsql_cli:
+    path: /Users/amjil/projects/pg/electric_dart/packages/electricsql_cli
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

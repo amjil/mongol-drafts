@@ -2,7 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [cljd.flutter.alpha2 :as f]
+   [cljd.flutter :as f]
    [mongol-drafts.widgets.empty :as empty-content]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
@@ -13,10 +13,7 @@
 (defn widget []
   (f/widget
    :context ctx
-   :get [:search-controller]
    :watch [{{:keys [contents is-end]} :drafts} global-state/state]
-   :bg-watcher ([^m/TextEditingValue {edit-text .-text} search-controller]
-                (draft-state/query-drafts global-state/state edit-text false))
    (m/Positioned
     .top 0
     .left 0
@@ -65,30 +62,25 @@
   
 (defn search-field []
   (f/widget
-   :context ctx
-   :get [:search-controller]
-   :watch [{:keys [show-system-keyboard]} global-state/state]
+   :managed [controller (m/TextEditingController)]
    (m/Expanded)
   ;;  (m/Padding
   ;;   .padding (.all m/EdgeInsets 0))
    (mgl/MongolTextField
-    .controller search-controller
+    .controller controller
+    .onChanged (fn [x] (draft-state/query-drafts x false))
     .autofocus true
-    .showCursor true
-    .readOnly (if show-system-keyboard false true)
     .maxLines 1
     .minLines 1
     .onTap (fn []
-             (swap! global-state/state assoc :show-stacked-keyboard true)
-             (swap! global-state/state assoc :text-controller search-controller))
+             (swap! global-state/state assoc :show-stacked-keyboard true))
     .style (m/TextStyle .fontSize 16)
     .decoration
     (m/InputDecoration
      .suffixIcon
      (m/IconButton .onPressed
                    (fn []
-                     (let [^m/TextEditingController controller search-controller]
-                       (.clear controller)))
+                     (.clear controller))
                    .icon (m/Icon (.clear m/Icons)))
      .isDense true
      ;;  Todo : when hintText is present Text cursor position error

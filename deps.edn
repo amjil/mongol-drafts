@@ -1,13 +1,13 @@
 {:paths ["src"] ; where your cljd files are
  :deps {tensegritics/clojuredart
         {:git/url "https://github.com/tensegritics/ClojureDart.git"
-         :sha "05f2ff1f2ad7a8799a28dfb1a7bf5b7e98eab37d"}
-        amjil/mongol-virtual-keyboard
-        {:git/url "https://github.com/amjil/mongol-virtual-keyboard.git"
-         :sha "d30cad1259e9967c02a2d2238f16286b422daae7"}
+         :sha "75665e2018b5c373b2e90d2299579fec7f94b3db"}
         amjil/mongol-menu-bar
         {:git/url "https://github.com/amjil/mongol-menu-bar.git"
-         :sha "4ea5915e94cc6439202d77a90276dcf8c10eb0f0"}}
+         :sha "d070ea149db29bed57a77eee09af3f865462c4ac"}
+        amjil/mongol-virtual-keyboard
+        {:git/url "https://github.com/amjil/mongol-virtual-keyboard.git"
+         :sha "83ce381c9d8f7a0a5b1e184677653a9eaf4a1d29"}}
        
  :aliases {:cljd {:main-opts ["-m" "cljd.build"]}}
  :cljd/opts {:kind :flutter

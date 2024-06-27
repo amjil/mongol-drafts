@@ -2,63 +2,48 @@
   (:require
    ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.draft :as draft-service]
-   [mongol-drafts.states.global :as global-state]
-   [mongol-drafts.states.history :as his-state]
+   [mongol-drafts.states.global :as gs]
    [mongol-drafts.states.counter :as counter-state]))
 
-(defn set-current-draft [state id]
+(defn set-current-draft [controller id]
   (let [result (await (draft-service/get-draft id))
-        ^m/TextEditingController
-        controller (:keyboard/text-controller @state)]
-    ;; Set :edit-watcher/lock false to prevent when (set! (.-text controller) ....)
-    ;; to fire :bg-watcher [text-controller]
-    (swap! state assoc :draft (into {} (-> result first)))
-    (set! (.-text controller) (get (:draft @state) "content"))
-    (counter-state/count-contents state (get (:draft @state) "content"))
-    (his-state/init-history state controller)))
+        draft (-> result first .-data)]
+    (set! (.-text controller) (get draft "content"))
+    (swap! gs/state assoc :draft draft)
+    (counter-state/count-contents gs/state (get draft "content"))))
 
-(defn new-draft [state controller]
-  ;; some initial states & function althogh here
-  (when (nil? (:keyboard/text-controller @state))
-    (swap! global-state/state assoc :keyboard/text-controller controller))
-  ;;;;;;;;
+(defn new-draft []
   (let [result (await (draft-service/last-draft))
-        content (-> result first (get "content"))
-        ^m/TextEditingController
-        controller (:keyboard/text-controller @state)]
+        content (-> result first .-data (get "content"))]
     (cond
-      (and (empty? content) (number? (-> result first (get "id"))))
-      (do
-        (swap! state assoc :draft
-               (into {} (-> result last)))
-        (if-not (empty? (.-text controller))
-          (.clear controller)))
+      (and (empty? content) (not-empty result))
+      (swap! gs/state assoc :draft
+             (-> result last .-data))
 
       :else
-      (let [id (await (draft-service/create-draft ""))
-            result (-> (draft-service/last-draft) await last)]
-        (swap! state assoc :draft (into {} result))
-        (.clear controller)))))
+      (let [id (await (draft-service/create-draft (-> @gs/state :workspace :id) ""))
+            result (-> (draft-service/last-draft) await last .-data)]
+        (swap! gs/state assoc :draft result)))))
 
-(defn delete-draft [state i]
-  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
+(defn delete-draft [i]
+  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
     (draft-service/delete-draft id)
-    (swap! state assoc-in [:drafts :contents]
-           (remove #(= id (get % "draft_id"))
-                   (get-in @state [:drafts :contents])))))
+    (swap! gs/state assoc-in [:drafts :contents]
+           (remove #(= id (get % "id"))
+                   (get-in @gs/state [:drafts :contents])))))
 
-(defn update-draft [state id content]
-  (let [result (await (draft-service/update-draft id content))
-        draft (:draft @state)]
-    (swap! state assoc-in [:draft "content"] content)
-    (counter-state/count-contents state content)))
+(defn update-draft [content]
+  (let [draft (:draft @gs/state)]
+    (await (draft-service/update-draft (get draft "id") content))
+    (swap! gs/state assoc :draft
+           (doto draft (.update "content" (fn [_] content))))
+    (counter-state/count-contents gs/state content)))
 
 (defn list-drafts [state]
   (let [;num (-> @state :drafts :contents count)
         flag (:draft/flag @state)
         status (:draft/status @state)
-        drafts (await (draft-service/list-drafts
-                       num [] [] flag status))]
+        drafts (await (draft-service/list-drafts [] [] flag status))]
     (if (empty? drafts)
       (do
         (swap! state assoc-in [:drafts :is-end] true)
@@ -66,99 +51,63 @@
       (do
         (swap! state assoc-in [:drafts :is-end] false)
         (swap! state assoc-in [:drafts :contents]
-               (concat (get-in @state [:drafts :contents]) drafts))))))
+               (concat (get-in @state [:drafts :contents]) (map (fn [x] (.-data x)) drafts)))))))
 
-(defn query-drafts [state q has-filter]
+(defn query-drafts [q has-filter]
   ;; has-filter false query without the tag filters
   ;;            true is query with the tag filters 
-  (swap! state assoc :draft-search q)
+  (swap! gs/state assoc :draft-search q)
   (if (empty? q)
     (let [;num (-> @state :draft :contents count)
-          tag-in-ids (map #(get % "id") (:filter-tags @state))
-          tag-out-ids (map #(get % "id") (:omitted-tags @state))
-          flag (:draft/flag @state)
-          status (:draft/status @state)
+          tag-in-ids (map #(get % "id") (:filter-tags @gs/state))
+          tag-out-ids (map #(get % "id") (:omitted-tags @gs/state))
+          flag (:draft/flag @gs/state)
+          status (:draft/status @gs/state)
           drafts (await (draft-service/list-drafts
-                         0
                          (if has-filter tag-in-ids [])
                          (if has-filter tag-out-ids [])
                          flag status))]
       (if (empty? drafts)
         (do
-          (swap! state assoc-in [:drafts :is-end] true)
-          (swap! state assoc-in [:drafts :contents] []))
+          (swap! gs/state assoc-in [:drafts :is-end] true)
+          (swap! gs/state assoc-in [:drafts :contents] []))
         (do
-          (swap! state assoc-in [:drafts :is-end] false)
-          (swap! state assoc-in [:drafts :contents]
-                 (into [] drafts)))))
+          (swap! gs/state assoc-in [:drafts :is-end] false)
+          (swap! gs/state assoc-in [:drafts :contents]
+                 (into [] (map (fn [x] (.-data x)) drafts))))))
     (let [;num (-> @state :draft :contents count)
-          tag-in-ids (map #(get % "id") (:filter-tags @state))
-          tag-out-ids (map #(get % "id") (:omitted-tags @state))
-          flag (:draft/flag @state)
-          status (:draft/status @state)
+          tag-in-ids (map #(get % "id") (:filter-tags @gs/state))
+          tag-out-ids (map #(get % "id") (:omitted-tags @gs/state))
+          flag (:draft/flag @gs/state)
+          status (:draft/status @gs/state)
           drafts (await (draft-service/query-drafts
                          q
                          (if has-filter tag-in-ids [])
                          (if has-filter tag-out-ids [])
-                         0 flag status))]
+                         flag status))]
       (if (empty? drafts)
         (do
-          (swap! state assoc-in [:drafts :is-end] true)
-          (swap! state assoc-in [:drafts :contents] []))
+          (swap! gs/state assoc-in [:drafts :is-end] true)
+          (swap! gs/state assoc-in [:drafts :contents] []))
         (do
-          (swap! state assoc-in [:drafts :is-end] false)
-          (swap! state assoc-in [:drafts :contents]
-                 (into [] drafts)))))))
+          (swap! gs/state assoc-in [:drafts :is-end] false)
+          (swap! gs/state assoc-in [:drafts :contents]
+                 (into [] (map (fn [x] (.-data x)) drafts))))))))
 
-(defn clear-drafts [state]
-  (swap! state assoc-in [:drafts :is-end] false)
-  (swap! state assoc-in [:drafts :contents] []))
+(defn clear-drafts []
+  (swap! gs/state assoc-in [:drafts :is-end] false)
+  (swap! gs/state assoc-in [:drafts :contents] []))
 
 ;;;;;
-(defn focus-on-draft [state text-controller]
-  (swap! state assoc :show-keyboard true)
-  (when (true? (:tag-on-edit @state))
-    (let [^m/TextEditingController controller (:keyboard/text-controller @state)]
-      (.clear controller))
-    (swap! state assoc :tag-on-edit false))
-  (swap! state assoc :keyboard/text-controller text-controller)
-  (when-not (empty? (:keyboard/candidates-list @state))
-    (swap! state assoc :keyboard/candidates-list []))
-  (swap! state assoc :edit-watcher/lock 1))
+(defn focus-on-draft []
+  (swap! gs/state assoc :show-keyboard true)
+  (when (true? (:tag-on-edit @gs/state))
+    (swap! gs/state assoc :tag-on-edit false))
 
-(defn draft-editing-listener [edit-text text-controller]
-  ;; (if (true? (:edit-watcher/lock @state))
-  (condp = (:edit-watcher/lock @global-state/state)
-    ;; TextEditingController text changed
-    ;; ----- Or The Open Other draft should't catch event.
-    0
-    (do
-      (dart:core/print "nothing")
-      (swap! global-state/state assoc :edit-watcher/lock 1))
-    ;; TextEditingController text & selection change
-    1
-    (do
-      (dart:core/print "The Change Event Is For Text")
-      ;; (swap! state assoc :edit-watcher/lock 0)
-      (when (and (some? edit-text) (not= (:editor/content @global-state/state) edit-text))
-        ;; (dart:core/print (str " content = " (:editor/content @global-state/state) " edit-text = " edit-text))
-        (swap! global-state/state assoc :editor/content edit-text)
-        (dart:core/print (str " end = " " his-flag = " (:history/flag @global-state/state)))
+  (when-not (empty? (:keyboard/candidates-list @gs/state))
+    (swap! gs/state assoc :keyboard/candidates-list [])))
 
-        (let [id (get (:draft @global-state/state) "id")]
-          (when (and (not (empty? edit-text))
-                     (true? (:history/flag @global-state/state)))
-            (dart:core/print "history >>")
-            (his-state/push-history global-state/state edit-text text-controller))
-          (update-draft global-state/state id edit-text))
-        ;; check this is redo/undo event
-        (when (false? (:history/flag @global-state/state))
-          (swap! global-state/state assoc :history/flag false))))
-
-    ;; else
-    (dart:core/print "Do nothing")))
-
-(defn initial-states [controller]
+(defn initial-states []
   {:tag-viewable false
    :show-keyboard false
    :show-stacked-keyboard false
@@ -166,34 +115,32 @@
    :show-sub-drawer-search false
    :show-search-diaglog false
    :tag-on-edit false
-   :current-layout "mn"
-   :edit-watcher/lock 2
-   :keyboard/text-controller controller})
+   :current-layout "mn"})
 
-(defn set-draft-search-status [state i]
-  (when-not (= i (:draft/tabbar-index @state))
-    (swap! state assoc :draft/tabbar-index i)
+(defn set-draft-search-status [i]
+  (when-not (= i (:draft/tabbar-index @gs/state))
+    (swap! gs/state assoc :draft/tabbar-index i)
     (condp = i
       ;; Query Inbox drafts
       0
       (do
-        (swap! state assoc :draft/flag nil)
-        (swap! state assoc :draft/status 0)
-        (query-drafts state (:draft-search @state) true))
+        (swap! gs/state assoc :draft/flag nil)
+        (swap! gs/state assoc :draft/status 0)
+        (query-drafts (:draft-search @gs/state) true))
 
       ;; Query Flaged drafts
       1
       (do
-        (swap! state assoc :draft/flag 1)
-        (swap! state assoc :draft/status 0)
-        (query-drafts state (:draft-search @state) true))
+        (swap! gs/state assoc :draft/flag 1)
+        (swap! gs/state assoc :draft/status 0)
+        (query-drafts (:draft-search @gs/state) true))
 
       ;; Query Archived drafts
       2
       (do
-        (swap! state assoc :draft/flag nil)
-        (swap! state assoc :draft/status 1)
-        (query-drafts state (:draft-search @state) true))
+        (swap! gs/state assoc :draft/flag nil)
+        (swap! gs/state assoc :draft/status 1)
+        (query-drafts (:draft-search @gs/state) true))
 
       ;; Query All drafts
       ;; 3
@@ -205,50 +152,56 @@
       ;; Query Deleted drafts
       3
       (do
-        (swap! state assoc :draft/flag nil)
-        (swap! state assoc :draft/status -1)
-        (query-drafts state (:draft-search @state) true)))))
+        (swap! gs/state assoc :draft/flag nil)
+        (swap! gs/state assoc :draft/status -1)
+        (query-drafts (:draft-search @gs/state) true)))))
 
-(defn toggle-draft-flag [state id]
-  (let [flag (-> @state :draft (get "flag"))]
+(defn toggle-draft-flag [id]
+  (let [flag (-> @gs/state :draft (get "flag"))]
     (if (= 1 flag)
       (draft-service/unflag-draft id)
       (draft-service/flag-draft id))
-    (swap! state assoc-in [:draft "flag"] (if (= 1 flag) 0 1))))
+    (swap! gs/state assoc :draft
+           (doto
+            (-> @gs/state :draft)
+             (.update
+              "flag"
+              (fn [_] (if (= 1 flag) 0 1)))))))
 
-(defn toggle-drafts-item-flag [state i]
-  (let [draft (-> @state :drafts :contents (nth i))]
+(defn toggle-drafts-item-flag [i]
+  (let [draft (-> @gs/state :drafts :contents (nth i))]
     (if (= 1 (get draft "flag"))
       (do
-        (draft-service/unflag-draft (get draft "draft_id"))
-        (if (= 1 (:draft/tabbar-index @state))
-          (swap! state assoc-in [:drafts :contents]
-                 (remove #(= (get draft "draft_id") (get % "draft_id"))
-                         (get-in @state [:drafts :contents])))
-          (swap! state assoc-in [:drafts :contents i] (assoc (into {} draft) "flag" 0))))
+        (draft-service/unflag-draft (get draft "id"))
+        (if (= 1 (:draft/tabbar-index @gs/state))
+          (swap! gs/state assoc-in [:drafts :contents]
+                 (remove #(= (get draft "id") (get % "id"))
+                         (get-in @gs/state [:drafts :contents])))
+          (swap! gs/state assoc-in [:drafts :contents i]
+                 (doto draft (.update "flag" (fn [_] 0))))))
       (do
-        (draft-service/flag-draft (get draft "draft_id"))
-        (swap! state assoc-in [:drafts :contents i] (assoc (into {} draft) "flag" 1))))))
+        (draft-service/flag-draft (get draft "id"))
+        (swap! gs/state assoc-in [:drafts :contents i]
+               (doto draft (.update "flag" (fn [_] 1))))))))
 
-(defn recycle-draft [state i]
-  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
+(defn recycle-draft [i]
+  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
     (draft-service/recycle-draft id)
-    (swap! state assoc-in [:drafts :contents]
-           (remove #(= id (get % "draft_id"))
-                   (get-in @state [:drafts :contents])))))
+    (swap! gs/state assoc-in [:drafts :contents]
+           (remove #(= id (get % "id"))
+                   (get-in @gs/state [:drafts :contents])))))
 
-(defn archive-draft [state i]
-  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
+(defn archive-draft [i]
+  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
     (draft-service/archive-draft id)
-    (swap! state assoc-in [:drafts :contents]
-           (remove #(= id (get % "draft_id"))
-                   (get-in @state [:drafts :contents])))))
+    (swap! gs/state assoc-in [:drafts :contents]
+           (remove #(= id (get % "id"))
+                   (get-in @gs/state [:drafts :contents])))))
 
-(defn inbox-draft [state i]
-  (let [id (-> @state :drafts :contents (nth i) (get "draft_id"))]
-    (dart:core/print (str "draft = " (-> @state :drafts :contents (nth i))))
+(defn inbox-draft [i]
+  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
     (draft-service/inbox-draft id)
-    (swap! state assoc-in [:drafts :contents]
-           (remove #(= id (get % "draft_id"))
-                   (get-in @state [:drafts :contents])))))
+    (swap! gs/state assoc-in [:drafts :contents]
+           (remove #(= id (get % "id"))
+                   (get-in @gs/state [:drafts :contents])))))
 

@@ -2,11 +2,10 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart" :as kv]
-   [cljd.flutter.alpha2 :as f]
+   [cljd.flutter :as f]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
-   [mongol-drafts.states.history :as his-state]
    [mongol-drafts.states.selection :as selection-state]
    [virtual-keyboard.keyboard-action :as keyboard-action]))
    
@@ -27,8 +26,6 @@
 (defn topbar []
   (f/widget
    :context ctx
-   :get [:info
-         :text-controller :search-controller]
    :watch [{char-count :editor/chars
             word-count :editor/words}
            global-state/state]
@@ -42,11 +39,8 @@
      (bar-button
       (m/Icon (.add m/Icons))
       (fn []
-        (dart:core/print "abc new draft")
-        (swap! global-state/state assoc :edit-watcher/lock 2)
-        (draft-state/new-draft global-state/state text-controller)
-        (draft-state/focus-on-draft global-state/state text-controller)
-        (swap! global-state/state assoc :edit-watcher/lock 1)))
+        (draft-state/new-draft)
+        (draft-state/focus-on-draft)))
      (bar-button
       (m/Icon (.sell_outlined m/Icons))
       (fn []
@@ -54,12 +48,7 @@
                assoc
                :tag-viewable
                (not (:tag-viewable @global-state/state)))
-        (tag-state/get-draft-tags global-state/state (-> @global-state/state :draft (get "id")))
-        (when (false? (:tag-viewable @global-state/state))
-          (swap! global-state/state
-                 assoc
-                 :text-controller
-                 text-controller))))
+        (tag-state/get-draft-tags global-state/state (-> @global-state/state :draft (get "id")))))
      (m/SizedBox .width 20)
      (m/Text
       (str char-count "c" word-count "w"))
@@ -71,9 +60,7 @@
       (fn []
         (swap! global-state/state assoc :show-search-diaglog true)
         (swap! global-state/state assoc :show-stacked-keyboard true)
-        (swap! global-state/state assoc :show-keyboard false)
-        (let [^m/TextEditingController controller search-controller]
-          (.clear controller))))
+        (swap! global-state/state assoc :show-keyboard false)))
      (m/Icon (.view_sidebar_outlined m/Icons))])))
 
 

@@ -1,230 +1,248 @@
 (ns mongol-drafts.services.draft
   (:require
-   ["package:sqflite/sqflite.dart" :as sqf]
    ["package:flutter/material.dart" :as m]
-   [mongol-drafts.services.sqlite :as sql]))
+   ["package:uuid/uuid.dart" :as uuid]
+   ["package:mongol_drafts/database/drift/database.dart" :as schema]
+   ["package:mongol_drafts/generated/electric/drift_schema.dart" :as drift-schema]
+   ["package:electricsql_flutter/drivers/drift.dart" :as electric-drift]
+   ["package:drift/drift.dart" :as drift]
+   [mongol-drafts.services.electric :as electric]))
 
-(defn create-draft [v]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        id1 (await
-             (.rawInsert db
-                         "INSERT INTO drafts values (?)"
-                         [v]))
-        _ (await
-           (.rawInsert db
-                       "INSERT INTO draft_info (draft_id) values (?)"
-                       [id1]))]
-    id1))
+(defn create-draft [wid ^String v]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)
+        result (await
+                (.insertReturning
+                 (.into db (.-drafts db))
+                 (schema.DraftsCompanion/insert
+                  .id (.v4 (uuid/Uuid))
+                  .workspaceId wid
+                  .electricUserId "ae1bad8a-5480-449b-bf82-9fd30bcd27b6"
+                  .content (drift/Value v)
+                  .flag false
+                  .status 0
+                  .createdAt (drift/Value (DateTime.now))
+                  .updatedAt (drift/Value (DateTime.now)))))]
+    (-> result)))
 
 (defn delete-draft [id]
-  (let [^sqf/Database db (await (sql/initialize-db))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)]
     (await
-     (.rawDelete db
-                 "DELETE FROM drafts WHERE rowid = ?"
-                 [id]))
-    (await
-     (.rawDelete db
-                 "DELETE FROM draft_info WHERE draft_id = ?"
-                 [id]))))
+     (.go
+      (doto (.delete db (.-drafts db))
+        (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))))))
 
-
-(defn update-draft [id content]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        num (await (.rawUpdate db
-                               "UPDATE drafts SET content = ? WHERE rowid = ?"
-                               [content id]))]
+(defn update-draft [id ^String content]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)
+        num (await
+             (.write
+              (doto (.update db (.-drafts db))
+                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
+              (schema/DraftsCompanion
+               .content (drift/Value content)
+               .updatedAt (drift/Value (DateTime.now)))))]
     num))
 
-(defn test-draft [ctx]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        sql (str "SELECT COUNT (*) AS CNTREC
-                   FROM pragma_table_info (?)
-                   WHERE name= ?")
-        result1 (await (.rawQuery db sql ["draft_info" "status"]))
-        result2 (await (.rawQuery db sql ["draft_info" "flag"]))]
-    (-> m/ScaffoldMessenger
-        (.of ctx)
-        (.showSnackBar (m/SnackBar .content (m/Text (str " result1 " result1 " result2 = " result2)))))))
-
-(defn test-table-exits [ctx]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        result (await (.rawQuery db "SELECT name FROM sqlite_master WHERE type='table' AND name='drafts';"))]
-    (-> m/ScaffoldMessenger
-        (.of ctx)
-        (.showSnackBar (m/SnackBar .content (m/Text (str result)))))))
-
 (defn flag-draft [id]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        num (await (.rawUpdate db
-                               "UPDATE draft_info SET flag = 1 WHERE rowid = ?"
-                               [id]))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)
+        num (await
+             (.write
+              (doto (.update db (.-drafts db))
+                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
+              (schema/DraftsCompanion .flag (drift/Value true))))]
     num))
 
 (defn unflag-draft [id]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        num (await (.rawUpdate db
-                               "UPDATE draft_info SET flag = 0 WHERE rowid = ?"
-                               [id]))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)
+        num (await
+             (.write
+              (doto (.update db (.-drafts db))
+                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
+              (schema/DraftsCompanion .flag (drift/Value false))))]
     num))
 
 (defn recycle-draft [id]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        num (await (.rawUpdate db
-                               "UPDATE draft_info SET status = -1 WHERE rowid = ?"
-                               [id]))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)
+        num (await
+             (.write
+              (doto (.update db (.-drafts db))
+                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
+              (schema/DraftsCompanion .status (drift/Value -1))))]
     num))
 
 (defn archive-draft [id]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        num (await (.rawUpdate db
-                               "UPDATE draft_info SET status = 1 WHERE rowid = ?"
-                               [id]))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)
+        num (await
+             (.write
+              (doto (.update db (.-drafts db))
+                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
+              (schema/DraftsCompanion .status (drift/Value 1))))]
     num))
 
 (defn inbox-draft [id]
-  (let [^sqf/Database db (await (sql/initialize-db))
-        num (await (.rawUpdate db
-                               "UPDATE draft_info SET status = 0 WHERE rowid = ?"
-                               [id]))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)
+        num (await
+             (.write
+              (doto (.update db (.-drafts db))
+                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
+              (schema/DraftsCompanion .status (drift/Value 0))))]
     num))
   
-(defn list-drafts [offset tag-in-ids tag-out-ids
+(defn list-drafts [tag-in-ids tag-out-ids
                    flag status]
-  (let [^sqf/Database db (await (sql/initialize-db))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)]
     (await
-     (.rawQuery
-      db
-      (str
-       "select a.*, b.content, b.rowid as id
-       from draft_info a 
-          left join drafts b on a.draft_id = b.rowid 
+     (.get
+      (.customSelect
+       db
+       (str
+        "select *
+          from drafts a 
           where 1 = 1 "
-       (cond
-         (and (empty? tag-in-ids)
-              (empty? tag-out-ids))
-         ""
+        (cond
+          (and (empty? tag-in-ids)
+               (empty? tag-out-ids))
+          ""
 
-         (and (not-empty tag-in-ids) (not-empty tag-out-ids))
-         (str
-          " and draft_id in 
+          (and (not-empty tag-in-ids) (not-empty tag-out-ids))
+          (str
+           " and id in 
              (select draft_id from draft_tags 
                 where tag_id in "
-          (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
-          ")"
-          " and draft_id not in 
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
+           ")"
+           " and id not in 
              (select draft_id from draft_tags 
                 where tag_id in "
-          (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
-          ")")
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
+           ")")
 
-         (not-empty tag-in-ids)
-         (str
-          " and draft_id in 
+          (not-empty tag-in-ids)
+          (str
+           " and id in 
              (select draft_id from draft_tags 
                 where tag_id in "
-          (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
-          ")")
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
+           ")")
 
-         (not-empty tag-out-ids)
-         (str
-          " and draft_id not in 
+          (not-empty tag-out-ids)
+          (str
+           " and id not in 
              (select draft_id from draft_tags 
                 where tag_id in "
-          (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
-          ")"))
-       (if (and (number? flag) (= 1 flag))
-         " and a.flag = 1 "
-         " ")
-       (if (number? status)
-         (str " and a.status = " status " ")
-         " ")
-       "
-       order by a.updated_at desc
-       ;")))))
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
+           ")"))
+        (if (and (number? flag) (= 1 flag))
+          " and flag = 1 "
+          " ")
+        (if (number? status)
+          (str " and status = " status " ")
+          " ")
+        "
+       order by updated_at desc
+       ;"))))))
 
 (defn last-draft []
-  (let [^sqf/Database db (await (sql/initialize-db))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)]
     (await
-     (.rawQuery
-      db
-      "select a.*, b.content, b.rowid as id 
-       from draft_info a 
-          left join drafts b on a.draft_id = b.rowid 
-       order by a.draft_id desc
-       limit 1
-       ;"))))
+     (.get
+      (.customSelect
+       db
+       "select *
+        from drafts
+        order by created_at desc
+        limit 1
+        ;")))))
 
 (defn get-draft [id]
-  (let [^sqf/Database db (await (sql/initialize-db))]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)]
     (await
-     (.rawQuery
-      db
-      "select a.*, b.content, b.rowid as id 
-       from draft_info a 
-          left join drafts b on a.draft_id = b.rowid 
-       where b.rowid = ?
-       order by a.draft_id desc
-       limit 1
-       ;"
-      [id]))))
+     (.get
+      (.customSelect
+       db
+       "select *
+        from drafts a 
+        where id = ?
+        order by id desc
+        limit 1
+        ;"
+       .variables [(drift/Variable id)])))))
 
-(defn query-drafts [word tag-in-ids tag-out-ids offset
+(defn query-drafts [word tag-in-ids tag-out-ids
                     flag status]
-  ;; (dart:core/print (str "query-drafts services flag = " flag))
-  (let [^sqf/Database db (await (sql/initialize-db))
-        ;; Runtime error: unable to use function MATCH in the requested context
-        ids (->> (.rawQuery db
-                            "select rowid from drafts 
-                               where drafts match ?"
-                            [word])
-                 await
-                 (map #(get % "rowid")))
-        ids-q (str "(" (clojure.string/join ", " (map #(str %) ids)) ")")]
-    (if (empty? ids)
-      []
-      (await
-       (.rawQuery
-        db
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)]
+    (await
+     (.get
+      (.customSelect
+       db
+       (str
+        "select *
+          from drafts a 
+          where 1 = 1 "
+        (cond
+          (and (empty? tag-in-ids)
+               (empty? tag-out-ids))
+          ""
+
+          (and (not-empty tag-in-ids) (not-empty tag-out-ids))
+          (str
+           " and id in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
+           ")"
+           " and id not in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
+           ")")
+
+          (not-empty tag-in-ids)
+          (str
+           " and id in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
+           ")")
+
+          (not-empty tag-out-ids)
+          (str
+           " and id not in 
+             (select draft_id from draft_tags 
+                where tag_id in "
+           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
+           ")"))
+        (if (and (number? flag) (= 1 flag))
+          " and flag = 1 "
+          " ")
+        (if (number? status)
+          (str " and status = " status " ")
+          " ")
         (str
-         "select a.*, b.content 
-         from draft_info a 
-          left join drafts b on a.draft_id = b.rowid 
-         where draft_id in " ids-q
-         (cond
-           (and (empty? tag-in-ids)
-                (empty? tag-out-ids))
-           ""
-
-           (and (not-empty tag-in-ids) (not-empty tag-out-ids))
-           (str
-            " and draft_id in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
-            " and tag_id not in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
-            ")")
-
-           (not-empty tag-in-ids)
-           (str
-            " and draft_id in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-in-ids)) ")")
-            ")")
-
-           (not-empty tag-out-ids)
-           (str
-            " and draft_id in 
-             (select draft_id from draft_tags 
-                where tag_id not in "
-            (str "(" (clojure.string/join ", " (map #(str %) tag-out-ids)) ")")
-            ")"))
-
-         (if (number? flag)
-           (str " and a.flag = 1"))
-         (if (number? status)
-           (str " and a.status = " status))
-         "
-         order by a.updated_at desc
+         " and content like '%" word "%' ")
+        "
+         order by updated_at desc
          ;"))))))

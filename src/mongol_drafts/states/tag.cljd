@@ -2,47 +2,49 @@
   (:require
    ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.tag :as tag-service]
-   [mongol-drafts.states.draft :as draft-state]))
+   [mongol-drafts.states.draft :as draft-state]
+   [mongol-drafts.states.global :as gs]))
 
 (declare update-filtered-tags)
 
 (defn get-draft-tags [state id]
   (let [tags (await (tag-service/query-draft-tags id))] 
-    (swap! state assoc :draft-tags tags)))
+    (swap! state assoc :draft-tags (map (fn [x] (.-data x)) tags))))
 
-(defn add-draft-tag [state name]
-  (let [id  (await (tag-service/create-tag name))
-        draft-id (-> @state :draft (get "id"))
+(defn add-draft-tag [name]
+  (let [workspace-id (-> @gs/state :workspace :id)
+        id  (await (tag-service/create-tag workspace-id name))
+        draft-id (-> @gs/state :draft (get "id"))
         _ (await (tag-service/add-draft-tag draft-id id))]
-    (swap! state update :draft-tags concat
+    (swap! gs/state update :draft-tags concat
            [{"id" id "name" name "related_num" 1}])))
 
-(defn delete-draft-tag [state id]
-  (let [draft (:draft @state)
-        tags (:draft-tags @state)
+(defn delete-draft-tag [id]
+  (let [draft (:draft @gs/state)
+        tags (:draft-tags @gs/state)
         _ (await (tag-service/delete-draft-tag (:draft_id draft) id))]
-    (swap! state assoc :draft-tags 
+    (swap! gs/state assoc :draft-tags 
            (remove #(= id (get % "id")) tags))))
 
-(defn query-tags [state q]
+(defn query-tags [q]
   (let [result (await (tag-service/query-tags q))]
-    (swap! state assoc :tags result)
-    (update-filtered-tags state)))
+    (swap! gs/state assoc :tags result)
+    (update-filtered-tags)))
 
-(defn all-tags [state]
+(defn all-tags []
   (let [result (await (tag-service/all-tags))]
-    (swap! state assoc :tags result)
-    (update-filtered-tags state)))
+    (swap! gs/state assoc :tags (map #(.-data %) result))
+    (update-filtered-tags)))
 
-(defn update-filtered-tags [state]
-  (let [tag-in-ids (:filter-tags @state)
-        tag-out-ids (:omitted-tags @state)
-        tag-search (:tag-search @state)
-        tags (:tags @state)
+(defn update-filtered-tags []
+  (let [tag-in-ids (:filter-tags @gs/state)
+        tag-out-ids (:omitted-tags @gs/state)
+        tag-search (:tag-search @gs/state)
+        tags (:tags @gs/state)
         exclude-ids (concat (map #(get % "id") tag-in-ids)
                             (map #(get % "id") tag-out-ids))]
     
-    (swap! state assoc :filtered-tags
+    (swap! gs/state assoc :filtered-tags
            (cond->> tags
              (not-empty exclude-ids)
              (remove #(some #{(get % "id")} exclude-ids))
@@ -50,39 +52,35 @@
              (not-empty tag-search)
              (filter #(clojure.string/starts-with? (get % "name") tag-search))))))
 
-(defn add-filter-tag [state tag]
-  (swap! state update :filter-tags concat [tag])
-  (update-filtered-tags state)
-  (draft-state/query-drafts state (:draft-search @state) true))
+(defn add-filter-tag [tag]
+  (swap! gs/state update :filter-tags concat [tag])
+  (update-filtered-tags)
+  (draft-state/query-drafts (:draft-search @gs/state) true))
 
-(defn delete-filter-tag [state tag]
-  (swap! state assoc :filter-tags
-         (remove #(= (get % "id") (get tag "id")) (:filter-tags @state)))
-  (update-filtered-tags state)
-  (draft-state/query-drafts state (:draft-search @state) true))
+(defn delete-filter-tag [tag]
+  (swap! gs/state assoc :filter-tags
+         (remove #(= (get % "id") (get tag "id")) (:filter-tags @gs/state)))
+  (update-filtered-tags)
+  (draft-state/query-drafts (:draft-search @gs/state) true))
 
-(defn add-omitted-tag [state tag]
-  (swap! state update :omitted-tags concat [tag])
-  (update-filtered-tags state)
-  (draft-state/query-drafts state (:draft-search @state) true))
+(defn add-omitted-tag [tag]
+  (swap! gs/state update :omitted-tags concat [tag])
+  (update-filtered-tags)
+  (draft-state/query-drafts (:draft-search @gs/state) true))
 
-(defn delete-omitted-tag [state tag]
-  (swap! state assoc :omitted-tags
-         (remove #(= (get % "id") (get tag "id")) (:omitted-tags @state)))
-  (update-filtered-tags state)
-  (draft-state/query-drafts state (:draft-search @state) true))
+(defn delete-omitted-tag [tag]
+  (swap! gs/state assoc :omitted-tags
+         (remove #(= (get % "id") (get tag "id")) (:omitted-tags @gs/state)))
+  (update-filtered-tags)
+  (draft-state/query-drafts (:draft-search @gs/state) true))
 
-(defn clear-filter [state
-                    ^m/TextEditingController
-                    controller]
-  (swap! state assoc :omitted-tags [])
-  (swap! state assoc :filter-tags [])
-  (swap! state assoc :filtered-tags [])
-  (swap! state assoc :tag-search "")
-  (when (empty? (:tag-search @state))
-    (.clear controller))
-  (draft-state/query-drafts state (:draft-search @state) true))
+(defn clear-filter []
+  (swap! gs/state assoc :omitted-tags [])
+  (swap! gs/state assoc :filter-tags [])
+  (swap! gs/state assoc :filtered-tags [])
+  (swap! gs/state assoc :tag-search "")
+  (draft-state/query-drafts (:draft-search @gs/state) true))
 
-(defn update-tag-search [state content]
-  (swap! state assoc :tag-search content)
-  (update-filtered-tags state))
+(defn update-tag-search [content]
+  (swap! gs/state assoc :tag-search content)
+  (update-filtered-tags))

@@ -1,11 +1,10 @@
 (ns mongol-drafts.widgets.toolbar
   (:require
    ["package:flutter/material.dart" :as m]
-   [cljd.flutter.alpha2 :as f]
+   [cljd.flutter :as f]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
-   [mongol-drafts.states.history :as his-state]
    [mongol-drafts.states.selection :as selection-state]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.button-bar :as button]))
@@ -88,11 +87,13 @@
         .children
         [(toolbar-button
           (m/Icon (.redo m/Icons))
-          (fn [] (his-state/redo global-state/state text-controller)))
+          (fn []
+            ;; TODO: history redo
+            nil))
          (toolbar-button
           (m/Icon (.undo m/Icons))
           (fn []
-            (his-state/undo global-state/state text-controller)
+            ;; TODO history undo
             (dart:core/print "abca xxx")))
          (m/SizedBox .height 8)
          (toolbar-button
