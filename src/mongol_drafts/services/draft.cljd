@@ -6,19 +6,21 @@
    ["package:mongol_drafts/generated/electric/drift_schema.dart" :as drift-schema]
    ["package:electricsql_flutter/drivers/drift.dart" :as electric-drift]
    ["package:drift/drift.dart" :as drift]
-   [mongol-drafts.services.electric :as electric]))
+   [mongol-drafts.services.electric :as electric]
+   [mongol-drafts.services.pref :as pref]))
 
 (defn create-draft [wid ^String v]
   (let [^electric-drift/ElectricClient
         client @electric/elec
         ^schema/AppDatabase db (.-db client)
+        userid (await (pref/get-string "userid"))
         result (await
                 (.insertReturning
                  (.into db (.-drafts db))
                  (schema.DraftsCompanion/insert
                   .id (.v4 (uuid/Uuid))
                   .workspaceId wid
-                  .electricUserId "ae1bad8a-5480-449b-bf82-9fd30bcd27b6"
+                  .electricUserId userid
                   .content (drift/Value v)
                   .flag false
                   .status 0

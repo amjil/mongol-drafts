@@ -5,7 +5,8 @@
    ["package:mongol_drafts/generated/electric/drift_schema.dart" :as drift-schema]
    ["package:electricsql_flutter/drivers/drift.dart" :as electric-drift]
    ["package:drift/drift.dart" :as drift]
-   [mongol-drafts.services.electric :as electric]))
+   [mongol-drafts.services.electric :as electric]
+   [mongol-drafts.services.pref :as pref]))
 
 (declare query-tag-with-name)
 
@@ -14,7 +15,8 @@
         client @electric/elec
         ^schema/AppDatabase db (.-db client)
         result (await (query-tag-with-name v))
-        uuid (.v4 (uuid/Uuid))]
+        uuid (.v4 (uuid/Uuid))
+        userid (await (pref/get-string "userid"))]
     (if (empty? result)
       (do
         (await
@@ -25,7 +27,7 @@
           .variables [(drift/Variable uuid)
                       (drift/Variable wid)
                       (drift/Variable v)
-                      (drift/Variable "ae1bad8a-5480-449b-bf82-9fd30bcd27b6")
+                      (drift/Variable userid)
                       (drift/Variable 0)]))
         uuid)
       (-> result first .-data (get "id")))))
@@ -122,14 +124,15 @@
                 await)]
 
     (when (empty? result)
-      (await
-       (.customInsert
-        db
-        "INSERT INTO draft_tags (id, electric_user_id, draft_id, tag_id) 
-       VALUES (?, ?, ?, ?)"
-        .variables [(drift/Variable (.v4 (uuid/Uuid)))
-                    (drift/Variable "ae1bad8a-5480-449b-bf82-9fd30bcd27b6")
-                    (drift/Variable draft_id) (drift/Variable tag_id)]))
+      (let [userid (await (pref/get-string "userid"))]
+        (await
+         (.customInsert
+          db
+          "INSERT INTO draft_tags (id, electric_user_id, draft_id, tag_id) 
+           VALUES (?, ?, ?, ?)"
+          .variables [(drift/Variable (.v4 (uuid/Uuid)))
+                      (drift/Variable userid)
+                      (drift/Variable draft_id) (drift/Variable tag_id)])))
       (await
        (.customUpdate
         db

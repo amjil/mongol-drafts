@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS drafts(
     "status" smallint NOT NULL,
     created_at TIMESTAMP, 
     updated_at TIMESTAMP);
+    
+CREATE INDEX IF NOT EXISTS drafts_user_id ON drafts(electric_user_id);
 
 ALTER TABLE drafts ENABLE ELECTRIC;
 -- migrate:down
