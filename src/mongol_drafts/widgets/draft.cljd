@@ -52,7 +52,7 @@
        .child
        (m/Column
         .children
-        [(button-bar/topbar)
+        [(button-bar/topbar text-controller)
          (m/Expanded
           .child
           (m/Row
@@ -69,7 +69,6 @@
                .controller text-controller
                .onChanged (fn [x]
                             (draft-state/update-draft x))
-               .onTap (fn [] (draft-state/focus-on-draft))
                .decoration nil
                .maxLines 1000
                .autofocus true

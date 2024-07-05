@@ -13,10 +13,9 @@
     (counter-state/count-contents gs/state (get draft "content"))))
 
 (defn new-draft []
-  (let [result (await (draft-service/last-draft))
-        content (-> result first .-data (get "content"))]
+  (let [result (await (draft-service/last-draft))]
     (cond
-      (and (empty? content) (not-empty result))
+      (and (not-empty result) (empty? (-> result first .-data (get "content"))))
       (swap! gs/state assoc :draft
              (-> result last .-data))
 
@@ -54,9 +53,6 @@
                (concat (get-in @state [:drafts :contents]) (map (fn [x] (.-data x)) drafts)))))))
 
 (defn query-drafts [q has-filter]
-  ;; has-filter false query without the tag filters
-  ;;            true is query with the tag filters 
-  (swap! gs/state assoc :draft-search q)
   (if (empty? q)
     (let [;num (-> @state :draft :contents count)
           tag-in-ids (map #(get % "id") (:filter-tags @gs/state))
@@ -99,11 +95,12 @@
   (swap! gs/state assoc-in [:drafts :contents] []))
 
 ;;;;;
-(defn focus-on-draft []
+(defn focus-on-draft [controller]
   (swap! gs/state assoc :show-keyboard true)
   (when (true? (:tag-on-edit @gs/state))
     (swap! gs/state assoc :tag-on-edit false))
-
+  (let [text (-> @gs/state :draft (get "content"))]
+    (set! (.-text controller) text))
   (when-not (empty? (:keyboard/candidates-list @gs/state))
     (swap! gs/state assoc :keyboard/candidates-list [])))
 

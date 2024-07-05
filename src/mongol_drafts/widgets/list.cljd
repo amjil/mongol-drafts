@@ -33,7 +33,7 @@
                        (swap! global-state/state assoc :show-search-diaglog false)
                        (swap! global-state/state assoc :show-stacked-keyboard false))
                      (.pop navigator))
-                   (draft-state/focus-on-draft)
+                   (draft-state/focus-on-draft text-controller)
                    (tag-state/get-draft-tags global-state/state (-> contents (nth i) (get "id")))))
          (slidable/Slidable
           .key (m/ValueKey i)
@@ -41,10 +41,10 @@
           .endActionPane
           (slidable/ActionPane
            .motion (slidable/BehindMotion)
-           .dismissible (slidable/DismissiblePane
-                         .onDismissed
-                         (fn []
-                           (dart:core/print "slide")))
+          ;;  .dismissible (slidable/DismissiblePane
+          ;;                .onDismissed
+          ;;                (fn []
+          ;;                  (dart:core/print "slide")))
            .children
            [(if-not (= 3 (:draft/tabbar-index @global-state/state))
               (slidable/SlidableAction .onPressed
@@ -69,7 +69,11 @@
             (if (not= (:draft/tabbar-index @global-state/state) 3)
               (slidable/SlidableAction .onPressed
                                        (fn [context]
-                                         (draft-state/recycle-draft i)
+                                         (await (draft-state/recycle-draft i))
+                                         (let [id (-> @global-state/state :drafts :contents (nth i) (get "id"))]
+                                           (when (= id (-> @global-state/state :draft (get "id")))
+                                             (await (draft-state/new-draft))
+                                             (draft-state/focus-on-draft text-controller)))
                                          (dart:core/print "slide delete"))
                                        .backgroundColor (.red m/Colors)
                                        .foregroundColor (.white m/Colors)

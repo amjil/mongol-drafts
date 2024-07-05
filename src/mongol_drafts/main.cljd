@@ -31,11 +31,12 @@
      :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
            info (merge keyboard-options/keyboard-option
                        {:keyboard/key-cap-border-radius 6
-                        :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-                        :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
-                        :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                        :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                        :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
+                        ;; :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
+                        ;; :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
+                        ;; :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
+                        ;; :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
+                        ;; :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
+                        }
                        {:keyboard/width w})]
      :watch [{brightness :theme/brightness} global-state/state]
      :bind {:info info :state (atom keyboard-options/keyboard-state)}

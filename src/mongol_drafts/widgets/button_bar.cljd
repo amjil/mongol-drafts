@@ -23,7 +23,7 @@
       .padding (.all m/EdgeInsets 2)
       .child child)))))
 
-(defn topbar []
+(defn topbar [controller]
   (f/widget
    :context ctx
    :watch [{char-count :editor/chars
@@ -39,8 +39,8 @@
      (bar-button
       (m/Icon (.add m/Icons))
       (fn []
-        (draft-state/new-draft)
-        (draft-state/focus-on-draft)))
+        (await (draft-state/new-draft))
+        (draft-state/focus-on-draft controller)))
      (bar-button
       (m/Icon (.sell_outlined m/Icons))
       (fn []

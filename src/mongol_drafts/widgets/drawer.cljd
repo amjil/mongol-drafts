@@ -204,37 +204,7 @@
           [(mgl/MongolText
             "Filter"
             .style (m/TextStyle .fontWeight m.FontWeight/bold
-                                .fontSize 18))
-           (m/SizedBox .height 40)
-           (m/Container
-            .padding (.all m/EdgeInsets 2)
-            .decoration (m/BoxDecoration
-                         .borderRadius
-                         (.all m/BorderRadius (.circular m/Radius 6))
-                         .border
-                         (.all m/Border
-                               .width 1))
-            .child
-            (m/Column
-             .children
-             [(m/Container
-               .padding (.symmetric m/EdgeInsets .horizontal 2 .vertical 12)
-               .decoration (m/BoxDecoration
-                            ;; .color (-> m/Colors .blueGrey .-shade300)
-                            .borderRadius
-                            (.all m/BorderRadius (.circular m/Radius 6))
-                            .border
-                            (.all m/Border 
-                                  ;; .color m.Colors/blueGrey 
-                                  .width 1))
-               .child
-               (mgl/MongolText "All"))
-
-              (m/Container
-               .margin (.only m/EdgeInsets .top 8)
-               .padding (.symmetric m/EdgeInsets .horizontal 2 .vertical 12)
-               .child
-               (mgl/MongolText "Any"))]))]))
+                                .fontSize 18))]))
         (m/VerticalDivider)
         (m/Expanded
          .child
