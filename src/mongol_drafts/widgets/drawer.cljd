@@ -12,8 +12,7 @@
 
 (declare left-sub-drawer
          in-drawer-tag-search-field
-         in-drawer-draft-search-field
-         toolbar-button-normal)
+         in-drawer-draft-search-field)
 
 (defn left-drawer []
   (f/widget
@@ -357,27 +356,6 @@
               .borderSide (m/BorderSide
                            .width 0.8)
               .borderRadius (.circular m/BorderRadius 10))))))
-
-(defn toolbar-button-normal [child on-press]
-  (f/widget
-   :context ctx
-   :watch [{show-drawer-search :show-drawer-search} global-state/state]
-   (m/Material
-    .color (if (true? show-drawer-search)
-             (-> m.Colors/transparent)
-             (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
-    
-    .shape (m/CircleBorder
-            .side (m/BorderSide
-                   .color (-> m/Theme (.of ctx) .-iconTheme .-color)
-                   .width 2)))
-   (m/InkWell
-    .customBorder (m/CircleBorder)
-    .splashColor (-> m.Colors/blueGrey)
-    .onTap on-press)
-   (m/Padding
-    .padding (.all m/EdgeInsets 2)
-    .child child)))
     
 (defn right-drawer []
   (f/widget
