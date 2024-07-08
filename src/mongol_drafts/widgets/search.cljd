@@ -50,7 +50,7 @@
         (m/InkWell
          .customBorder (m/CircleBorder)
          .onTap (fn []
-                  (swap! global-state/state assoc :show-search-diaglog false)
+                  (swap! global-state/state assoc :show-search-dialog false)
                   (swap! global-state/state assoc :show-stacked-keyboard false))
          .child (m/Icon (.cancel_outlined m/Icons)
                         .size 36)))])

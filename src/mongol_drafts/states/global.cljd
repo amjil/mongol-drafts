@@ -10,7 +10,7 @@
     :show-stacked-keyboard false
     :show-drawer-search false
     :show-sub-drawer-search false
-    :show-search-diaglog false
+    :show-search-dialog false
     :show-system-keyboard false
     :tag-on-edit false
     :current-layout "mg"

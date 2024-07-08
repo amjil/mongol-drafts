@@ -77,7 +77,7 @@
 (defn clear-filter []
   (swap! gs/state assoc :omitted-tags [])
   (swap! gs/state assoc :filter-tags [])
-  (swap! gs/state assoc :filtered-tags [])
+  (swap! gs/state assoc :filtered-tags (-> @gs/state :tags))
   (swap! gs/state assoc :tag-search "")
   (draft-state/query-drafts (:draft-search @gs/state) true))
 

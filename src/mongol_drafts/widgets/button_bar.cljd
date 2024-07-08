@@ -58,10 +58,13 @@
      (bar-button
       (m/Icon (.search m/Icons))
       (fn []
-        (swap! global-state/state assoc :show-search-diaglog true)
+        (swap! global-state/state assoc :show-search-dialog true)
         (swap! global-state/state assoc :show-stacked-keyboard true)
         (swap! global-state/state assoc :show-keyboard false)))
-     (m/Icon (.view_sidebar_outlined m/Icons))])))
+     (bar-button
+      (m/Icon (.view_sidebar_outlined m/Icons))
+      (fn [] 
+        (swap! global-state/state assoc :show-search-dialog false)))])))
 
 
 

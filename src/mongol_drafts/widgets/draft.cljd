@@ -29,7 +29,7 @@
                    show-keyboard
                    show-stacked-keyboard
                    show-system-keyboard
-                   show-search-diaglog]
+                   show-search-dialog]
             candidates-list :keyboard/candidates-list}
            global-state/state
            visible control/visible]
@@ -109,7 +109,7 @@
             [(button-bar/keyboard-upper-bar)
              (keyboard/keyboard)])))))
        (m/Container))
-     (if (true? show-search-diaglog)
+     (if (true? show-search-dialog)
        (search/widget)
        (m/Container))
      (m/Positioned

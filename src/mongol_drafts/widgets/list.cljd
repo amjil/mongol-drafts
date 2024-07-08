@@ -28,9 +28,9 @@
          (m/GestureDetector
           .onTap (fn []
                    (draft-state/set-current-draft text-controller (-> contents (nth i) (get "id")))
-                   (if (true? (:show-search-diaglog @global-state/state))
+                   (if (true? (:show-search-dialog @global-state/state))
                      (do
-                       (swap! global-state/state assoc :show-search-diaglog false)
+                       (swap! global-state/state assoc :show-search-dialog false)
                        (swap! global-state/state assoc :show-stacked-keyboard false))
                      (.pop navigator))
                    (draft-state/focus-on-draft text-controller)
