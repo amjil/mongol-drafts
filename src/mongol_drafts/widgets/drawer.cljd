@@ -20,7 +20,8 @@
    :context ctx
    :watch [{filter-tags :filter-tags
             omitted-tags :omitted-tags
-            show-drawer-search :show-drawer-search} global-state/state]
+            show-drawer-search :show-drawer-search
+            draft-search :draft-search} global-state/state]
    :managed [^m/TextEditingController
              draft-search-controller (m/TextEditingController)]
    (m/Drawer
@@ -51,16 +52,33 @@
        (m/Spacer)
        (m/Row
         .children
-        [(toolbar-button-normal
-          (m/Icon (.search m/Icons)
-                  .size 18)
-          (fn []
-            (swap! global-state/state assoc :show-drawer-search
-                   (not (:show-drawer-search @global-state/state)))
-            (when (and
-                   (false? (:show-drawer-search @global-state/state))
-                   (true? (:show-stacked-keyboard @global-state/state)))
-              (swap! global-state/state assoc :show-stacked-keyboard false))))
+        [(f/widget
+          :context ctx
+          (m/Material
+           .color (if (or (true? show-drawer-search)
+                          (not-empty draft-search))
+                    (-> m/Theme (.of ctx) .-colorScheme .-outlineVariant)
+                    (-> m.Colors/transparent)
+                    )
+
+           .shape (m/CircleBorder
+                   .side (m/BorderSide
+                          .color (-> m/Theme (.of ctx) .-iconTheme .-color)
+                          .width 2)))
+          (m/InkWell
+           .customBorder (m/CircleBorder)
+           .splashColor (-> m.Colors/blueGrey)
+           .onTap (fn []
+                    (swap! global-state/state assoc :show-drawer-search
+                           (not (:show-drawer-search @global-state/state)))
+                    (when (and
+                           (false? (:show-drawer-search @global-state/state))
+                           (true? (:show-stacked-keyboard @global-state/state)))
+                      (swap! global-state/state assoc :show-stacked-keyboard false))))
+          (m/Padding
+           .padding (.all m/EdgeInsets 2)
+           .child (m/Icon (.search m/Icons)
+                          .size 18)))
          (m/SizedBox .width 20)
          (m/GestureDetector
           .onTap (fn []
@@ -194,8 +212,8 @@
        .crossAxisAlignment m.CrossAxisAlignment/start
        .children
        [(m/SizedBox .width 10)
-        (if (true? (:show-sub-drawer-search @global-state/state))
-          (in-drawer-tag-search-field)
+        (if (true? show-sub-drawer-search)
+          (in-drawer-tag-search-field tag-search)
           (m/Container))
         (m/Container
          .margin (.only m/EdgeInsets .top 6)
@@ -293,7 +311,9 @@
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
     .controller draft-search-controller
-    .onChanged (fn [x] (draft-state/query-drafts x false))
+    .onChanged (fn [x] 
+                 (draft-state/query-drafts x false)
+                 (swap! global-state/state assoc :draft-search x))
     .autofocus true
     .maxLines 1
     .onTap (fn []
@@ -308,9 +328,10 @@
                            .width 0.8)
               .borderRadius (.circular m/BorderRadius 10))))))
 
-(defn in-drawer-tag-search-field []
+(defn in-drawer-tag-search-field [text]
   (f/widget
    :context ctx
+   :managed [controller (m/TextEditingController .text text)]
    (m/Container
     .constraints
     (m/BoxConstraints
@@ -320,7 +341,8 @@
    (m/Padding
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
-    .onChanged (fn [x] 
+    .controller controller
+    .onChanged (fn [x]
                  (tag-state/update-tag-search x))
     .autofocus true
     .maxLines 1
@@ -344,6 +366,7 @@
     .color (if (true? show-drawer-search)
              (-> m.Colors/transparent)
              (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer))
+    
     .shape (m/CircleBorder
             .side (m/BorderSide
                    .color (-> m/Theme (.of ctx) .-iconTheme .-color)

@@ -79,6 +79,7 @@
   (swap! gs/state assoc :filter-tags [])
   (swap! gs/state assoc :filtered-tags (-> @gs/state :tags))
   (swap! gs/state assoc :tag-search "")
+  (swap! gs/state assoc :draft-search "")
   (draft-state/query-drafts (:draft-search @gs/state) true))
 
 (defn update-tag-search [content]
