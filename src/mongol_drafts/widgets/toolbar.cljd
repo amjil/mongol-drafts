@@ -6,6 +6,7 @@
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.selection :as selection-state]
+   [mongol-drafts.states.history :as history]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.button-bar :as button]))
 
@@ -60,10 +61,9 @@
                            .color 
                            (-> m/Theme (.of ctx) .-iconTheme .-color))))])])))
 
-(defn toolbar []
+(defn toolbar [controller]
   (f/widget
    :context ctx
-   :get [:keyboard/text-controller :info]
    (m/Container
     .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer)
     .height double/infinity)
@@ -88,26 +88,24 @@
         [(toolbar-button
           (m/Icon (.redo m/Icons))
           (fn []
-            ;; TODO: history redo
-            nil))
+            (history/redo controller)))
          (toolbar-button
           (m/Icon (.undo m/Icons))
           (fn []
-            ;; TODO history undo
-            (dart:core/print "abca xxx")))
+            (history/undo controller)))
          (m/SizedBox .height 8)
          (toolbar-button
           (m/Icon (.arrow_back_outlined m/Icons))
-          (fn [] (selection-state/cursor-up text-controller)))
+          (fn [] (selection-state/cursor-up controller)))
          (toolbar-button
           (m/Icon (.arrow_forward_outlined m/Icons))
-          (fn [] (selection-state/cursor-down text-controller)))
+          (fn [] (selection-state/cursor-down controller)))
          (toolbar-text-button
           (m/Icon (.arrow_back_outlined m/Icons))
-          (fn [] (selection-state/cursor-before-word text-controller)))
+          (fn [] (selection-state/cursor-before-word controller)))
          (toolbar-text-button
           (m/Icon (.arrow_forward_outlined m/Icons))
-          (fn [] (selection-state/cursor-after-word text-controller)))
+          (fn [] (selection-state/cursor-after-word controller)))
          (m/SizedBox .height 8)
          (toolbar-button-normal
           (m/Icon (.date_range_outlined m/Icons))
@@ -118,11 +116,11 @@
              global-state/state)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
-          (fn [] (selection-state/copy text-controller)))
+          (fn [] (selection-state/copy controller)))
          (toolbar-button-normal
           (m/Icon (.paste m/Icons))
-          (fn [] (selection-state/paste text-controller)))
+          (fn [] (selection-state/paste controller)))
          (toolbar-button-normal
           (m/Icon (.select_all m/Icons))
-          (fn [] (selection-state/select-all text-controller)))])))
+          (fn [] (selection-state/select-all controller)))])))
      (button/keyboard-close-button true)])))

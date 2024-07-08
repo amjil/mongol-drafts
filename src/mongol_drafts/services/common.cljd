@@ -1,0 +1,29 @@
+(ns mongol-drafts.services.common
+  (:require
+   ["package:connectivity_plus/connectivity_plus.dart" :as conn]
+   ["package:package_info_plus/package_info_plus.dart" :as pip]
+   ["package:device_info_plus/device_info_plus.dart" :as dip]))
+   
+(defn connectivity []
+  (let [result (await (.checkConnectivity (conn/Connectivity)))]
+    (not (= conn.ConnectivityResult/none result))))
+    
+(defn device-info []
+  (let [plugin (dip/DeviceInfoPlugin)
+        info (await (.-deviceInfo plugin))]
+    (.-data info)))
+    
+(defn device-id []
+  (let [info (await (device-info))]
+    (condp = (get info "systemName")
+      "iOS" (get info "identifierForVendor")
+
+      :else 
+      (get info "androidId"))))
+      
+(defn package-info []
+  (let [info (await (pip.PackageInfo/fromPlatform))]
+    {:app-name (.-appName info)
+     :package-name (.-packageName info)
+     :version (.-version info)
+     :buildNumber (.-buildNumber info)}))

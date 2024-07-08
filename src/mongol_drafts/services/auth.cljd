@@ -1,0 +1,62 @@
+(ns mongol-drafts.services.auth
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:flutter/widgets.dart" :as widgets]
+   ["package:http/http.dart" :as http]
+   ["dart:convert" :as convert]
+   ["dart:io" :as io]
+   [mongol-drafts.utils.util :as toast]
+   [mongol-drafts.utils.indicator :as indicator]
+   [mongol-drafts.utils.response :as response]
+   [mongol-drafts.services.env :as env]
+   [mongol-drafts.services.token :as token-service]
+   [mongol-drafts.services.common :as common-service]
+   [mongol-drafts.states.global :as gs]))
+
+(defn login [ctx ^widgets/NavigatorState navigator info success-fn]
+  (indicator/show-indicator ctx)
+  (try
+    (let [device-id (await (common-service/device-id))
+          result (await
+                  (http/post (Uri/http (env/get "base_url") "/api/auth/login")
+                             .headers {"Content-Type" "application/json; charset=UTF-8"}
+                             .body
+                             (convert/jsonEncode
+                              (assoc
+                               info "device_id" device-id))))]
+      (response/response-message
+       ctx
+       result
+       (fn [x]
+         (token-service/save-token (get x "token"))
+         (when-not (nil? success-fn)
+           (success-fn)))))
+    (catch io/SocketException e
+      (toast/show-toast ctx "Socket Exception")
+      (when (true? (:is-loading? @gs/state))
+        (swap! gs/state assoc :is-loading? false)
+        (-> m/Navigator (.of ctx) .pop)))))
+
+(defn signup [ctx ^widgets/NavigatorState navigator info login-screen]
+  (swap! gs/state assoc :is-loading? true)
+  (indicator/show-indicator ctx)
+  (if (not= (get info "password")
+            (get info "password_confirmation"))
+    (toast/show-toast ctx "Password confirmation")
+    (try
+      (let [result (await
+                    (http/post (Uri/http (env/get "base_url") "/api/auth/signup")
+                               .headers {"Content-Type" "application/json; charset=UTF-8"}
+                               .body
+                               (convert/jsonEncode
+                                info)))]
+        (response/response-message
+         ctx
+         result
+         (fn [_]
+           nil)))
+      (catch io/SocketException e
+        (toast/show-toast ctx "Socket Exception")
+        (when (true? (:is-loading? @gs/state))
+          (swap! gs/state assoc :is-loading? false)
+          (-> m/Navigator (.of ctx) .pop))))))

@@ -1,0 +1,29 @@
+(ns mongol-drafts.states.profile
+  (:require
+   [mongol-drafts.services.pref :as pref]
+   [mongol-drafts.states.global :as gs]))
+
+(def profile-keys
+  ;; 1 key 2 type 3 default value
+  [["in-app-keyboard" :bool true
+    "sync-data" :bool false]])
+
+(defn get-profile-setting [k]
+  (await
+   (pref/get-value {:key (first k) :type (second k)})))
+
+(defn set-profile-setting [k]
+  ;; k => {:key "xx" :type :string/:bool/.... :value xxx}
+  (await 
+   (pref/set-value k))
+  (swap! gs/state assoc-in [:profile (:key k)] (:value k)))
+   
+(defn prepopulate-profile-settings []
+  (doall
+   (map (fn [k]
+          (let [result (await (get-profile-setting k))]
+            (swap! gs/state assoc-in [:profile (first k)]
+                   (if (nil? result)
+                     (last k)
+                     result))))
+        profile-keys)))

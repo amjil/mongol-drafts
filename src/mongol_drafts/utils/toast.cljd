@@ -1,0 +1,19 @@
+(ns mongol-drafts.utils.toast
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   ["package:flutter_styled_toast/flutter_styled_toast.dart" :as styled-toast]))
+
+(defn show-toast [ctx msg]
+  (styled-toast/showToastWidget
+   (m/Container
+    .padding (m.EdgeInsets/all 18)
+    .decoration (m/BoxDecoration
+                 .borderRadius (.all m/BorderRadius (.circular m/Radius 20))
+                 .color m.Colors/blueAccent)
+    .child
+    (mgl/MongolText msg))
+   .context ctx
+   .reverseAnimation styled-toast.StyledToastAnimation/fade
+   .animation styled-toast.StyledToastAnimation/fade
+   .position styled-toast.StyledToastPosition/center))

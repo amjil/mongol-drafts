@@ -1,0 +1,26 @@
+(ns mongol-drafts.utils.indicator
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   ["package:flutter_styled_toast/flutter_styled_toast.dart" :as styled-toast]
+   [cljd.flutter :as f]))
+
+(defn show-indicator [ctx]
+  (m/showDialog
+   .context ctx
+   .barrierDismissible false
+   .builder (f/build
+             (f/widget
+              :context ctx
+              :get [m/Navigator]
+              (m/WillPopScope
+               .onWillPop ^:async (fn [] false)
+               .child (m/SimpleDialog
+                       .children
+                       [(m/Center
+                         .child (m/Column
+                                 .mainAxisSize m.MainAxisSize/min
+                                 .children [(m/Padding .padding (.only m/EdgeInsets .left 16 .top 16 .right 16)
+                                                       .child (m/CircularProgressIndicator))
+                                            (m/Padding .padding (.all m/EdgeInsets 16)
+                                                       .child (mgl/MongolText "ᠠᠴᠢᠶᠠᠯᠠᠵᠤ ᠪᠠᠢᠨ᠎ᠠ..."))]))]))))))

@@ -1,0 +1,82 @@
+(ns mongol-drafts.widgets.auth
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f]
+   [mongol-drafts.services.auth :as auth-service]
+   [notes-app.utils.toast :as toast]
+   [notes-app.states.global :as gs]))
+
+(declare form-field rounded-button)
+
+(defn login []
+  (f/widget
+   :context ctx
+   :let [w (-> m/MediaQuery (.of ctx) .-size .-width)]
+   :get [m/Navigator]
+   :managed [email-controller (m/TextEditingController)
+             password-controller (m/TextEditingController)]
+   (m/Column
+    .children
+    [(form-field email-controller "Email")
+     (m/SizedBox .height 10)
+     (form-field password-controller "Password")
+     (m/SizedBox .height 20)
+     (m/Row
+      .mainAxisAlignment m.MainAxisAlignment/spaceAround
+      .children
+      [(m/SizedBox .height 100
+                   .width (* 0.5 w)
+                   .child
+                   (m/GestureDetector
+                    .onTap (fn []
+                             (.pushNamed navigator "/signup")
+                             nil)
+                    .child
+                    (mgl/MongolRichText
+                     .text (m/TextSpan
+                            .text "Don't have an account?"
+                            .style (m/TextStyle .fontSize 16)
+                            .children [(m/TextSpan .text " Sign up"
+                                                   .style (m/TextStyle .fontSize 16))]))))
+       (rounded-button (fn [] (auth-service/login ctx
+                                                  navigator
+                                                  {"email" (.-text email-controller)
+                                                   "password" (.-text password-controller)}
+                                                  (fn []
+                                                    (swap! gs/state assoc :is-loading? false)
+                                                    (.popUntil navigator (widgets.ModalRoute/withName "/"))
+                                                    (toast/show-toast ctx "yessss"))))
+                       "Done" nil nil)
+       (rounded-button (fn [] (.popUntil navigator (widgets.ModalRoute/withName "/")))
+                       "Back" nil nil)])])))
+                                   
+
+(defn form-field [controller hint-text]
+  (m/TextFormField
+   .controller controller
+   .decoration
+   (m/InputDecoration
+    .focusedBorder
+    (m/OutlineInputBorder
+     .borderRadius (.circular m/BorderRadius 5)
+     .borderSide (m/BorderSide .width 3))
+    .enabledBorder (m/OutlineInputBorder
+                    .borderRadius (.circular m/BorderRadius 5)
+                    .borderSide
+                    (m/BorderSide))
+    .contentPadding (.all m/EdgeInsets 22)
+    .hintText hint-text
+    .hintStyle (m/TextStyle .fontSize 18))))
+
+(defn rounded-button [on-tap label bg-color text-color]
+  (m/InkWell
+   .onTap on-tap
+   .child (m/Chip
+           .label
+           (mgl/MongolText label
+                           .style (m/TextStyle
+                                   .color (if (nil? text-color) nil text-color)
+                                   .fontSize 16))
+           .backgroundColor (if (nil? bg-color) nil bg-color)
+           .labelPadding (.symmetric m/EdgeInsets .horizontal 5 .vertical 20))))

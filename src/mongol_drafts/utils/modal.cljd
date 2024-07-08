@@ -1,0 +1,21 @@
+(ns mongol-drafts.utils.modal
+  (:require
+   ["package:flutter/material.dart" :as m]
+   [cljd.flutter :as f]))
+
+(defn modal-bottom-sheet [^m/BuildContext ctx child]
+  (m/showModalBottomSheet
+   .context ctx
+   .isScrollControlled true
+   .shape (m/RoundedRectangleBorder
+           .borderRadius (m.BorderRadius/vertical .top (m.Radius/circular 20)))
+   .builder
+   (fn [^m/BuildContext context]
+     (f/widget
+      (m/FractionallySizedBox
+       .heightFactor 0.9)
+      (m/Scaffold)
+      .body
+      (m/Container)
+      (m/SafeArea .top false
+                  .child child)))))

@@ -2,6 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
+   ["package:undo_textfield/undo_textfield.dart" :as undo]
    [virtual-keyboard.keyboard :as keyboard]
    [virtual-keyboard.input-control :as control]
    [virtual-keyboard.keyboard-action :as keyboard-action]
@@ -22,7 +23,7 @@
    :get [:info]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          _ (draft-state/new-draft)]
-   :managed [^m/TextEditingController text-controller (m/TextEditingController)]
+   :managed [^undo/RedoTextEditController text-controller (undo/RedoTextEditController)]
    :bind {:text-controller text-controller}
    :watch [{:keys [tag-viewable
                    show-keyboard
@@ -46,6 +47,7 @@
             (draft-state/query-drafts (:draft-search @global-state/state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
+      .endDrawer (drawer/right-drawer)
       .body
       (m/SafeArea
       ;;  .bottom false
@@ -69,12 +71,13 @@
                .controller text-controller
                .onChanged (fn [x]
                             (draft-state/update-draft x))
+               .onTap (fn [] (swap! global-state/state assoc :show-keyboard true))
                .decoration nil
                .maxLines 1000
                .autofocus true
                .style (m/TextStyle .fontSize 18 .height 1.8))))
             (if (true? show-keyboard)
-              (toolbar/toolbar)
+              (toolbar/toolbar text-controller)
               (m/Container))]))
          (if (and (true? show-keyboard) (false? show-system-keyboard))
            (m/Container

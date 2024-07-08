@@ -1,0 +1,7 @@
+(ns mongol-drafts.states.history)
+
+(defn redo [controller]
+  (.redo controller))
+  
+(defn undo [controller]
+  (.undo controller))
