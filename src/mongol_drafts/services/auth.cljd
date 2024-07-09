@@ -1,11 +1,10 @@
 (ns mongol-drafts.services.auth
   (:require
    ["package:flutter/material.dart" :as m]
-   ["package:flutter/widgets.dart" :as widgets]
    ["package:http/http.dart" :as http]
    ["dart:convert" :as convert]
    ["dart:io" :as io]
-   [mongol-drafts.utils.util :as toast]
+   [mongol-drafts.utils.toast :as toast]
    [mongol-drafts.utils.indicator :as indicator]
    [mongol-drafts.utils.response :as response]
    [mongol-drafts.services.env :as env]
@@ -13,7 +12,7 @@
    [mongol-drafts.services.common :as common-service]
    [mongol-drafts.states.global :as gs]))
 
-(defn login [ctx ^widgets/NavigatorState navigator info success-fn]
+(defn login [ctx info success-fn]
   (indicator/show-indicator ctx)
   (try
     (let [device-id (await (common-service/device-id))
@@ -30,14 +29,15 @@
        (fn [x]
          (token-service/save-token (get x "token"))
          (when-not (nil? success-fn)
-           (success-fn)))))
+           (success-fn))
+         nil)))
     (catch io/SocketException e
       (toast/show-toast ctx "Socket Exception")
       (when (true? (:is-loading? @gs/state))
         (swap! gs/state assoc :is-loading? false)
         (-> m/Navigator (.of ctx) .pop)))))
 
-(defn signup [ctx ^widgets/NavigatorState navigator info login-screen]
+(defn signup [ctx info success-fn]
   (swap! gs/state assoc :is-loading? true)
   (indicator/show-indicator ctx)
   (if (not= (get info "password")
@@ -54,6 +54,8 @@
          ctx
          result
          (fn [_]
+           (when-not (nil? success-fn)
+             (success-fn))
            nil)))
       (catch io/SocketException e
         (toast/show-toast ctx "Socket Exception")

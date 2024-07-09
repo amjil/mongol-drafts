@@ -3,10 +3,12 @@
    ["package:flutter/material.dart" :as m]
    ["package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart" :as kv]
    [cljd.flutter :as f]
+   [mongol-drafts.widgets.profile :as profile]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.selection :as selection-state]
+   [mongol-drafts.utils.modal :as modal]
    [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
@@ -63,7 +65,8 @@
         (swap! global-state/state assoc :show-keyboard false)))
      (bar-button
       (m/Icon (.view_sidebar_outlined m/Icons))
-      (fn [] 
+      (fn []
+        (modal/modal-bottom-sheet ctx (profile/widget))
         (swap! global-state/state assoc :show-search-dialog false)))])))
 
 

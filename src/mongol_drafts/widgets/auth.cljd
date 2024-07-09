@@ -4,8 +4,8 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter :as f]
    [mongol-drafts.services.auth :as auth-service]
-   [notes-app.utils.toast :as toast]
-   [notes-app.states.global :as gs]))
+   [mongol-drafts.utils.toast :as toast]
+   [mongol-drafts.states.global :as gs]))
 
 (declare form-field rounded-button)
 
@@ -16,6 +16,8 @@
    :get [m/Navigator]
    :managed [email-controller (m/TextEditingController)
              password-controller (m/TextEditingController)]
+   (m/Padding 
+    .padding (m.EdgeInsets/all 14))
    (m/Column
     .children
     [(form-field email-controller "Email")
@@ -40,43 +42,31 @@
                             .children [(m/TextSpan .text " Sign up"
                                                    .style (m/TextStyle .fontSize 16))]))))
        (rounded-button (fn [] (auth-service/login ctx
-                                                  navigator
                                                   {"email" (.-text email-controller)
                                                    "password" (.-text password-controller)}
                                                   (fn []
                                                     (swap! gs/state assoc :is-loading? false)
-                                                    (.popUntil navigator (widgets.ModalRoute/withName "/"))
+                                                    (swap! gs/state assoc :profile-view-index 0)
                                                     (toast/show-toast ctx "yessss"))))
-                       "Done" nil nil)
-       (rounded-button (fn [] (.popUntil navigator (widgets.ModalRoute/withName "/")))
-                       "Back" nil nil)])])))
+                       "Done")
+       (rounded-button (fn []
+                         (swap! gs/state assoc :profile-view-index 0))
+                       "Back")])])))
                                    
-
 (defn form-field [controller hint-text]
   (m/TextFormField
    .controller controller
    .decoration
    (m/InputDecoration
-    .focusedBorder
-    (m/OutlineInputBorder
-     .borderRadius (.circular m/BorderRadius 5)
-     .borderSide (m/BorderSide .width 3))
-    .enabledBorder (m/OutlineInputBorder
-                    .borderRadius (.circular m/BorderRadius 5)
-                    .borderSide
-                    (m/BorderSide))
-    .contentPadding (.all m/EdgeInsets 22)
     .hintText hint-text
-    .hintStyle (m/TextStyle .fontSize 18))))
+    .hintStyle (m/TextStyle .fontSize 14))))
 
-(defn rounded-button [on-tap label bg-color text-color]
+(defn rounded-button [on-tap label]
   (m/InkWell
    .onTap on-tap
    .child (m/Chip
            .label
            (mgl/MongolText label
                            .style (m/TextStyle
-                                   .color (if (nil? text-color) nil text-color)
                                    .fontSize 16))
-           .backgroundColor (if (nil? bg-color) nil bg-color)
            .labelPadding (.symmetric m/EdgeInsets .horizontal 5 .vertical 20))))

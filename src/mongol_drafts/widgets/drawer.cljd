@@ -4,10 +4,8 @@
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter :as f]
    [mongol-drafts.widgets.tabbar :as tabbar]
-   [mongol-drafts.widgets.settings :as settings]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.tag :as tag-state]
-   [mongol-drafts.states.profile :as profile-state]
    [mongol-drafts.states.draft :as draft-state]))
 
 (declare left-sub-drawer
@@ -356,85 +354,3 @@
               .borderSide (m/BorderSide
                            .width 0.8)
               .borderRadius (.circular m/BorderRadius 10))))))
-    
-(defn right-drawer []
-  (f/widget
-   :context ctx
-   :get [m/Navigator]
-   :watch [{token :user-token} global-state/state]
-   (m/Drawer
-    .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
-              40))
-   (m/Scaffold)
-   .body
-   (m/Container)
-   (m/SafeArea)
-   (m/Column
-    .crossAxisAlignment m.CrossAxisAlignment/start
-    .children [(m/IconButton
-                .onPressed (fn [] (-> m/Navigator (.of ctx) .pop))
-                .icon (m/Icon m.Icons/keyboard_backspace))
-               (m/SizedBox .height 10)
-               (m/Expanded
-                .child
-                (m/Row
-                 .children
-                 [(m/Column
-                   .mainAxisAlignment m.MainAxisAlignment/spaceBetween
-                   .children
-                   [(m/CircleAvatar
-                     .radius 30
-                     .backgroundColor m.Colors/blueAccent)
-                    (if (nil? token)
-                      (m/TextButton
-                       .style (m.TextButton/styleFrom
-                               .backgroundColor (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer)
-                               .minimumSize m.Size/zero
-                               .padding (m.EdgeInsets/symmetric .horizontal 8 .vertical 20)
-                               .tapTargetSize m.MaterialTapTargetSize/shrinkWrap)
-                       .child (m/Column
-                               .mainAxisAlignment m.MainAxisAlignment/spaceBetween
-                               .children
-                               [(m/Icon m.Icons/person
-                                        .color (-> m/Theme (.of ctx) .-colorScheme .-onPrimary))
-                                (m/SizedBox .height 20)
-                                (mgl/MongolText
-                                 "Login"
-                                 .style (m/TextStyle
-                                         .fontSize 20
-                                         .color (-> m/Theme (.of ctx) .-colorScheme .-onPrimary)))])
-                       .onPressed (fn [] (.pushNamed navigator "/login") nil))
-                      (m/GestureDetector
-                       .onTap (fn [] (.pushNamed navigator "/user") nil)
-                       .child
-                       (m/Container
-                        .padding (m.EdgeInsets/all 10)
-                        .margin (m.EdgeInsets/all 20)
-                        .decoration (m/BoxDecoration
-                                     .color (-> m/Theme (.of ctx) .-cardColor)
-                                     .borderRadius (m.BorderRadius/circular 15))
-                        .child
-                        (mgl/MongolText
-                         "Hello User"
-                         .style (m/TextStyle .fontSize 20
-                                             .fontWeight m.FontWeight/w600)))))])
-                  (m/Expanded
-                   .child
-                   (m/ListView
-                    .scrollDirection m.Axis/horizontal
-                    .children [(settings/settings-group
-                                [{:title "In-APP embeded virtual keyboard"
-                                  :trailing
-                                  (f/widget
-                                   :watch [{{v "in-app-keyboard" :or {v true}} :profile} global-state/state]
-                                   (m/RotatedBox
-                                    .quarterTurns 1)
-                                   (m/Switch
-                                    .activeColor m.Colors/blueAccent
-                                    .value v
-                                    .onChanged (fn [b]
-                                                 (profile-state/set-profile-setting {:key "in-app-keyboard" :type :bool :value b}))))}])
-                               (settings/settings-group
-                                [{:title "About"
-                                  :on-tap (fn [] (dart:core/print "about"))}
-                                 {:title "License"}])]))]))])))

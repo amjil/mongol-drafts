@@ -47,7 +47,6 @@
             (draft-state/query-drafts (:draft-search @global-state/state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
-      .endDrawer (drawer/right-drawer)
       .body
       (m/SafeArea
       ;;  .bottom false
