@@ -1,0 +1,32 @@
+(ns mongol-drafts.utils.request
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["dart:convert" :as convert]
+   ["dart:io" :as io]
+   ["package:http/http.dart" :as http]
+   [mongol-drafts.utils.indicator :as indicator]
+   [mongol-drafts.utils.toast :as toast]
+   [mongol-drafts.services.env :as env]))
+   
+(defn http-post [url info]
+  (http/post (Uri/http (env/get "base_url") url)
+             .headers {"Content-Type" "application/json; charset=UTF-8"}
+             .body
+             (convert/jsonEncode
+              info)))
+
+(defn request [ctx url info success-fn]
+  (indicator/show-indicator ctx)
+  (try
+    (let [result (await
+                  (http-post url info))]
+      (-> m/Navigator (.of ctx .rootNavigator true) .pop)
+      (let [response-body (convert/jsonDecode (.-body result))]
+        (when (not= 200 (.-statusCode result))
+          (dart:core/print response-body))
+        (if (not= 200 (.-statusCode result))
+          (toast/show-toast ctx (get-in response-body ["data" "message"]))
+          (success-fn response-body))))
+    (catch io/SocketException e
+      (-> m/Navigator (.of ctx .rootNavigator true) .pop)
+      (toast/show-toast ctx "Socket Exception"))))

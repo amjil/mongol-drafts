@@ -2,6 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
+   ["package:flutter_dotenv/flutter_dotenv.dart" :as dotenv]
    [virtual-keyboard.input-control :as control]
    [virtual-keyboard.options :as keyboard-options]
    [cljd.flutter :as f]
@@ -12,6 +13,7 @@
 
 (defn main []
   (m.WidgetsFlutterBinding/ensureInitialized)
+  (await (.load dotenv/dotenv .fileName "assets/.env"))
   (let [window (-> m/WidgetsBinding .instance .-window)]
     (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))
     (set!

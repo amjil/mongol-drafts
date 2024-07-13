@@ -92,4 +92,5 @@
    (m/SafeArea)
    (case profile-view-index
      0 (default-view)
-     1 (auth/login))))
+     1 (auth/login)
+     2 (auth/signup))))

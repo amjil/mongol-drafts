@@ -19,8 +19,13 @@
    (m/Padding 
     .padding (m.EdgeInsets/all 14))
    (m/Column
+    .crossAxisAlignment m.CrossAxisAlignment/start
     .children
-    [(form-field email-controller "Email")
+    [(m/IconButton
+      .onPressed (fn [] (-> m/Navigator (.of ctx) .pop))
+      .icon (m/Icon m.Icons/close))
+     (m/SizedBox .height 10)
+     (form-field email-controller "Email")
      (m/SizedBox .height 10)
      (form-field password-controller "Password")
      (m/SizedBox .height 20)
@@ -32,7 +37,7 @@
                    .child
                    (m/GestureDetector
                     .onTap (fn []
-                             (.pushNamed navigator "/signup")
+                             (swap! gs/state assoc :profile-view-index 2)
                              nil)
                     .child
                     (mgl/MongolRichText
@@ -48,6 +53,58 @@
                                                     (swap! gs/state assoc :is-loading? false)
                                                     (swap! gs/state assoc :profile-view-index 0)
                                                     (toast/show-toast ctx "yessss"))))
+                       "Done")
+       (rounded-button (fn []
+                         (swap! gs/state assoc :profile-view-index 0))
+                       "Back")])])))
+                       
+(defn signup []
+  (f/widget
+   :context ctx
+   :let [w (-> m/MediaQuery (.of ctx) .-size .-width)]
+   :managed [email-controller (m/TextEditingController)
+             name-controller (m/TextEditingController)
+             password-controller (m/TextEditingController)]
+   (m/Padding 
+    .padding (m.EdgeInsets/all 14))
+   (m/Column
+    .crossAxisAlignment m.CrossAxisAlignment/start
+    .children
+    [(m/IconButton
+      .onPressed (fn [] (-> m/Navigator (.of ctx) .pop))
+      .icon (m/Icon m.Icons/close))
+     (m/SizedBox .height 10)
+     (form-field name-controller "Name")
+     (m/SizedBox .height 10)
+     (form-field email-controller "Email")
+     (m/SizedBox .height 10)
+     (form-field password-controller "Password")
+     (m/SizedBox .height 20)
+     (m/Row
+      .mainAxisAlignment m.MainAxisAlignment/spaceAround
+      .children
+      [(m/SizedBox .height 100
+                   .width (* 0.5 w)
+                   .child
+                   (m/GestureDetector
+                    .onTap (fn []
+                             (swap! gs/state assoc :profile-view-index 2)
+                             nil)
+                    .child
+                    (mgl/MongolRichText
+                     .text (m/TextSpan
+                            .text "Already have an account?"
+                            .style (m/TextStyle .fontSize 16)
+                            .children [(m/TextSpan .text " Login"
+                                                   .style (m/TextStyle .fontSize 16))]))))
+       (rounded-button (fn [] (auth-service/signup ctx
+                                                   {"email" (.-text email-controller)
+                                                    "name" (.-text name-controller)
+                                                    "password" (.-text password-controller)}
+                                                   (fn []
+                                                     (swap! gs/state assoc :is-loading? false)
+                                                     (swap! gs/state assoc :profile-view-index 1)
+                                                     (toast/show-toast ctx "success"))))
                        "Done")
        (rounded-button (fn []
                          (swap! gs/state assoc :profile-view-index 0))
