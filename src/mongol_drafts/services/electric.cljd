@@ -3,6 +3,7 @@
    ["package:uuid/uuid.dart" :as uuid]
    ["package:mongol_drafts/database/drift/database.dart" :as drift]
    ["package:mongol_drafts/database/electric.dart" :as electric]
+   ["package:electricsql_flutter/drivers/drift.dart" :as electric-drift]
    ["package:drift/drift.dart" :as dr]
    [mongol-drafts.states.global :as gs]
    [mongol-drafts.services.pref :as pref]))
@@ -12,9 +13,24 @@
 
 (def elec (atom nil))
 
+(defn apply-sync []
+  (let [^electric-drift/ElectricClient
+        db-electric @elec
+        ^drift/AppDatabase db (.-db db-electric)
+        token (get-in @gs/state [:profile "token"])]
+    (dart:core/print "------- apply-sync -------")
+    (await
+     (.connect db-electric token))
+    (let [shape (await (.syncTable db-electric (.-tags db)))]
+      (await (.-synced shape)))
+    (let [shape (await (.syncTable db-electric (.-drafts db)))]
+      (await (.-synced shape)))
+    (let [shape (await (.syncTable db-electric (.-draftTags db)))]
+      (await (.-synced shape)))))
+
 (defn set-electric []
   (let [d (await (init-db))
-        notes-electric (await (electric/startElectricDrift "drafts-app" d))
+        db-electric (await (electric/startElectricDrift "drafts-app" d))
         result (await
                 (.get
                  (.customSelect
@@ -39,13 +55,10 @@
       (let [workspace (-> result last .-data)]
         (swap! gs/state assoc :workspace {:id (get workspace "id")
                                           :name "default"})))
-    ;; (await
-    ;;  (.connect notes-electric auth-token))
-    ;; (let [shape (await (.syncTable notes-electric (.-tags d)))]
-    ;;   (await (.-synced shape)))
-    ;; (let [shape (await (.syncTable notes-electric (.-drafts d)))]
-    ;;   (await (.-synced shape)))
-    ;; (let [shape (await (.syncTable notes-electric (.-draftTags d)))]
-    ;;   (await (.-synced shape)))
-    ;; (reset! db d)
-    (reset! elec notes-electric)))
+    (reset! elec db-electric)
+    (dart:core/print "------- set-electric -------")
+    (dart:core/print (get-in @gs/state [:profile "token"]))
+    (when (not-empty (get-in @gs/state [:profile "token"]))
+      (apply-sync))
+    ))
+    

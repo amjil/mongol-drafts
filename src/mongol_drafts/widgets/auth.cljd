@@ -3,7 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter :as f]
-   [mongol-drafts.services.auth :as auth-service]
+   [mongol-drafts.states.auth :as auth]
    [mongol-drafts.utils.toast :as toast]
    [mongol-drafts.states.global :as gs]))
 
@@ -46,13 +46,9 @@
                             .style (m/TextStyle .fontSize 16)
                             .children [(m/TextSpan .text " Sign up"
                                                    .style (m/TextStyle .fontSize 16))]))))
-       (rounded-button (fn [] (auth-service/login ctx
+       (rounded-button (fn [] (auth/login ctx
                                                   {"email" (.-text email-controller)
-                                                   "password" (.-text password-controller)}
-                                                  (fn []
-                                                    (swap! gs/state assoc :is-loading? false)
-                                                    (swap! gs/state assoc :profile-view-index 0)
-                                                    (toast/show-toast ctx "yessss"))))
+                                                   "password" (.-text password-controller)}))
                        "Done")
        (rounded-button (fn []
                          (swap! gs/state assoc :profile-view-index 0))
@@ -97,14 +93,11 @@
                             .style (m/TextStyle .fontSize 16)
                             .children [(m/TextSpan .text " Login"
                                                    .style (m/TextStyle .fontSize 16))]))))
-       (rounded-button (fn [] (auth-service/signup ctx
-                                                   {"email" (.-text email-controller)
-                                                    "name" (.-text name-controller)
-                                                    "password" (.-text password-controller)}
-                                                   (fn []
-                                                     (swap! gs/state assoc :is-loading? false)
-                                                     (swap! gs/state assoc :profile-view-index 1)
-                                                     (toast/show-toast ctx "success"))))
+       (rounded-button (fn []
+                         (auth/signup ctx
+                                      {"email" (.-text email-controller)
+                                       "name" (.-text name-controller)
+                                       "password" (.-text password-controller)}))
                        "Done")
        (rounded-button (fn []
                          (swap! gs/state assoc :profile-view-index 0))

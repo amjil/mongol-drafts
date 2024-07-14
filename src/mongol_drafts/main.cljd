@@ -9,11 +9,13 @@
    [mongol-drafts.services.electric :as db]
    [mongol-drafts.widgets.draft :as draft]
    [mongol-drafts.widgets.theme :as theme]
+   [mongol-drafts.states.profile :as profile]
    [mongol-drafts.states.global :as global-state]))
 
 (defn main []
   (m.WidgetsFlutterBinding/ensureInitialized)
   (await (.load dotenv/dotenv .fileName "assets/.env"))
+  (profile/prepopulate-profile-settings)
   (let [window (-> m/WidgetsBinding .instance .-window)]
     (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))
     (set!

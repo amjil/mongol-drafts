@@ -1,0 +1,23 @@
+(ns mongol-drafts.states.auth
+  (:require
+   [mongol-drafts.services.auth :as service]
+   [mongol-drafts.utils.toast :as toast]
+   [mongol-drafts.states.global :as gs]
+   [mongol-drafts.states.profile :as profile]))
+
+(defn login [ctx info]
+  (service/login ctx info
+                 (fn [x]
+                   (toast/show-toast ctx (get x "message"))
+                   (swap! gs/state assoc :profile-view-index 0)
+                   (let [username (get x "name")
+                         token (get x "token")]
+                     (profile/set-profile-setting {:key "token" :type :string :value token})
+                     (profile/set-profile-setting {:key "user-name" :type :string :value username})))))
+                   
+(defn signup [ctx info]
+  (service/signup ctx info
+                  (fn []
+                    (swap! gs/state assoc :is-loading? false)
+                    (swap! gs/state assoc :profile-view-index 1)
+                    (toast/show-toast ctx "success"))))
