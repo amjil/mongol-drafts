@@ -7,7 +7,7 @@
                    success-fn))
 
 (defn signup [ctx info success-fn]
-  (request/request ctx "/api/sign" info success-fn))
+  (request/request ctx "/api/signup" info success-fn))
   
 (defn send-mail [ctx info success-fn]
   (request/request ctx "/api/send_mail" info success-fn))

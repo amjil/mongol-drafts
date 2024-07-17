@@ -1,0 +1,53 @@
+(ns mongol-drafts.desktop.widgets.settings
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f]))
+
+(declare settings-item)
+
+(defn settings-group [items]
+  (f/widget
+   :context ctx
+   (m/Container
+    .margin (m.EdgeInsets/only .left 20)
+    .decoration (m/BoxDecoration
+                 .color (-> m/Theme (.of ctx) .-cardColor)
+                 .borderRadius (m.BorderRadius/circular 15))
+    .child (m.ListView/separated
+            .scrollDirection m.Axis/horizontal
+            .separatorBuilder (fn [context i]
+                                (m/VerticalDivider))
+            .itemCount (count items)
+            .itemBuilder (fn [context i]
+                           (settings-item (nth items i)))
+            .shrinkWrap true
+            .padding m.EdgeInsets/zero
+            .physics (m/ScrollPhysics)))))
+                        
+(defn settings-item-rect [item]
+  (f/widget
+   
+   (m/ClipRRect
+    .borderRadius (m.BorderRadius/circular 15))
+   (mgl/MongolListTile
+    .leading (if (nil? (:leading item))
+               nil
+               (m/Padding
+                .padding (m.EdgeInsets/all 5)
+                .child
+                (m/Icon (:leading item))))
+    .title (mgl/MongolText (:title item))
+    .subtitle nil
+    .trailing (if (:trailing item)
+                (:trailing item)
+                nil))))
+                
+(defn settings-item [item]
+  (if (nil? (:on-tap item))
+    (settings-item-rect item)
+    (m/GestureDetector
+     .onTap (fn [] 
+              ((:on-tap item)))
+     .child (settings-item-rect item))))
+

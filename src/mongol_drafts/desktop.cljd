@@ -1,0 +1,30 @@
+(ns mongol-drafts.desktop
+  (:require
+   ["package:flutter/material.dart" :as m]
+   [cljd.flutter :as f]
+   [mongol-drafts.desktop.screens.home :as home]
+   [mongol-drafts.desktop.screens.profile :as profile]
+   [mongol-drafts.desktop.screens.search :as search]
+   [mongol-drafts.desktop.screens.drafts :as drafts]
+   [mongol-drafts.desktop.screens.login :as login]
+   [mongol-drafts.desktop.screens.signup :as signup]
+   [mongol-drafts.desktop.screens.reset-password :as reset-password]
+   [mongol-drafts.states.draft :as draft-state]))
+
+(defn app []
+  (draft-state/new-draft)
+  (f/widget
+   (m/MaterialApp
+    ;; .theme (.copyWith (.dark m/ThemeData))
+    .theme (m/ThemeData
+            .brightness m.Brightness/dark
+            .fontFamily "MongolianBaiZheng")
+    .debugShowCheckedModeBanner false
+    .initialRoute "/"
+    .routes {"/"          (fn ^m/Widget [_] (home/screen))
+             "/drafts" (fn ^m/Widget [_] (drafts/screen))
+             "/login" (fn ^m/Widget [_] (login/screen))
+             "/signup" (fn ^m/Widget [_] (signup/screen))
+             "/reset_password" (fn ^m/Widget [_] (reset-password/screen))
+             "/search" (fn ^m/Widget [_] (search/screen))
+             "/profile" (fn ^m/Widget [_] (profile/screen))})))

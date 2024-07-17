@@ -1,0 +1,61 @@
+(ns mongol-drafts.desktop.screens.login
+  (:require 
+   ["package:flutter/material.dart" :as m]
+   ["package:flutter/widgets.dart" :as widgets]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f]
+   [mongol-drafts.desktop.widgets.auth :as auth-widget]
+   [mongol-drafts.services.auth :as auth-service]
+   [mongol-drafts.states.profile :as profile]
+   [mongol-drafts.utils.toast :as toast]))
+
+(defn screen []
+  (f/widget
+   :context ctx
+   :get {navigator m/Navigator
+         {{primary-color .-primary} .-colorScheme} m/Theme}
+   :managed [email-controller (m/TextEditingController)
+             password-controller (m/TextEditingController)]
+   (m/Scaffold)
+   .body
+   (m/Padding
+    .padding (m.EdgeInsets/only .top 40))
+   (m/Center)
+   (m/Container
+    .width 400)
+   (m/Padding
+    .padding (.all m/EdgeInsets 20))
+   (m/Column
+    .children
+    [(auth-widget/field email-controller "Email")
+     (m/SizedBox .height 25)
+     (auth-widget/field  password-controller "Password")
+     (m/SizedBox .height 40)
+     (f/widget
+      (m/Container .height 100)
+      (m/Row
+       .children
+       [(m/GestureDetector
+         .onTap (fn []
+                  (.pushNamed navigator "/signup")
+                  nil)
+         .child
+         (mgl/MongolRichText
+          .text (m/TextSpan
+                 .text "Don't have an account?"
+                 .style (m/TextStyle .fontSize 16)
+                 .children [(m/TextSpan .text " Sign up"
+                                        .style (m/TextStyle .color primary-color
+                                                            .fontSize 16))])))
+        (auth-widget/rounded-button (fn [] (auth-service/login
+                                            ctx
+                                            {"email" (.-text email-controller)
+                                             "password" (.-text password-controller)}
+                                            (fn [x]
+                                              (toast/show-toast ctx (get x "message"))
+                                              (.popUntil navigator (widgets.ModalRoute/withName "/"))
+                                              (let [username (get x "name")
+                                                    token (get x "token")]
+                                                (profile/set-profile-setting {:key "token" :type :string :value token})
+                                                (profile/set-profile-setting {:key "user-name" :type :string :value username})))))
+                                    "Done")]))])))

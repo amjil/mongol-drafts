@@ -1,0 +1,172 @@
+(ns mongol-drafts.desktop.widgets.tag
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f]
+   [mongol-drafts.states.tag :as tag-state]
+   [mongol-drafts.states.global :as gs]))
+   
+(defn filtered-tag [tag]
+  (m/GestureDetector
+   .onTap (fn []
+            (when-not (= "Any" (get tag "name"))
+              (tag-state/delete-filter-tag tag)))
+   .child
+   (m/Padding
+    .padding (.all m/EdgeInsets 10)
+    .child
+    (m/Column
+     .children [(m/Icon (.sell_rounded m/Icons)
+                        .size 16)
+                (m/SizedBox .height 4)
+                (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
+
+(defn omitted-tag [state tag]
+  (m/GestureDetector
+   .onTap (fn []
+            (when-not (= "none" (get tag "name"))
+              (tag-state/delete-omitted-tag tag)))
+   .child
+   (m/Padding
+    .padding (.all m/EdgeInsets 10)
+    .child
+    (m/Column
+     .children [(m/Icon (.do_disturb_alt m/Icons)
+                        .size 16)
+                (m/SizedBox .height 4)
+                (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
+
+(defn widget []
+;;   (f/widget
+;;    (m/Text "TAG"))
+  (f/widget
+   :context ctx
+   :watch [{filter-tags :filter-tags
+            omitted-tags :omitted-tags
+            filtered-tags :filtered-tags
+            tag-search :tag-search
+            show-sub-drawer-search :show-sub-drawer-search} gs/state]
+   (m/Column
+    .children
+    [(m/Row
+      .mainAxisAlignment m.MainAxisAlignment/end
+      .children
+      [(f/widget
+        (m/Material
+         .color (if (or (not-empty tag-search)
+                        (true? show-sub-drawer-search))
+                  (-> m/Theme (.of ctx) .-colorScheme .-outlineVariant)
+                  (-> m.Colors/transparent))
+         .shape (m/CircleBorder
+                 .side (m/BorderSide
+                        .color (-> m/Theme (.of ctx) .-iconTheme .-color)
+                        .width 2)))
+        (m/InkWell
+         .customBorder (m/CircleBorder)
+         .onTap (fn []
+                  (swap! gs/state assoc :show-sub-drawer-search
+                         (not (:show-sub-drawer-search @gs/state)))
+                  (when (and
+                         (false? show-sub-drawer-search)
+                         (true? (:show-stacked-keyboard @gs/state)))
+                    (swap! gs/state assoc :show-stacked-keyboard false))))
+        (m/Padding
+         .padding (.all m/EdgeInsets 2)
+         .child (m/Icon (.search m/Icons)
+                        .size 18)))
+
+       (m/SizedBox .width 20)
+       (m/GestureDetector
+        .onTap (fn []
+                 (tag-state/clear-filter))
+        .child
+        (m/Icon (.cancel_outlined m/Icons)))
+       (m/SizedBox .width 20)
+       (m/Icon (.pending_outlined m/Icons))
+       (m/SizedBox .width 10)])
+     (m/Divider)
+     (m/Expanded
+      .child
+      (m/Row
+       .crossAxisAlignment m.CrossAxisAlignment/start
+       .children
+       [(m/SizedBox .width 10)
+        (m/Container
+         .margin (.only m/EdgeInsets .top 6)
+         .child
+         (m/Column
+          .mainAxisAlignment m.MainAxisAlignment/spaceBetween
+          .children
+          [(mgl/MongolText
+            "Filter"
+            .style (m/TextStyle .fontWeight m.FontWeight/bold
+                                .fontSize 18))]))
+        (m/VerticalDivider)
+        (m/Expanded
+         .child
+         (m/Column
+          .children
+          [(m/Expanded
+            .flex 2
+            .child
+            (m/CustomScrollView
+             .scrollDirection m/Axis.horizontal
+             .slivers
+             [(m/SliverFillRemaining
+               .hasScrollBody false
+               .child
+               (m/Row
+                .crossAxisAlignment m/CrossAxisAlignment.stretch
+                .children
+                [(m/Container
+                  .child
+                  (m/Row
+                   .crossAxisAlignment m/CrossAxisAlignment.start
+                   .children
+                   (if (empty? filter-tags)
+                     [(filtered-tag {"name" "Any"})]
+                     (map #(filtered-tag %) filter-tags))))
+                 (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
+                 (m/Container
+                  .child
+                  (m/Row
+                   .crossAxisAlignment m/CrossAxisAlignment.start
+                   .children
+                   (if (empty? omitted-tags)
+                     [(omitted-tag gs/state {"name" "none"})]
+                     (map #(omitted-tag gs/state %)
+                          omitted-tags))))]))]))
+           (m/Divider)
+           (m/Expanded
+            .flex 4
+            .child
+            (m.ListView/separated
+             .separatorBuilder (fn [_ i] (m/VerticalDivider .width 1))
+             .scrollDirection m.Axis/horizontal
+             .padding (.fromLTRB m/EdgeInsets 8 20 8 8)
+             .itemCount (count filtered-tags)
+             .itemBuilder (fn [^m/BuildContext context i]
+                            (m/Container
+                             .constraints
+                             (m/BoxConstraints
+                              .maxWidth 40)
+                             .child
+                             (m/Padding
+                              .padding (.only m/EdgeInsets .left 10 .right 10)
+                              .child
+                              (m/Column
+                               .mainAxisAlignment m/MainAxisAlignment.spaceBetween
+                               .children
+                               [(m/Expanded
+                                 .child
+                                 (m/GestureDetector
+                                  .onTap (fn []
+                                           (tag-state/add-filter-tag (nth filtered-tags i)))
+                                  .child
+                                  (mgl/MongolText (get (nth filtered-tags i) "name") .style (m/TextStyle .fontSize 18))))
+                                (m/GestureDetector
+                                 .onTap (fn []
+                                          (tag-state/add-omitted-tag (nth filtered-tags i)))
+                                 .child
+                                 (m/Icon (.do_disturb_alt m/Icons)
+                                         .size 16))]))))))]))]))])))

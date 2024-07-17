@@ -1,0 +1,46 @@
+(ns mongol-drafts.desktop.screens.home
+  (:require 
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f] 
+   [mongol-drafts.desktop.screens.signup :as signup]
+   [mongol-drafts.desktop.widgets.menu :as menu]
+   [mongol-drafts.desktop.widgets.tagbar :as tagbar]
+   [mongol-drafts.states.draft :as draft-state]
+   [mongol-drafts.states.global :as gs]))
+   
+(defn screen []
+  (f/widget
+   :watch [{{token "token"} :profile} gs/state]
+   (cond
+     (empty? token)
+     (signup/screen)
+
+     :else
+     (f/widget
+      :get {{{primary-color .-primary} .-colorScheme} m/Theme}
+      :let [draft (:draft @gs/state)]
+      :managed [content-controller (m/TextEditingController .text (if (nil? draft) "" (get draft "content")))]
+      (m/Scaffold)
+      .body
+      (m/Padding
+       .padding (m.EdgeInsets/only .top 8 .bottom 8))
+      (m/Row
+       .children
+       [(menu/view)
+        (m/VerticalDivider .color primary-color)
+        (tagbar/tagbar)
+        (m/VerticalDivider .color primary-color)
+        (mgl/MongolTextField
+         .controller content-controller
+         .onChanged (fn [x]
+                      (draft-state/update-draft x))
+         .decoration (m/InputDecoration
+                      .isDense true
+                      .border (m/OutlineInputBorder
+                               .borderSide (m/BorderSide
+                                            .width 0.2)
+                               .borderRadius (.circular m/BorderRadius 4)))
+         .maxLines nil
+         .minLines 3
+         .style (m/TextStyle .fontSize 12))])))))

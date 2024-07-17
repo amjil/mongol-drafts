@@ -12,6 +12,11 @@
     (swap! gs/state assoc :draft draft)
     (counter-state/count-contents gs/state (get draft "content"))))
 
+(defn set-current-draft-without-controller [id]
+  (let [result (await (draft-service/get-draft id))
+        draft (-> result first .-data)]
+    (swap! gs/state assoc :draft draft)))
+
 (defn new-draft []
   (let [result (await (draft-service/last-draft))]
     (cond

@@ -59,6 +59,5 @@
     (dart:core/print "------- set-electric -------")
     (dart:core/print (get-in @gs/state [:profile "token"]))
     (when (not-empty (get-in @gs/state [:profile "token"]))
-      (apply-sync))
-    ))
+      (apply-sync))))
     

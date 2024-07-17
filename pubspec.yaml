@@ -51,6 +51,9 @@ dependencies:
   adaptive_theme: ^3.6.0
   undo_textfield: ^0.0.7
   package_info_plus: ^8.0.0
+  flutter_context_menu:
+    git:
+      url: https://github.com/amjil/flutter_context_menu.git
     
   drift: 2.18.0
   sqlite3_flutter_libs: ^0.5.23
