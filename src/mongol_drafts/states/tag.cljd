@@ -22,8 +22,8 @@
 (defn delete-draft-tag [id]
   (let [draft (:draft @gs/state)
         tags (:draft-tags @gs/state)
-        _ (await (tag-service/delete-draft-tag (:draft_id draft) id))]
-    (swap! gs/state assoc :draft-tags 
+        _ (await (tag-service/delete-draft-tag (get draft "id") id))]
+    (swap! gs/state assoc :draft-tags
            (remove #(= id (get % "id")) tags))))
 
 (defn query-tags [q]

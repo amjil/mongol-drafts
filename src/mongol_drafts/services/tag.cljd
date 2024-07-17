@@ -147,7 +147,7 @@
         num (->
              (.customSelect db "SELECT related_num as num FROM tags
                             WHERE id = ?"
-                            .variables [tag_id])
+                            .variables [(drift/Variable tag_id)])
              .getSingle
              await
              .-data

@@ -18,16 +18,15 @@
     .onTap on-press)
    (m/Padding
     .padding (.all m/EdgeInsets 6))
-   (m/Row
-    .children [(m/Column
-                .children
-                [(m/Icon (.remove_circle m/Icons)
-                         .size 14)
-                 (m/SizedBox .height 4)
-                 (m/RotatedBox
-                  .quarterTurns 1
-                  .child (m/Text text))
-                 (m/SizedBox .height 4)])])))
+   (m/Column
+    .children
+    [(m/Icon (.remove_circle m/Icons)
+             .size 14)
+     (m/SizedBox .height 4)
+     (m/RotatedBox
+      .quarterTurns 1
+      .child (m/Text text))
+     (m/SizedBox .height 4)])))
 
 (defn tagbar []
   (f/widget
@@ -83,9 +82,11 @@
          .padding (.all m/EdgeInsets 5)
          .child
          (if (true? tag-on-edit)
+           (m/IntrinsicHeight 
+            .child
            (mgl/MongolTextField
             .focusNode focus
-            .onChanged (fn [x] 
+            .onChanged (fn [x]
                          (when (and (not-empty x) (.endsWith x "\n"))
                            (let [text (.substring x 0
                                                   (dec (.-length x)))]
@@ -96,7 +97,7 @@
             .style (m/TextStyle .fontSize 14)
             .maxLines 2
             .minLines 1
-            .decoration nil)
+            .decoration nil))
            (m/GestureDetector
             .onTap (fn []
                      (swap! global-state/state assoc :tag-on-edit true)
@@ -111,5 +112,6 @@
       (m/SizedBox .height 8)]
      (map #(tag-text-button
             (get % "name")
-            (fn [] (tag-state/delete-draft-tag (get % "id"))))
+            (fn []
+              (tag-state/delete-draft-tag (get % "id"))))
           draft-tags)))))
