@@ -34,6 +34,7 @@
      (f/widget
       (m/Container .height 100)
       (m/Row
+       .mainAxisAlignment m.MainAxisAlignment/spaceBetween
        .children
        [(m/GestureDetector
          .onTap (fn []
@@ -45,6 +46,18 @@
                  .text "Don't have an account?"
                  .style (m/TextStyle .fontSize 16)
                  .children [(m/TextSpan .text " Sign up"
+                                        .style (m/TextStyle .color primary-color
+                                                            .fontSize 16))])))
+        (m/GestureDetector
+         .onTap (fn []
+                  (.pushNamed navigator "/reset_password")
+                  nil)
+         .child
+         (mgl/MongolRichText
+          .text (m/TextSpan
+                 .text "Forgot Password?"
+                 .style (m/TextStyle .fontSize 16)
+                 .children [(m/TextSpan .text " Reset Password"
                                         .style (m/TextStyle .color primary-color
                                                             .fontSize 16))])))
         (auth-widget/rounded-button (fn [] (auth-service/login

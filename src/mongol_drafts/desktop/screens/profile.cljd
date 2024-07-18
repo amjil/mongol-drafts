@@ -11,7 +11,8 @@
 (defn screen []
   (f/widget
    :context ctx
-   :get {{{primary-color .-primary} .-colorScheme} m/Theme}
+   :get {navigator m/Navigator
+         {{primary-color .-primary} .-colorScheme} m/Theme}
    :watch [{{token "token"
              user-name "user-name"} :profile} gs/state]
    (m/Scaffold)
@@ -51,7 +52,8 @@
                                .fontSize 20
                                .color (-> m/Theme (.of ctx) .-colorScheme .-onPrimary)))])
              .onPressed (fn []
-                          (swap! gs/state assoc :profile-view-index 1)))
+                          (.pushNamed navigator "/login")
+                          nil))
             (m/GestureDetector
              .onTap (fn [] nil)
              .child

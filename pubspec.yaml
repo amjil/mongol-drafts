@@ -54,6 +54,7 @@ dependencies:
   flutter_context_menu:
     git:
       url: https://github.com/amjil/flutter_context_menu.git
+  timer_button: ^2.1.1
     
   drift: 2.18.0
   sqlite3_flutter_libs: ^0.5.23

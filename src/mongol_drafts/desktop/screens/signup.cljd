@@ -3,7 +3,6 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter :as f]
-   [mongol-drafts.desktop.widgets.menu :as menu]
    [mongol-drafts.services.auth :as auth-service]
    [mongol-drafts.desktop.widgets.auth :as auth-widget]))
 
