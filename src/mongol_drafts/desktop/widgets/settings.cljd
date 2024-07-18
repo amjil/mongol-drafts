@@ -31,17 +31,24 @@
    (m/ClipRRect
     .borderRadius (m.BorderRadius/circular 15))
    (mgl/MongolListTile
+    .shape (m/RoundedRectangleBorder 
+            .side (m/BorderSide .width 1
+                                .color m.Colors/blueAccent)
+            .borderRadius (m.BorderRadius/circular 5))
     .leading (if (nil? (:leading item))
                nil
-               (m/Padding
-                .padding (m.EdgeInsets/all 5)
-                .child
-                (m/Icon (:leading item))))
-    .title (mgl/MongolText (:title item))
-    .subtitle nil
-    .trailing (if (:trailing item)
-                (:trailing item)
-                nil))))
+               (:leading item))
+    .title (if (nil? (:title item))
+             nil
+             (if (string? (:title item))
+               (mgl/MongolText (:title item))
+               (:title item)))
+    .subtitle (if (nil? (:subtitle item))
+                nil
+                (mgl/MongolText (:subtitle item)))
+    .trailing (if (nil? (:trailing item))
+                nil
+                (:trailing item)))))
                 
 (defn settings-item [item]
   (if (nil? (:on-tap item))

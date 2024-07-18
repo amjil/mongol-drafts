@@ -5,8 +5,8 @@
    [cljd.flutter :as f]
    [mongol-drafts.desktop.widgets.menu :as menu]
    [mongol-drafts.desktop.widgets.settings :as settings]
-   [mongol-drafts.states.profile :as profile-state]
-   [mongol-drafts.states.global :as gs]))
+   [mongol-drafts.states.global :as gs]
+   [mongol-drafts.states.profile :as profile]))
    
 (defn screen []
   (f/widget
@@ -72,4 +72,14 @@
           .children [(settings/settings-group
                       [{:title "About"
                         :on-tap (fn [] (dart:core/print "about"))}
-                       {:title "License"}])]))]))])))
+                       {:title "License"}])
+                     (m/SizedBox .width 40)
+                     (if (nil? token)
+                       (m/SizedBox)
+                       (settings/settings-group
+                        [{:leading (m/SizedBox .height 10)
+                          :trailing (m/SizedBox .height 10)
+                          :title (m/Center .child (mgl/MongolText "Logout"))
+                          :on-tap (fn []
+                                    (profile/remove-profile-setting {:key "token"})
+                                    (profile/remove-profile-setting {:key "user-name"}))}]))]))]))])))
