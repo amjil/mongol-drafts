@@ -10,6 +10,8 @@
 
 (defn init-db []
   (await (drift/initDriftDatabase)))
+  
+(def default-user-id "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
 
 (def elec (atom nil))
 
@@ -41,7 +43,9 @@
                    ;")))]
     (if (empty? result)
       (let [uuid (.v4 (uuid/Uuid))
-            user-id (.v4 (uuid/Uuid))
+            user-id (if (empty? (get-in @gs/state [:profile "user-id"]))
+                      default-user-id
+                      (get-in @gs/state [:profile "user-id"]))
             ^#/(List dr/Variable)
             vars (into [] [(dr/Variable uuid) (dr/Variable "default")
                            (dr/Variable user-id)])]

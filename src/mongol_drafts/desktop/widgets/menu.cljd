@@ -78,7 +78,7 @@
                     (swap! gs/state assoc :menu-index "read")
                     nil)
        .child
-       (mgl/MongolText "ᠲᠠᠨ ᠤ ᠨᠣᠣᠷᠠᠭ ᠤᠳ")))])))
+       (mgl/MongolText "ᠴᠣᠮᠣᠭ")))])))
        
 (defn item-menu
   [item]

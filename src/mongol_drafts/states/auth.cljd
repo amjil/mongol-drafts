@@ -1,6 +1,7 @@
 (ns mongol-drafts.states.auth
   (:require
    [mongol-drafts.services.auth :as service]
+   [mongol-drafts.services.draft :as draft-service]
    [mongol-drafts.utils.toast :as toast]
    [mongol-drafts.states.global :as gs]
    [mongol-drafts.states.profile :as profile]))
@@ -11,8 +12,11 @@
                    (toast/show-toast ctx (get x "message"))
                    (swap! gs/state assoc :profile-view-index 0)
                    (let [username (get x "name")
-                         token (get x "token")]
+                         token (get x "token")
+                         user-id (get x "user_id")]
+                     (draft-service/update-initial-user user-id)
                      (profile/set-profile-setting {:key "token" :type :string :value token})
+                     (profile/set-profile-setting {:key "user-id" :type :string :value user-id})
                      (profile/set-profile-setting {:key "user-name" :type :string :value username})))))
                    
 (defn signup [ctx info]

@@ -7,7 +7,8 @@
    [mongol-drafts.desktop.widgets.auth :as auth-widget]
    [mongol-drafts.services.auth :as auth-service]
    [mongol-drafts.states.profile :as profile]
-   [mongol-drafts.utils.toast :as toast]))
+   [mongol-drafts.utils.toast :as toast]
+   [mongol-drafts.services.draft :as draft-service]))
 
 (defn screen []
   (f/widget
@@ -68,7 +69,10 @@
                                               (toast/show-toast ctx (get x "message"))
                                               (.popUntil navigator (widgets.ModalRoute/withName "/"))
                                               (let [username (get x "name")
-                                                    token (get x "token")]
+                                                    token (get x "token")
+                                                    user-id (get x "user_id")]
+                                                (draft-service/update-initial-user user-id)
                                                 (profile/set-profile-setting {:key "token" :type :string :value token})
+                                                (profile/set-profile-setting {:key "user-id" :type :string :value user-id})
                                                 (profile/set-profile-setting {:key "user-name" :type :string :value username})))))
                                     "Done")]))])))

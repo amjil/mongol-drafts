@@ -248,3 +248,32 @@
         "
          order by updated_at desc
          ;"))))))
+
+(defn update-initial-user [id]
+  (let [^electric-drift/ElectricClient
+        client @electric/elec
+        ^schema/AppDatabase db (.-db client)]
+    (await
+     (.write
+      (doto (.update db (.-drafts db))
+        (.where (fn [^drift-schema/Drafts tbl] (.equals (.-electricUserId tbl) id))))
+      (schema/DraftsCompanion
+       .electricUserId (drift/Value id))))
+    (await
+     (.write
+      (doto (.update db (.-workspaces db))
+        (.where (fn [^drift-schema/Workspaces tbl] (.equals (.-electricUserId tbl) id))))
+      (schema/WorkspacesCompanion
+       .electricUserId (drift/Value id))))
+    (await
+     (.write
+      (doto (.update db (.-tags db))
+        (.where (fn [^drift-schema/Tags tbl] (.equals (.-electricUserId tbl) id))))
+      (schema/TagsCompanion
+       .electricUserId (drift/Value id))))
+    (await
+     (.write
+      (doto (.update db (.-draftTags db))
+        (.where (fn [^drift-schema/DraftTags tbl] (.equals (.-electricUserId tbl) id))))
+      (schema/DraftTagsCompanion
+       .electricUserId (drift/Value id))))))

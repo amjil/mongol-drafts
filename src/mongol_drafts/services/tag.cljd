@@ -16,7 +16,7 @@
         ^schema/AppDatabase db (.-db client)
         result (await (query-tag-with-name v))
         uuid (.v4 (uuid/Uuid))
-        userid (await (pref/get-string "userid"))]
+        userid (await (pref/get-string "user-id"))]
     (if (empty? result)
       (do
         (await
