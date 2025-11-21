@@ -8,23 +8,24 @@
 
 (declare query-tag-with-name)
 
-(defn create-tag [^String wid ^String v]
-  (let [^schema/AppDatabase db (db/get-db)
-        result (await (query-tag-with-name v))
-        uuid (.v4 (uuid/Uuid))]
-    (if (empty? result)
-      (do
-        (await
-         (.customInsert
-          db
-          "INSERT INTO tags (id, workspace_id, name, related_num) 
+(defn create-tag [wid ^String v]
+  (when wid
+    (let [^schema/AppDatabase db (db/get-db)
+          result (await (query-tag-with-name v))
+          uuid (.v4 (uuid/Uuid))]
+      (if (empty? result)
+        (do
+          (await
+           (.customInsert
+            db
+            "INSERT INTO tags (id, workspace_id, name, related_num) 
              values (?, ?, ?, ?)"
-          .variables [(drift/Variable uuid)
-                      (drift/Variable wid)
-                      (drift/Variable v)
-                      (drift/Variable 0)]))
-        uuid)
-      (-> result first .-data (get "id")))))
+            .variables [(drift/Variable uuid)
+                        (drift/Variable wid)
+                        (drift/Variable v)
+                        (drift/Variable 0)]))
+          uuid)
+        (-> result first .-data (get "id"))))))
 
 (defn delete-tag [id]
   (let [^schema/AppDatabase db (db/get-db)]

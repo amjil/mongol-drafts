@@ -16,7 +16,6 @@
    [mongol-drafts.widgets.theme :as theme]))
 
 (defn app []
-  (control/set-control)
   (f/widget
    :context ctx
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)

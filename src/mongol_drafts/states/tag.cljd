@@ -8,16 +8,20 @@
 (declare update-filtered-tags)
 
 (defn get-draft-tags [state id]
-  (let [tags (await (tag-service/query-draft-tags id))] 
+  (let [tags (await (tag-service/query-draft-tags id))]
+    (dart:core/print (str "tags = " (map (fn [x] (.-data x)) tags)))
     (swap! state assoc :draft-tags (map (fn [x] (.-data x)) tags))))
 
 (defn add-draft-tag [name]
-  (let [workspace-id (-> @gs/state :workspace :id)
-        id  (await (tag-service/create-tag workspace-id name))
-        draft-id (-> @gs/state :draft (get "id"))
-        _ (await (tag-service/add-draft-tag draft-id id))]
-    (swap! gs/state update :draft-tags concat
-           [{"id" id "name" name "related_num" 1}])))
+  (let [workspace-id (-> @gs/state :workspace (get "id"))]
+    (dart:core/print (str "workspace-id: " workspace-id))
+    (when workspace-id
+      (let [id  (await (tag-service/create-tag workspace-id name))
+            draft-id (-> @gs/state :draft (get "id"))]
+        (when draft-id
+          (let [_ (await (tag-service/add-draft-tag draft-id id))]
+            (swap! gs/state update :draft-tags concat
+                   [{"id" id "name" name "related_num" 1}])))))))
 
 (defn delete-draft-tag [id]
   (let [draft (:draft @gs/state)
