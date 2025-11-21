@@ -15,7 +15,9 @@
 (defn widget []
   (f/widget
    :context ctx
-   :let [_ (draft-state/new-draft)]
+   :get [:info]
+   :let [_ (draft-state/new-draft)
+         width (-> m/MediaQuery (.of ctx) .-size .-width)]
    :managed [^m/TextEditingController text-controller (m/TextEditingController)]
    :bind {:text-controller text-controller}
    :watch [{:keys [tag-viewable
@@ -39,7 +41,7 @@
       .drawer (drawer/left-drawer)
       .body
       (m/SafeArea
-      ;;  .bottom false
+       ;;  .bottom false
        .child
        (m/Column
         .children
@@ -101,4 +103,8 @@
      (if (true? show-search-dialog)
        (search/widget)
        (m/Container))
-    (keyboard/candidates nil)])))
+     (m/Positioned
+      .bottom (+ 40 (keyboard/get-height info))
+      .left (/ width 4)
+      .child
+      (keyboard/candidates-panel nil))])))

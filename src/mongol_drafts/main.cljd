@@ -5,6 +5,8 @@
    ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
    [virtual-keyboard.input-control :as control]
    [virtual-keyboard.options :as keyboard-options]
+   [virtual-keyboard.keyboard-candidates :as kc]
+   [virtual-keyboard.zip-utils :as zip-utils]
    [cljd.flutter :as f]
    [mongol-drafts.services.db :as db-service]
    [mongol-drafts.states.profile :as profile]
@@ -20,11 +22,14 @@
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          info (merge keyboard-options/keyboard-option
                      {:keyboard/key-cap-border-radius 6
-                          ;; :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-                          ;; :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
-                          ;; :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                          ;; :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                          ;; :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
+                      :keyboard/font-size 18
+                      :keyboard/key-container-color m/Colors.grey.shade500
+                      :keyboard/mongol-font-family "OyunQagantig"
+                      ;; :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
+                      ;; :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
+                      ;; :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
+                      ;; :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
+                      ;; :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
                       }
                      {:keyboard/width w})]
    :bind {:info info :state (atom keyboard-options/keyboard-state)}
@@ -46,21 +51,34 @@
 
 (defn main []
   (m.WidgetsFlutterBinding/ensureInitialized)
+
+  ;; load the environment variables from the .env file
   (await (.load dotenv/dotenv .fileName "assets/.env"))
+
+  ;; prepopulate the profile settings
   (profile/prepopulate-profile-settings)
   (let [window (-> m/WidgetsBinding .instance .-window)]
     (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))
     (set!
      (.-onPlatformBrightnessChanged window)
      (fn []
-      ;;  (dart:core/print (str "brightnes = " (.-platformBrightness window)))
+       ;;  (dart:core/print (str "brightnes = " (.-platformBrightness window)))
        (swap! global-state/state assoc :theme/brightness (.-platformBrightness window)))))
-       
+
+  ;; set the control
   (control/set-control)
 
+
+  ;; initialize the database
   (await
    (db-service/init-db))
+
+  ;; read the data.zip & next.zip
+  (zip-utils/read-json-from-asset-zip kc/data "assets/data.zip")
+  (zip-utils/read-json-from-asset-zip kc/next "assets/next.zip")
+
   (let [workspace (await (workspace-service/get-or-create-default))]
     (swap! global-state/state assoc :workspace workspace))
+
   (m/runApp
    (app)))

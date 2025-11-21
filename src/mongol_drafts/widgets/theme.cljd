@@ -44,7 +44,7 @@
 
 (def default-light-theme 
   (m/ThemeData
-   .fontFamily "MongolianBaiZheng"
+   .fontFamily "OyunQagantig"
    .scaffoldBackgroundColor (-> m/Colors .white)
    .colorScheme
    (.light m/ColorScheme
@@ -68,7 +68,7 @@
 
 (def default-dark-theme
   (m/ThemeData
-   .fontFamily "MongolianBaiZheng"
+   .fontFamily "OyunQagantig"
    .scaffoldBackgroundColor (-> m/Colors .black45)
    .colorScheme
    (.dark m/ColorScheme
