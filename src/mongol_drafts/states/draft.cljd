@@ -1,9 +1,16 @@
 (ns mongol-drafts.states.draft
   (:require
-   ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.draft :as draft-service]
+   [mongol-drafts.services.workspace :as workspace-service]
    [mongol-drafts.states.global :as gs]
    [mongol-drafts.states.counter :as counter-state]))
+
+(defn- ensure-workspace-id []
+  (if-let [workspace-id (-> @gs/state :workspace :id)]
+    workspace-id
+    (let [workspace (await (workspace-service/get-or-create-default))]
+      (swap! gs/state assoc :workspace workspace)
+      (get workspace "id"))))
 
 (defn set-current-draft [controller id]
   (let [result (await (draft-service/get-draft id))
@@ -25,7 +32,8 @@
              (-> result last .-data))
 
       :else
-      (let [id (await (draft-service/create-draft (-> @gs/state :workspace :id) ""))
+      (let [workspace-id (await (ensure-workspace-id))
+            _ (await (draft-service/create-draft workspace-id ""))
             result (-> (draft-service/last-draft) await last .-data)]
         (swap! gs/state assoc :draft result)))))
 
@@ -105,9 +113,7 @@
   (when (true? (:tag-on-edit @gs/state))
     (swap! gs/state assoc :tag-on-edit false))
   (let [text (-> @gs/state :draft (get "content"))]
-    (set! (.-text controller) text))
-  (when-not (empty? (:keyboard/candidates-list @gs/state))
-    (swap! gs/state assoc :keyboard/candidates-list [])))
+    (set! (.-text controller) text)))
 
 (defn initial-states []
   {:tag-viewable false

@@ -13,26 +13,20 @@ class $DraftTagsTable extends DraftTags
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
-  static const VerificationMeta _electricUserIdMeta =
-      const VerificationMeta('electricUserId');
-  @override
-  late final GeneratedColumn<String> electricUserId = GeneratedColumn<String>(
-      'electric_user_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _tagIdMeta = const VerificationMeta('tagId');
   @override
   late final GeneratedColumn<String> tagId = GeneratedColumn<String>(
       'tag_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _draftIdMeta =
       const VerificationMeta('draftId');
   @override
   late final GeneratedColumn<String> draftId = GeneratedColumn<String>(
       'draft_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   @override
-  List<GeneratedColumn> get $columns => [id, electricUserId, tagId, draftId];
+  List<GeneratedColumn> get $columns => [id, tagId, draftId];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -47,14 +41,6 @@ class $DraftTagsTable extends DraftTags
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
-    }
-    if (data.containsKey('electric_user_id')) {
-      context.handle(
-          _electricUserIdMeta,
-          electricUserId.isAcceptableOrUnknown(
-              data['electric_user_id']!, _electricUserIdMeta));
-    } else if (isInserting) {
-      context.missing(_electricUserIdMeta);
     }
     if (data.containsKey('tag_id')) {
       context.handle(
@@ -78,13 +64,11 @@ class $DraftTagsTable extends DraftTags
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DraftTag(
       id: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}id'])!,
-      electricUserId: attachedDatabase.typeMapping.read(
-          ElectricTypes.uuid, data['${effectivePrefix}electric_user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       tagId: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}tag_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}tag_id'])!,
       draftId: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}draft_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}draft_id'])!,
     );
   }
 
@@ -96,29 +80,22 @@ class $DraftTagsTable extends DraftTags
 
 class DraftTag extends DataClass implements Insertable<DraftTag> {
   final String id;
-  final String electricUserId;
   final String tagId;
   final String draftId;
   const DraftTag(
-      {required this.id,
-      required this.electricUserId,
-      required this.tagId,
-      required this.draftId});
+      {required this.id, required this.tagId, required this.draftId});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id, ElectricTypes.uuid);
-    map['electric_user_id'] =
-        Variable<String>(electricUserId, ElectricTypes.uuid);
-    map['tag_id'] = Variable<String>(tagId, ElectricTypes.uuid);
-    map['draft_id'] = Variable<String>(draftId, ElectricTypes.uuid);
+    map['id'] = Variable<String>(id);
+    map['tag_id'] = Variable<String>(tagId);
+    map['draft_id'] = Variable<String>(draftId);
     return map;
   }
 
   DraftTagsCompanion toCompanion(bool nullToAbsent) {
     return DraftTagsCompanion(
       id: Value(id),
-      electricUserId: Value(electricUserId),
       tagId: Value(tagId),
       draftId: Value(draftId),
     );
@@ -129,7 +106,6 @@ class DraftTag extends DataClass implements Insertable<DraftTag> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DraftTag(
       id: serializer.fromJson<String>(json['id']),
-      electricUserId: serializer.fromJson<String>(json['electricUserId']),
       tagId: serializer.fromJson<String>(json['tagId']),
       draftId: serializer.fromJson<String>(json['draftId']),
     );
@@ -139,20 +115,13 @@ class DraftTag extends DataClass implements Insertable<DraftTag> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'electricUserId': serializer.toJson<String>(electricUserId),
       'tagId': serializer.toJson<String>(tagId),
       'draftId': serializer.toJson<String>(draftId),
     };
   }
 
-  DraftTag copyWith(
-          {String? id,
-          String? electricUserId,
-          String? tagId,
-          String? draftId}) =>
-      DraftTag(
+  DraftTag copyWith({String? id, String? tagId, String? draftId}) => DraftTag(
         id: id ?? this.id,
-        electricUserId: electricUserId ?? this.electricUserId,
         tagId: tagId ?? this.tagId,
         draftId: draftId ?? this.draftId,
       );
@@ -160,7 +129,6 @@ class DraftTag extends DataClass implements Insertable<DraftTag> {
   String toString() {
     return (StringBuffer('DraftTag(')
           ..write('id: $id, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('tagId: $tagId, ')
           ..write('draftId: $draftId')
           ..write(')'))
@@ -168,50 +136,43 @@ class DraftTag extends DataClass implements Insertable<DraftTag> {
   }
 
   @override
-  int get hashCode => Object.hash(id, electricUserId, tagId, draftId);
+  int get hashCode => Object.hash(id, tagId, draftId);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DraftTag &&
           other.id == this.id &&
-          other.electricUserId == this.electricUserId &&
           other.tagId == this.tagId &&
           other.draftId == this.draftId);
 }
 
 class DraftTagsCompanion extends UpdateCompanion<DraftTag> {
   final Value<String> id;
-  final Value<String> electricUserId;
   final Value<String> tagId;
   final Value<String> draftId;
   final Value<int> rowid;
   const DraftTagsCompanion({
     this.id = const Value.absent(),
-    this.electricUserId = const Value.absent(),
     this.tagId = const Value.absent(),
     this.draftId = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DraftTagsCompanion.insert({
     required String id,
-    required String electricUserId,
     required String tagId,
     required String draftId,
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        electricUserId = Value(electricUserId),
         tagId = Value(tagId),
         draftId = Value(draftId);
   static Insertable<DraftTag> custom({
     Expression<String>? id,
-    Expression<String>? electricUserId,
     Expression<String>? tagId,
     Expression<String>? draftId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (electricUserId != null) 'electric_user_id': electricUserId,
       if (tagId != null) 'tag_id': tagId,
       if (draftId != null) 'draft_id': draftId,
       if (rowid != null) 'rowid': rowid,
@@ -220,13 +181,11 @@ class DraftTagsCompanion extends UpdateCompanion<DraftTag> {
 
   DraftTagsCompanion copyWith(
       {Value<String>? id,
-      Value<String>? electricUserId,
       Value<String>? tagId,
       Value<String>? draftId,
       Value<int>? rowid}) {
     return DraftTagsCompanion(
       id: id ?? this.id,
-      electricUserId: electricUserId ?? this.electricUserId,
       tagId: tagId ?? this.tagId,
       draftId: draftId ?? this.draftId,
       rowid: rowid ?? this.rowid,
@@ -237,17 +196,13 @@ class DraftTagsCompanion extends UpdateCompanion<DraftTag> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value, ElectricTypes.uuid);
-    }
-    if (electricUserId.present) {
-      map['electric_user_id'] =
-          Variable<String>(electricUserId.value, ElectricTypes.uuid);
+      map['id'] = Variable<String>(id.value);
     }
     if (tagId.present) {
-      map['tag_id'] = Variable<String>(tagId.value, ElectricTypes.uuid);
+      map['tag_id'] = Variable<String>(tagId.value);
     }
     if (draftId.present) {
-      map['draft_id'] = Variable<String>(draftId.value, ElectricTypes.uuid);
+      map['draft_id'] = Variable<String>(draftId.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -259,7 +214,6 @@ class DraftTagsCompanion extends UpdateCompanion<DraftTag> {
   String toString() {
     return (StringBuffer('DraftTagsCompanion(')
           ..write('id: $id, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('tagId: $tagId, ')
           ..write('draftId: $draftId, ')
           ..write('rowid: $rowid')
@@ -277,19 +231,13 @@ class $DraftsTable extends Drafts with TableInfo<$DraftsTable, Draft> {
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _workspaceIdMeta =
       const VerificationMeta('workspaceId');
   @override
   late final GeneratedColumn<String> workspaceId = GeneratedColumn<String>(
       'workspace_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
-  static const VerificationMeta _electricUserIdMeta =
-      const VerificationMeta('electricUserId');
-  @override
-  late final GeneratedColumn<String> electricUserId = GeneratedColumn<String>(
-      'electric_user_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _contentMeta =
       const VerificationMeta('content');
   @override
@@ -308,30 +256,22 @@ class $DraftsTable extends Drafts with TableInfo<$DraftsTable, Draft> {
   @override
   late final GeneratedColumn<int> status = GeneratedColumn<int>(
       'status', aliasedName, false,
-      type: ElectricTypes.int2, requiredDuringInsert: true);
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
   @override
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, true,
-      type: ElectricTypes.timestamp, requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   static const VerificationMeta _updatedAtMeta =
       const VerificationMeta('updatedAt');
   @override
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, true,
-      type: ElectricTypes.timestamp, requiredDuringInsert: false);
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [
-        id,
-        workspaceId,
-        electricUserId,
-        content,
-        flag,
-        status,
-        createdAt,
-        updatedAt
-      ];
+  List<GeneratedColumn> get $columns =>
+      [id, workspaceId, content, flag, status, createdAt, updatedAt];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -354,14 +294,6 @@ class $DraftsTable extends Drafts with TableInfo<$DraftsTable, Draft> {
               data['workspace_id']!, _workspaceIdMeta));
     } else if (isInserting) {
       context.missing(_workspaceIdMeta);
-    }
-    if (data.containsKey('electric_user_id')) {
-      context.handle(
-          _electricUserIdMeta,
-          electricUserId.isAcceptableOrUnknown(
-              data['electric_user_id']!, _electricUserIdMeta));
-    } else if (isInserting) {
-      context.missing(_electricUserIdMeta);
     }
     if (data.containsKey('content')) {
       context.handle(_contentMeta,
@@ -397,21 +329,19 @@ class $DraftsTable extends Drafts with TableInfo<$DraftsTable, Draft> {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Draft(
       id: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       workspaceId: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}workspace_id'])!,
-      electricUserId: attachedDatabase.typeMapping.read(
-          ElectricTypes.uuid, data['${effectivePrefix}electric_user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}workspace_id'])!,
       content: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}content']),
       flag: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}flag'])!,
       status: attachedDatabase.typeMapping
-          .read(ElectricTypes.int2, data['${effectivePrefix}status'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}status'])!,
       createdAt: attachedDatabase.typeMapping
-          .read(ElectricTypes.timestamp, data['${effectivePrefix}created_at']),
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at']),
       updatedAt: attachedDatabase.typeMapping
-          .read(ElectricTypes.timestamp, data['${effectivePrefix}updated_at']),
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at']),
     );
   }
 
@@ -424,7 +354,6 @@ class $DraftsTable extends Drafts with TableInfo<$DraftsTable, Draft> {
 class Draft extends DataClass implements Insertable<Draft> {
   final String id;
   final String workspaceId;
-  final String electricUserId;
   final String? content;
   final bool flag;
   final int status;
@@ -433,7 +362,6 @@ class Draft extends DataClass implements Insertable<Draft> {
   const Draft(
       {required this.id,
       required this.workspaceId,
-      required this.electricUserId,
       this.content,
       required this.flag,
       required this.status,
@@ -442,22 +370,18 @@ class Draft extends DataClass implements Insertable<Draft> {
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id, ElectricTypes.uuid);
-    map['workspace_id'] = Variable<String>(workspaceId, ElectricTypes.uuid);
-    map['electric_user_id'] =
-        Variable<String>(electricUserId, ElectricTypes.uuid);
+    map['id'] = Variable<String>(id);
+    map['workspace_id'] = Variable<String>(workspaceId);
     if (!nullToAbsent || content != null) {
       map['content'] = Variable<String>(content);
     }
     map['flag'] = Variable<bool>(flag);
-    map['status'] = Variable<int>(status, ElectricTypes.int2);
+    map['status'] = Variable<int>(status);
     if (!nullToAbsent || createdAt != null) {
-      map['created_at'] =
-          Variable<DateTime>(createdAt, ElectricTypes.timestamp);
+      map['created_at'] = Variable<DateTime>(createdAt);
     }
     if (!nullToAbsent || updatedAt != null) {
-      map['updated_at'] =
-          Variable<DateTime>(updatedAt, ElectricTypes.timestamp);
+      map['updated_at'] = Variable<DateTime>(updatedAt);
     }
     return map;
   }
@@ -466,7 +390,6 @@ class Draft extends DataClass implements Insertable<Draft> {
     return DraftsCompanion(
       id: Value(id),
       workspaceId: Value(workspaceId),
-      electricUserId: Value(electricUserId),
       content: content == null && nullToAbsent
           ? const Value.absent()
           : Value(content),
@@ -487,7 +410,6 @@ class Draft extends DataClass implements Insertable<Draft> {
     return Draft(
       id: serializer.fromJson<String>(json['id']),
       workspaceId: serializer.fromJson<String>(json['workspaceId']),
-      electricUserId: serializer.fromJson<String>(json['electricUserId']),
       content: serializer.fromJson<String?>(json['content']),
       flag: serializer.fromJson<bool>(json['flag']),
       status: serializer.fromJson<int>(json['status']),
@@ -501,7 +423,6 @@ class Draft extends DataClass implements Insertable<Draft> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'workspaceId': serializer.toJson<String>(workspaceId),
-      'electricUserId': serializer.toJson<String>(electricUserId),
       'content': serializer.toJson<String?>(content),
       'flag': serializer.toJson<bool>(flag),
       'status': serializer.toJson<int>(status),
@@ -513,7 +434,6 @@ class Draft extends DataClass implements Insertable<Draft> {
   Draft copyWith(
           {String? id,
           String? workspaceId,
-          String? electricUserId,
           Value<String?> content = const Value.absent(),
           bool? flag,
           int? status,
@@ -522,7 +442,6 @@ class Draft extends DataClass implements Insertable<Draft> {
       Draft(
         id: id ?? this.id,
         workspaceId: workspaceId ?? this.workspaceId,
-        electricUserId: electricUserId ?? this.electricUserId,
         content: content.present ? content.value : this.content,
         flag: flag ?? this.flag,
         status: status ?? this.status,
@@ -534,7 +453,6 @@ class Draft extends DataClass implements Insertable<Draft> {
     return (StringBuffer('Draft(')
           ..write('id: $id, ')
           ..write('workspaceId: $workspaceId, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('content: $content, ')
           ..write('flag: $flag, ')
           ..write('status: $status, ')
@@ -545,15 +463,14 @@ class Draft extends DataClass implements Insertable<Draft> {
   }
 
   @override
-  int get hashCode => Object.hash(id, workspaceId, electricUserId, content,
-      flag, status, createdAt, updatedAt);
+  int get hashCode =>
+      Object.hash(id, workspaceId, content, flag, status, createdAt, updatedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Draft &&
           other.id == this.id &&
           other.workspaceId == this.workspaceId &&
-          other.electricUserId == this.electricUserId &&
           other.content == this.content &&
           other.flag == this.flag &&
           other.status == this.status &&
@@ -564,7 +481,6 @@ class Draft extends DataClass implements Insertable<Draft> {
 class DraftsCompanion extends UpdateCompanion<Draft> {
   final Value<String> id;
   final Value<String> workspaceId;
-  final Value<String> electricUserId;
   final Value<String?> content;
   final Value<bool> flag;
   final Value<int> status;
@@ -574,7 +490,6 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
   const DraftsCompanion({
     this.id = const Value.absent(),
     this.workspaceId = const Value.absent(),
-    this.electricUserId = const Value.absent(),
     this.content = const Value.absent(),
     this.flag = const Value.absent(),
     this.status = const Value.absent(),
@@ -585,7 +500,6 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
   DraftsCompanion.insert({
     required String id,
     required String workspaceId,
-    required String electricUserId,
     this.content = const Value.absent(),
     required bool flag,
     required int status,
@@ -594,13 +508,11 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
     this.rowid = const Value.absent(),
   })  : id = Value(id),
         workspaceId = Value(workspaceId),
-        electricUserId = Value(electricUserId),
         flag = Value(flag),
         status = Value(status);
   static Insertable<Draft> custom({
     Expression<String>? id,
     Expression<String>? workspaceId,
-    Expression<String>? electricUserId,
     Expression<String>? content,
     Expression<bool>? flag,
     Expression<int>? status,
@@ -611,7 +523,6 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (workspaceId != null) 'workspace_id': workspaceId,
-      if (electricUserId != null) 'electric_user_id': electricUserId,
       if (content != null) 'content': content,
       if (flag != null) 'flag': flag,
       if (status != null) 'status': status,
@@ -624,7 +535,6 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
   DraftsCompanion copyWith(
       {Value<String>? id,
       Value<String>? workspaceId,
-      Value<String>? electricUserId,
       Value<String?>? content,
       Value<bool>? flag,
       Value<int>? status,
@@ -634,7 +544,6 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
     return DraftsCompanion(
       id: id ?? this.id,
       workspaceId: workspaceId ?? this.workspaceId,
-      electricUserId: electricUserId ?? this.electricUserId,
       content: content ?? this.content,
       flag: flag ?? this.flag,
       status: status ?? this.status,
@@ -648,15 +557,10 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value, ElectricTypes.uuid);
+      map['id'] = Variable<String>(id.value);
     }
     if (workspaceId.present) {
-      map['workspace_id'] =
-          Variable<String>(workspaceId.value, ElectricTypes.uuid);
-    }
-    if (electricUserId.present) {
-      map['electric_user_id'] =
-          Variable<String>(electricUserId.value, ElectricTypes.uuid);
+      map['workspace_id'] = Variable<String>(workspaceId.value);
     }
     if (content.present) {
       map['content'] = Variable<String>(content.value);
@@ -665,15 +569,13 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
       map['flag'] = Variable<bool>(flag.value);
     }
     if (status.present) {
-      map['status'] = Variable<int>(status.value, ElectricTypes.int2);
+      map['status'] = Variable<int>(status.value);
     }
     if (createdAt.present) {
-      map['created_at'] =
-          Variable<DateTime>(createdAt.value, ElectricTypes.timestamp);
+      map['created_at'] = Variable<DateTime>(createdAt.value);
     }
     if (updatedAt.present) {
-      map['updated_at'] =
-          Variable<DateTime>(updatedAt.value, ElectricTypes.timestamp);
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -686,7 +588,6 @@ class DraftsCompanion extends UpdateCompanion<Draft> {
     return (StringBuffer('DraftsCompanion(')
           ..write('id: $id, ')
           ..write('workspaceId: $workspaceId, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('content: $content, ')
           ..write('flag: $flag, ')
           ..write('status: $status, ')
@@ -858,19 +759,13 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _workspaceIdMeta =
       const VerificationMeta('workspaceId');
   @override
   late final GeneratedColumn<String> workspaceId = GeneratedColumn<String>(
       'workspace_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
-  static const VerificationMeta _electricUserIdMeta =
-      const VerificationMeta('electricUserId');
-  @override
-  late final GeneratedColumn<String> electricUserId = GeneratedColumn<String>(
-      'electric_user_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
@@ -881,10 +776,9 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
   @override
   late final GeneratedColumn<int> relatedNum = GeneratedColumn<int>(
       'related_num', aliasedName, true,
-      type: ElectricTypes.int4, requiredDuringInsert: false);
+      type: DriftSqlType.int, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, workspaceId, electricUserId, name, relatedNum];
+  List<GeneratedColumn> get $columns => [id, workspaceId, name, relatedNum];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -908,14 +802,6 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
     } else if (isInserting) {
       context.missing(_workspaceIdMeta);
     }
-    if (data.containsKey('electric_user_id')) {
-      context.handle(
-          _electricUserIdMeta,
-          electricUserId.isAcceptableOrUnknown(
-              data['electric_user_id']!, _electricUserIdMeta));
-    } else if (isInserting) {
-      context.missing(_electricUserIdMeta);
-    }
     if (data.containsKey('name')) {
       context.handle(
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
@@ -936,15 +822,13 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Tag(
       id: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       workspaceId: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}workspace_id'])!,
-      electricUserId: attachedDatabase.typeMapping.read(
-          ElectricTypes.uuid, data['${effectivePrefix}electric_user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}workspace_id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name']),
       relatedNum: attachedDatabase.typeMapping
-          .read(ElectricTypes.int4, data['${effectivePrefix}related_num']),
+          .read(DriftSqlType.int, data['${effectivePrefix}related_num']),
     );
   }
 
@@ -957,27 +841,23 @@ class $TagsTable extends Tags with TableInfo<$TagsTable, Tag> {
 class Tag extends DataClass implements Insertable<Tag> {
   final String id;
   final String workspaceId;
-  final String electricUserId;
   final String? name;
   final int? relatedNum;
   const Tag(
       {required this.id,
       required this.workspaceId,
-      required this.electricUserId,
       this.name,
       this.relatedNum});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id, ElectricTypes.uuid);
-    map['workspace_id'] = Variable<String>(workspaceId, ElectricTypes.uuid);
-    map['electric_user_id'] =
-        Variable<String>(electricUserId, ElectricTypes.uuid);
+    map['id'] = Variable<String>(id);
+    map['workspace_id'] = Variable<String>(workspaceId);
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
     }
     if (!nullToAbsent || relatedNum != null) {
-      map['related_num'] = Variable<int>(relatedNum, ElectricTypes.int4);
+      map['related_num'] = Variable<int>(relatedNum);
     }
     return map;
   }
@@ -986,7 +866,6 @@ class Tag extends DataClass implements Insertable<Tag> {
     return TagsCompanion(
       id: Value(id),
       workspaceId: Value(workspaceId),
-      electricUserId: Value(electricUserId),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
       relatedNum: relatedNum == null && nullToAbsent
           ? const Value.absent()
@@ -1000,7 +879,6 @@ class Tag extends DataClass implements Insertable<Tag> {
     return Tag(
       id: serializer.fromJson<String>(json['id']),
       workspaceId: serializer.fromJson<String>(json['workspaceId']),
-      electricUserId: serializer.fromJson<String>(json['electricUserId']),
       name: serializer.fromJson<String?>(json['name']),
       relatedNum: serializer.fromJson<int?>(json['relatedNum']),
     );
@@ -1011,7 +889,6 @@ class Tag extends DataClass implements Insertable<Tag> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'workspaceId': serializer.toJson<String>(workspaceId),
-      'electricUserId': serializer.toJson<String>(electricUserId),
       'name': serializer.toJson<String?>(name),
       'relatedNum': serializer.toJson<int?>(relatedNum),
     };
@@ -1020,13 +897,11 @@ class Tag extends DataClass implements Insertable<Tag> {
   Tag copyWith(
           {String? id,
           String? workspaceId,
-          String? electricUserId,
           Value<String?> name = const Value.absent(),
           Value<int?> relatedNum = const Value.absent()}) =>
       Tag(
         id: id ?? this.id,
         workspaceId: workspaceId ?? this.workspaceId,
-        electricUserId: electricUserId ?? this.electricUserId,
         name: name.present ? name.value : this.name,
         relatedNum: relatedNum.present ? relatedNum.value : this.relatedNum,
       );
@@ -1035,7 +910,6 @@ class Tag extends DataClass implements Insertable<Tag> {
     return (StringBuffer('Tag(')
           ..write('id: $id, ')
           ..write('workspaceId: $workspaceId, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('name: $name, ')
           ..write('relatedNum: $relatedNum')
           ..write(')'))
@@ -1043,15 +917,13 @@ class Tag extends DataClass implements Insertable<Tag> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, workspaceId, electricUserId, name, relatedNum);
+  int get hashCode => Object.hash(id, workspaceId, name, relatedNum);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Tag &&
           other.id == this.id &&
           other.workspaceId == this.workspaceId &&
-          other.electricUserId == this.electricUserId &&
           other.name == this.name &&
           other.relatedNum == this.relatedNum);
 }
@@ -1059,14 +931,12 @@ class Tag extends DataClass implements Insertable<Tag> {
 class TagsCompanion extends UpdateCompanion<Tag> {
   final Value<String> id;
   final Value<String> workspaceId;
-  final Value<String> electricUserId;
   final Value<String?> name;
   final Value<int?> relatedNum;
   final Value<int> rowid;
   const TagsCompanion({
     this.id = const Value.absent(),
     this.workspaceId = const Value.absent(),
-    this.electricUserId = const Value.absent(),
     this.name = const Value.absent(),
     this.relatedNum = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -1074,17 +944,14 @@ class TagsCompanion extends UpdateCompanion<Tag> {
   TagsCompanion.insert({
     required String id,
     required String workspaceId,
-    required String electricUserId,
     this.name = const Value.absent(),
     this.relatedNum = const Value.absent(),
     this.rowid = const Value.absent(),
   })  : id = Value(id),
-        workspaceId = Value(workspaceId),
-        electricUserId = Value(electricUserId);
+        workspaceId = Value(workspaceId);
   static Insertable<Tag> custom({
     Expression<String>? id,
     Expression<String>? workspaceId,
-    Expression<String>? electricUserId,
     Expression<String>? name,
     Expression<int>? relatedNum,
     Expression<int>? rowid,
@@ -1092,7 +959,6 @@ class TagsCompanion extends UpdateCompanion<Tag> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (workspaceId != null) 'workspace_id': workspaceId,
-      if (electricUserId != null) 'electric_user_id': electricUserId,
       if (name != null) 'name': name,
       if (relatedNum != null) 'related_num': relatedNum,
       if (rowid != null) 'rowid': rowid,
@@ -1102,14 +968,12 @@ class TagsCompanion extends UpdateCompanion<Tag> {
   TagsCompanion copyWith(
       {Value<String>? id,
       Value<String>? workspaceId,
-      Value<String>? electricUserId,
       Value<String?>? name,
       Value<int?>? relatedNum,
       Value<int>? rowid}) {
     return TagsCompanion(
       id: id ?? this.id,
       workspaceId: workspaceId ?? this.workspaceId,
-      electricUserId: electricUserId ?? this.electricUserId,
       name: name ?? this.name,
       relatedNum: relatedNum ?? this.relatedNum,
       rowid: rowid ?? this.rowid,
@@ -1120,21 +984,16 @@ class TagsCompanion extends UpdateCompanion<Tag> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value, ElectricTypes.uuid);
+      map['id'] = Variable<String>(id.value);
     }
     if (workspaceId.present) {
-      map['workspace_id'] =
-          Variable<String>(workspaceId.value, ElectricTypes.uuid);
-    }
-    if (electricUserId.present) {
-      map['electric_user_id'] =
-          Variable<String>(electricUserId.value, ElectricTypes.uuid);
+      map['workspace_id'] = Variable<String>(workspaceId.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
     }
     if (relatedNum.present) {
-      map['related_num'] = Variable<int>(relatedNum.value, ElectricTypes.int4);
+      map['related_num'] = Variable<int>(relatedNum.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1147,7 +1006,6 @@ class TagsCompanion extends UpdateCompanion<Tag> {
     return (StringBuffer('TagsCompanion(')
           ..write('id: $id, ')
           ..write('workspaceId: $workspaceId, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('name: $name, ')
           ..write('relatedNum: $relatedNum, ')
           ..write('rowid: $rowid')
@@ -1166,20 +1024,14 @@ class $WorkspacesTable extends Workspaces
   @override
   late final GeneratedColumn<String> id = GeneratedColumn<String>(
       'id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
-  static const VerificationMeta _electricUserIdMeta =
-      const VerificationMeta('electricUserId');
-  @override
-  late final GeneratedColumn<String> electricUserId = GeneratedColumn<String>(
-      'electric_user_id', aliasedName, false,
-      type: ElectricTypes.uuid, requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
       'name', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   @override
-  List<GeneratedColumn> get $columns => [id, electricUserId, name];
+  List<GeneratedColumn> get $columns => [id, name];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1195,14 +1047,6 @@ class $WorkspacesTable extends Workspaces
     } else if (isInserting) {
       context.missing(_idMeta);
     }
-    if (data.containsKey('electric_user_id')) {
-      context.handle(
-          _electricUserIdMeta,
-          electricUserId.isAcceptableOrUnknown(
-              data['electric_user_id']!, _electricUserIdMeta));
-    } else if (isInserting) {
-      context.missing(_electricUserIdMeta);
-    }
     if (data.containsKey('name')) {
       context.handle(
           _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
@@ -1217,9 +1061,7 @@ class $WorkspacesTable extends Workspaces
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Workspace(
       id: attachedDatabase.typeMapping
-          .read(ElectricTypes.uuid, data['${effectivePrefix}id'])!,
-      electricUserId: attachedDatabase.typeMapping.read(
-          ElectricTypes.uuid, data['${effectivePrefix}electric_user_id'])!,
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       name: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}name']),
     );
@@ -1233,15 +1075,12 @@ class $WorkspacesTable extends Workspaces
 
 class Workspace extends DataClass implements Insertable<Workspace> {
   final String id;
-  final String electricUserId;
   final String? name;
-  const Workspace({required this.id, required this.electricUserId, this.name});
+  const Workspace({required this.id, this.name});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
-    map['id'] = Variable<String>(id, ElectricTypes.uuid);
-    map['electric_user_id'] =
-        Variable<String>(electricUserId, ElectricTypes.uuid);
+    map['id'] = Variable<String>(id);
     if (!nullToAbsent || name != null) {
       map['name'] = Variable<String>(name);
     }
@@ -1251,7 +1090,6 @@ class Workspace extends DataClass implements Insertable<Workspace> {
   WorkspacesCompanion toCompanion(bool nullToAbsent) {
     return WorkspacesCompanion(
       id: Value(id),
-      electricUserId: Value(electricUserId),
       name: name == null && nullToAbsent ? const Value.absent() : Value(name),
     );
   }
@@ -1261,7 +1099,6 @@ class Workspace extends DataClass implements Insertable<Workspace> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Workspace(
       id: serializer.fromJson<String>(json['id']),
-      electricUserId: serializer.fromJson<String>(json['electricUserId']),
       name: serializer.fromJson<String?>(json['name']),
     );
   }
@@ -1270,81 +1107,63 @@ class Workspace extends DataClass implements Insertable<Workspace> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'electricUserId': serializer.toJson<String>(electricUserId),
       'name': serializer.toJson<String?>(name),
     };
   }
 
   Workspace copyWith(
-          {String? id,
-          String? electricUserId,
-          Value<String?> name = const Value.absent()}) =>
+          {String? id, Value<String?> name = const Value.absent()}) =>
       Workspace(
         id: id ?? this.id,
-        electricUserId: electricUserId ?? this.electricUserId,
         name: name.present ? name.value : this.name,
       );
   @override
   String toString() {
     return (StringBuffer('Workspace(')
           ..write('id: $id, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('name: $name')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, electricUserId, name);
+  int get hashCode => Object.hash(id, name);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Workspace &&
-          other.id == this.id &&
-          other.electricUserId == this.electricUserId &&
-          other.name == this.name);
+      (other is Workspace && other.id == this.id && other.name == this.name);
 }
 
 class WorkspacesCompanion extends UpdateCompanion<Workspace> {
   final Value<String> id;
-  final Value<String> electricUserId;
   final Value<String?> name;
   final Value<int> rowid;
   const WorkspacesCompanion({
     this.id = const Value.absent(),
-    this.electricUserId = const Value.absent(),
     this.name = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WorkspacesCompanion.insert({
     required String id,
-    required String electricUserId,
     this.name = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        electricUserId = Value(electricUserId);
+  }) : id = Value(id);
   static Insertable<Workspace> custom({
     Expression<String>? id,
-    Expression<String>? electricUserId,
     Expression<String>? name,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (electricUserId != null) 'electric_user_id': electricUserId,
       if (name != null) 'name': name,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
   WorkspacesCompanion copyWith(
-      {Value<String>? id,
-      Value<String>? electricUserId,
-      Value<String?>? name,
-      Value<int>? rowid}) {
+      {Value<String>? id, Value<String?>? name, Value<int>? rowid}) {
     return WorkspacesCompanion(
       id: id ?? this.id,
-      electricUserId: electricUserId ?? this.electricUserId,
       name: name ?? this.name,
       rowid: rowid ?? this.rowid,
     );
@@ -1354,11 +1173,7 @@ class WorkspacesCompanion extends UpdateCompanion<Workspace> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     if (id.present) {
-      map['id'] = Variable<String>(id.value, ElectricTypes.uuid);
-    }
-    if (electricUserId.present) {
-      map['electric_user_id'] =
-          Variable<String>(electricUserId.value, ElectricTypes.uuid);
+      map['id'] = Variable<String>(id.value);
     }
     if (name.present) {
       map['name'] = Variable<String>(name.value);
@@ -1373,7 +1188,6 @@ class WorkspacesCompanion extends UpdateCompanion<Workspace> {
   String toString() {
     return (StringBuffer('WorkspacesCompanion(')
           ..write('id: $id, ')
-          ..write('electricUserId: $electricUserId, ')
           ..write('name: $name, ')
           ..write('rowid: $rowid')
           ..write(')'))
@@ -1400,14 +1214,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 
 typedef $$DraftTagsTableInsertCompanionBuilder = DraftTagsCompanion Function({
   required String id,
-  required String electricUserId,
   required String tagId,
   required String draftId,
   Value<int> rowid,
 });
 typedef $$DraftTagsTableUpdateCompanionBuilder = DraftTagsCompanion Function({
   Value<String> id,
-  Value<String> electricUserId,
   Value<String> tagId,
   Value<String> draftId,
   Value<int> rowid,
@@ -1434,28 +1246,24 @@ class $$DraftTagsTableTableManager extends RootTableManager<
               $$DraftTagsTableProcessedTableManager(p),
           getUpdateCompanionBuilder: ({
             Value<String> id = const Value.absent(),
-            Value<String> electricUserId = const Value.absent(),
             Value<String> tagId = const Value.absent(),
             Value<String> draftId = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               DraftTagsCompanion(
             id: id,
-            electricUserId: electricUserId,
             tagId: tagId,
             draftId: draftId,
             rowid: rowid,
           ),
           getInsertCompanionBuilder: ({
             required String id,
-            required String electricUserId,
             required String tagId,
             required String draftId,
             Value<int> rowid = const Value.absent(),
           }) =>
               DraftTagsCompanion.insert(
             id: id,
-            electricUserId: electricUserId,
             tagId: tagId,
             draftId: draftId,
             rowid: rowid,
@@ -1483,11 +1291,6 @@ class $$DraftTagsTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
-  ColumnFilters<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
   ColumnFilters<String> get tagId => $state.composableBuilder(
       column: $state.table.tagId,
       builder: (column, joinBuilders) =>
@@ -1507,11 +1310,6 @@ class $$DraftTagsTableOrderingComposer
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
-  ColumnOrderings<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
   ColumnOrderings<String> get tagId => $state.composableBuilder(
       column: $state.table.tagId,
       builder: (column, joinBuilders) =>
@@ -1526,7 +1324,6 @@ class $$DraftTagsTableOrderingComposer
 typedef $$DraftsTableInsertCompanionBuilder = DraftsCompanion Function({
   required String id,
   required String workspaceId,
-  required String electricUserId,
   Value<String?> content,
   required bool flag,
   required int status,
@@ -1537,7 +1334,6 @@ typedef $$DraftsTableInsertCompanionBuilder = DraftsCompanion Function({
 typedef $$DraftsTableUpdateCompanionBuilder = DraftsCompanion Function({
   Value<String> id,
   Value<String> workspaceId,
-  Value<String> electricUserId,
   Value<String?> content,
   Value<bool> flag,
   Value<int> status,
@@ -1567,7 +1363,6 @@ class $$DraftsTableTableManager extends RootTableManager<
           getUpdateCompanionBuilder: ({
             Value<String> id = const Value.absent(),
             Value<String> workspaceId = const Value.absent(),
-            Value<String> electricUserId = const Value.absent(),
             Value<String?> content = const Value.absent(),
             Value<bool> flag = const Value.absent(),
             Value<int> status = const Value.absent(),
@@ -1578,7 +1373,6 @@ class $$DraftsTableTableManager extends RootTableManager<
               DraftsCompanion(
             id: id,
             workspaceId: workspaceId,
-            electricUserId: electricUserId,
             content: content,
             flag: flag,
             status: status,
@@ -1589,7 +1383,6 @@ class $$DraftsTableTableManager extends RootTableManager<
           getInsertCompanionBuilder: ({
             required String id,
             required String workspaceId,
-            required String electricUserId,
             Value<String?> content = const Value.absent(),
             required bool flag,
             required int status,
@@ -1600,7 +1393,6 @@ class $$DraftsTableTableManager extends RootTableManager<
               DraftsCompanion.insert(
             id: id,
             workspaceId: workspaceId,
-            electricUserId: electricUserId,
             content: content,
             flag: flag,
             status: status,
@@ -1633,11 +1425,6 @@ class $$DraftsTableFilterComposer
 
   ColumnFilters<String> get workspaceId => $state.composableBuilder(
       column: $state.table.workspaceId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
-  ColumnFilters<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
@@ -1677,11 +1464,6 @@ class $$DraftsTableOrderingComposer
 
   ColumnOrderings<String> get workspaceId => $state.composableBuilder(
       column: $state.table.workspaceId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
@@ -1795,7 +1577,6 @@ class $$SchemaMigrationsTableOrderingComposer
 typedef $$TagsTableInsertCompanionBuilder = TagsCompanion Function({
   required String id,
   required String workspaceId,
-  required String electricUserId,
   Value<String?> name,
   Value<int?> relatedNum,
   Value<int> rowid,
@@ -1803,7 +1584,6 @@ typedef $$TagsTableInsertCompanionBuilder = TagsCompanion Function({
 typedef $$TagsTableUpdateCompanionBuilder = TagsCompanion Function({
   Value<String> id,
   Value<String> workspaceId,
-  Value<String> electricUserId,
   Value<String?> name,
   Value<int?> relatedNum,
   Value<int> rowid,
@@ -1830,7 +1610,6 @@ class $$TagsTableTableManager extends RootTableManager<
           getUpdateCompanionBuilder: ({
             Value<String> id = const Value.absent(),
             Value<String> workspaceId = const Value.absent(),
-            Value<String> electricUserId = const Value.absent(),
             Value<String?> name = const Value.absent(),
             Value<int?> relatedNum = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -1838,7 +1617,6 @@ class $$TagsTableTableManager extends RootTableManager<
               TagsCompanion(
             id: id,
             workspaceId: workspaceId,
-            electricUserId: electricUserId,
             name: name,
             relatedNum: relatedNum,
             rowid: rowid,
@@ -1846,7 +1624,6 @@ class $$TagsTableTableManager extends RootTableManager<
           getInsertCompanionBuilder: ({
             required String id,
             required String workspaceId,
-            required String electricUserId,
             Value<String?> name = const Value.absent(),
             Value<int?> relatedNum = const Value.absent(),
             Value<int> rowid = const Value.absent(),
@@ -1854,7 +1631,6 @@ class $$TagsTableTableManager extends RootTableManager<
               TagsCompanion.insert(
             id: id,
             workspaceId: workspaceId,
-            electricUserId: electricUserId,
             name: name,
             relatedNum: relatedNum,
             rowid: rowid,
@@ -1887,11 +1663,6 @@ class $$TagsTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
-  ColumnFilters<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
   ColumnFilters<String> get name => $state.composableBuilder(
       column: $state.table.name,
       builder: (column, joinBuilders) =>
@@ -1916,11 +1687,6 @@ class $$TagsTableOrderingComposer
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 
-  ColumnOrderings<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
   ColumnOrderings<String> get name => $state.composableBuilder(
       column: $state.table.name,
       builder: (column, joinBuilders) =>
@@ -1934,13 +1700,11 @@ class $$TagsTableOrderingComposer
 
 typedef $$WorkspacesTableInsertCompanionBuilder = WorkspacesCompanion Function({
   required String id,
-  required String electricUserId,
   Value<String?> name,
   Value<int> rowid,
 });
 typedef $$WorkspacesTableUpdateCompanionBuilder = WorkspacesCompanion Function({
   Value<String> id,
-  Value<String> electricUserId,
   Value<String?> name,
   Value<int> rowid,
 });
@@ -1966,25 +1730,21 @@ class $$WorkspacesTableTableManager extends RootTableManager<
               $$WorkspacesTableProcessedTableManager(p),
           getUpdateCompanionBuilder: ({
             Value<String> id = const Value.absent(),
-            Value<String> electricUserId = const Value.absent(),
             Value<String?> name = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               WorkspacesCompanion(
             id: id,
-            electricUserId: electricUserId,
             name: name,
             rowid: rowid,
           ),
           getInsertCompanionBuilder: ({
             required String id,
-            required String electricUserId,
             Value<String?> name = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
               WorkspacesCompanion.insert(
             id: id,
-            electricUserId: electricUserId,
             name: name,
             rowid: rowid,
           ),
@@ -2011,11 +1771,6 @@ class $$WorkspacesTableFilterComposer
       builder: (column, joinBuilders) =>
           ColumnFilters(column, joinBuilders: joinBuilders));
 
-  ColumnFilters<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
-      builder: (column, joinBuilders) =>
-          ColumnFilters(column, joinBuilders: joinBuilders));
-
   ColumnFilters<String> get name => $state.composableBuilder(
       column: $state.table.name,
       builder: (column, joinBuilders) =>
@@ -2027,11 +1782,6 @@ class $$WorkspacesTableOrderingComposer
   $$WorkspacesTableOrderingComposer(super.$state);
   ColumnOrderings<String> get id => $state.composableBuilder(
       column: $state.table.id,
-      builder: (column, joinBuilders) =>
-          ColumnOrderings(column, joinBuilders: joinBuilders));
-
-  ColumnOrderings<String> get electricUserId => $state.composableBuilder(
-      column: $state.table.electricUserId,
       builder: (column, joinBuilders) =>
           ColumnOrderings(column, joinBuilders: joinBuilders));
 

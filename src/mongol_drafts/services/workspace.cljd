@@ -1,0 +1,29 @@
+(ns mongol-drafts.services.workspace
+  (:require
+   ["package:uuid/uuid.dart" :as uuid]
+   ["package:mongol_drafts/database/drift/database.dart" :as schema]
+   ["package:drift/drift.dart" :as drift]
+   [mongol-drafts.services.db :as db]))
+
+(def default-workspace-name "Default Workspace")
+
+(defn get-or-create-default []
+  (let [^schema/AppDatabase database (db/get-db)
+        existing (await
+                  (.get
+                   (.customSelect
+                    database
+                    "SELECT id, name FROM workspaces LIMIT 1;")))]
+    (if (empty? existing)
+      (let [workspace-id (.v4 (uuid/Uuid))
+            name default-workspace-name]
+        (await
+         (.customInsert
+          database
+          "INSERT INTO workspaces (id, name) VALUES (?, ?)"
+          .variables [(drift/Variable workspace-id)
+                      (drift/Variable name)]))
+        {"id" workspace-id
+         "name" name})
+      (-> existing first .-data))))
+

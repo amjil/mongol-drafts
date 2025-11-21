@@ -2,49 +2,39 @@
   (:require
    ["package:uuid/uuid.dart" :as uuid]
    ["package:mongol_drafts/database/drift/database.dart" :as schema]
-   ["package:mongol_drafts/generated/electric/drift_schema.dart" :as drift-schema]
-   ["package:electricsql_flutter/drivers/drift.dart" :as electric-drift]
    ["package:drift/drift.dart" :as drift]
-   [mongol-drafts.services.electric :as electric]
+   [mongol-drafts.services.db :as db]
    [mongol-drafts.services.pref :as pref]))
 
 (declare query-tag-with-name)
 
 (defn create-tag [^String wid ^String v]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         result (await (query-tag-with-name v))
-        uuid (.v4 (uuid/Uuid))
-        userid (await (pref/get-string "user-id"))]
+        uuid (.v4 (uuid/Uuid))]
     (if (empty? result)
       (do
         (await
          (.customInsert
           db
-          "INSERT INTO tags (id, workspace_id, name, electric_user_id, related_num) 
-             values (?, ?, ?, ?, ?)"
+          "INSERT INTO tags (id, workspace_id, name, related_num) 
+             values (?, ?, ?, ?)"
           .variables [(drift/Variable uuid)
                       (drift/Variable wid)
                       (drift/Variable v)
-                      (drift/Variable userid)
                       (drift/Variable 0)]))
         uuid)
       (-> result first .-data (get "id")))))
 
 (defn delete-tag [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.customStatement db
                        "DELETE FROM tags WHERE id = ?"
                        [id]))))
 
 (defn count-tags []
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (->
      (await
       (.getSingle
@@ -53,9 +43,7 @@
      (get "total"))))
 
 (defn all-tags []
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -66,9 +54,7 @@
         ;")))))
 
 (defn query-tags [^String word]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -81,9 +67,7 @@
        .variables [(drift/Variable word)])))))
 
 (defn query-tag-with-name [^String n]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -95,9 +79,7 @@
        .variables [(drift/Variable n)])))))
 
 (defn query-draft-tags [^String id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -111,9 +93,7 @@
        .variables [(drift/Variable id)])))))
 
 (defn add-draft-tag [draft_id tag_id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
 
         result (->
                 (.customSelect db "SELECT id FROM draft_tags
@@ -124,15 +104,13 @@
                 await)]
 
     (when (empty? result)
-      (let [userid (await (pref/get-string "userid"))]
-        (await
-         (.customInsert
-          db
-          "INSERT INTO draft_tags (id, electric_user_id, draft_id, tag_id) 
-           VALUES (?, ?, ?, ?)"
-          .variables [(drift/Variable (.v4 (uuid/Uuid)))
-                      (drift/Variable userid)
-                      (drift/Variable draft_id) (drift/Variable tag_id)])))
+      (await
+       (.customInsert
+        db
+        "INSERT INTO draft_tags (id, draft_id, tag_id) 
+         VALUES (?, ?, ?)"
+        .variables [(drift/Variable (.v4 (uuid/Uuid)))
+                    (drift/Variable draft_id) (drift/Variable tag_id)]))
       (await
        (.customUpdate
         db
@@ -141,9 +119,7 @@
         .variables [(drift/Variable tag_id)])))))
 
 (defn delete-draft-tag [draft_id tag_id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         num (->
              (.customSelect db "SELECT related_num as num FROM tags
                             WHERE id = ?"

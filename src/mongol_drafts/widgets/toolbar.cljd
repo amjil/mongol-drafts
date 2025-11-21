@@ -3,10 +3,7 @@
    ["package:flutter/material.dart" :as m]
    [cljd.flutter :as f]
    [mongol-drafts.states.global :as global-state]
-   [mongol-drafts.states.draft :as draft-state]
-   [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.selection :as selection-state]
-   [mongol-drafts.states.history :as history]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.button-bar :as button]))
 
@@ -66,7 +63,7 @@
    :context ctx
    (m/Container
     .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer)
-    .height double/infinity)
+    .height (-> m/MediaQuery (.of ctx) .-size .-height))
    (m/Padding
     .padding (.all m/EdgeInsets 4))
    (m/Column
@@ -85,15 +82,7 @@
         .direction m.Axis/vertical
         .spacing 5
         .children
-        [(toolbar-button
-          (m/Icon (.redo m/Icons))
-          (fn []
-            (history/redo controller)))
-         (toolbar-button
-          (m/Icon (.undo m/Icons))
-          (fn []
-            (history/undo controller)))
-         (m/SizedBox .height 8)
+        [(m/SizedBox .height 8)
          (toolbar-button
           (m/Icon (.arrow_back_outlined m/Icons))
           (fn [] (selection-state/cursor-up controller)))
@@ -113,7 +102,7 @@
             (keyboard-action/on-key-press
              {:key-type :string
               :text (.toString (.now DateTime))}
-             global-state/state)))
+             nil)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
           (fn [] (selection-state/copy controller)))

@@ -1,1 +1,1 @@
-export "cljd-out/mongol-drafts/main.dart" show main;
+export "cljd-out/mongol-drafts/main.dart" show main, app;

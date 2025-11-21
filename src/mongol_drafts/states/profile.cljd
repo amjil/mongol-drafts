@@ -1,16 +1,16 @@
 (ns mongol-drafts.states.profile
    (:require
     [mongol-drafts.services.pref :as pref]
-    [mongol-drafts.services.electric :as electric]
     [mongol-drafts.states.global :as gs]))
+
+ (def default-user-id "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
 
  (def profile-keys
   ;; 1 key 2 type 3 default value
    [["in-app-keyboard" :bool true]
     ["sync-data" :bool false]
-    ["token" :string nil]
     ["user-name" :string nil]
-    ["user-id" :string electric/default-user-id]])
+    ["user-id" :string default-user-id]])
 
  (defn get-profile-setting [k]
    (await

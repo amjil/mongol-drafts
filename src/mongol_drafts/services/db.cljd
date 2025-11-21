@@ -1,0 +1,14 @@
+(ns mongol-drafts.services.db
+  (:require
+   ["package:mongol_drafts/database/drift/database.dart" :as db]))
+
+(def db-instance (atom nil))
+
+(defn init-db []
+  (let [database (await (db/initDriftDatabase))]
+    (reset! db-instance database)
+    database))
+
+(defn get-db []
+  @db-instance)
+

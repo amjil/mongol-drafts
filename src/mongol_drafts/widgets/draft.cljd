@@ -2,11 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   ["package:undo_textfield/undo_textfield.dart" :as undo]
    [virtual-keyboard.keyboard :as keyboard]
-   [virtual-keyboard.input-control :as control]
-   [virtual-keyboard.keyboard-action :as keyboard-action]
-   [virtual-keyboard.options :as keyboard-options]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.drawer :as drawer]
    [cljd.flutter :as f]
@@ -14,25 +10,20 @@
    [mongol-drafts.widgets.tagbar :as tagbar]
    [mongol-drafts.widgets.toolbar :as toolbar]
    [mongol-drafts.states.global :as global-state]
-   [mongol-drafts.states.draft :as draft-state]
-   [menu-bar.menu :as menu]))
+   [mongol-drafts.states.draft :as draft-state]))
 
 (defn widget []
   (f/widget
    :context ctx
-   :get [:info]
-   :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
-         _ (draft-state/new-draft)]
-   :managed [^undo/RedoTextEditController text-controller (undo/RedoTextEditController)]
+   :let [_ (draft-state/new-draft)]
+   :managed [^m/TextEditingController text-controller (m/TextEditingController)]
    :bind {:text-controller text-controller}
    :watch [{:keys [tag-viewable
                    show-keyboard
                    show-stacked-keyboard
                    show-system-keyboard
-                   show-search-dialog]
-            candidates-list :keyboard/candidates-list}
-           global-state/state
-           visible control/visible]
+                   show-search-dialog]}
+           global-state/state]
    (m/Stack
     .children
     [(m/Scaffold
@@ -43,7 +34,6 @@
           (do
             (swap! global-state/state assoc-in [:drafts :is-end] false)
             (swap! global-state/state assoc-in [:drafts :contents] [])
-            (swap! global-state/state assoc :keyboard/candidates-list [])
             (draft-state/query-drafts (:draft-search @global-state/state) true)
             (dart:core/print "onDrawerChanged"))))
       .drawer (drawer/left-drawer)
@@ -87,7 +77,7 @@
              .child
              (m/IntrinsicHeight
               .child
-              (keyboard/keyboard))))
+              (keyboard/keyboard {}))))
            (m/Container))])))
      (if (and (true? show-stacked-keyboard) (false? show-system-keyboard))
        (m/Positioned
@@ -106,17 +96,9 @@
            (m/Column
             .children
             [(button-bar/keyboard-upper-bar)
-             (keyboard/keyboard)])))))
+             (keyboard/keyboard {})])))))
        (m/Container))
      (if (true? show-search-dialog)
        (search/widget)
        (m/Container))
-     (m/Positioned
-      .bottom (+ keyboard-options/keyboard-default-height 20 (* 4 (+ 4 (:keyboard/row-vertical-padding info))))
-      .right (/ w 4)
-      .child
-      (menu/menu {:bar {:elavation 10
-                        :background-color
-                        (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)}
-                  :item {:on-tap (fn [x] (keyboard-action/on-candidates-clicked x global-state/state))}}
-                 candidates-list))])))
+    (keyboard/candidates nil)])))

@@ -3,113 +3,104 @@
    ["package:flutter/material.dart" :as m]
    ["package:uuid/uuid.dart" :as uuid]
    ["package:mongol_drafts/database/drift/database.dart" :as schema]
-   ["package:mongol_drafts/generated/electric/drift_schema.dart" :as drift-schema]
-   ["package:electricsql_flutter/drivers/drift.dart" :as electric-drift]
    ["package:drift/drift.dart" :as drift]
-   [mongol-drafts.services.electric :as electric]
+   [mongol-drafts.services.db :as db]
    [mongol-drafts.services.pref :as pref]))
 
 (defn create-draft [wid ^String v]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
-        userid (await (pref/get-string "userid"))
-        result (await
-                (.insertReturning
-                 (.into db (.-drafts db))
-                 (schema.DraftsCompanion/insert
-                  .id (.v4 (uuid/Uuid))
-                  .workspaceId wid
-                  .electricUserId userid
-                  .content (drift/Value v)
-                  .flag false
-                  .status 0
-                  .createdAt (drift/Value (DateTime.now))
-                  .updatedAt (drift/Value (DateTime.now)))))]
-    (-> result)))
+  (let [^schema/AppDatabase db (db/get-db)
+        id (.v4 (uuid/Uuid))
+        now (DateTime/now)]
+    (await
+     (.customInsert
+      db
+      "INSERT INTO drafts (id, workspace_id, content, flag, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      .variables [(drift/Variable id)
+                  (drift/Variable wid)
+                  (drift/Variable v)
+                  (drift/Variable false)
+                  (drift/Variable 0)
+                  (drift/Variable now)
+                  (drift/Variable now)]))
+    (await
+     (.getSingle
+      (.customSelect
+       db
+       "SELECT * FROM drafts WHERE id = ?"
+       .variables [(drift/Variable id)])))))
 
 (defn delete-draft [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
-     (.go
-      (doto (.delete db (.-drafts db))
-        (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))))))
+     (.customStatement
+      db
+      "DELETE FROM drafts WHERE id = ?"
+      [id]))))
 
 (defn update-draft [id ^String content]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         num (await
-             (.write
-              (doto (.update db (.-drafts db))
-                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
-              (schema/DraftsCompanion
-               .content (drift/Value content)
-               .updatedAt (drift/Value (DateTime.now)))))]
+             (.customUpdate
+              db
+              "UPDATE drafts SET content = ?, updated_at = ? WHERE id = ?"
+              .variables [(drift/Variable content)
+                          (drift/Variable (DateTime/now))
+                          (drift/Variable id)]))]
     num))
 
 (defn flag-draft [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         num (await
-             (.write
-              (doto (.update db (.-drafts db))
-                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
-              (schema/DraftsCompanion .flag (drift/Value true))))]
+             (.customUpdate
+              db
+              "UPDATE drafts SET flag = ? WHERE id = ?"
+              .variables [(drift/Variable true)
+                          (drift/Variable id)]))]
     num))
 
 (defn unflag-draft [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         num (await
-             (.write
-              (doto (.update db (.-drafts db))
-                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
-              (schema/DraftsCompanion .flag (drift/Value false))))]
+             (.customUpdate
+              db
+              "UPDATE drafts SET flag = ? WHERE id = ?"
+              .variables [(drift/Variable false)
+                          (drift/Variable id)]))]
     num))
 
 (defn recycle-draft [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         num (await
-             (.write
-              (doto (.update db (.-drafts db))
-                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
-              (schema/DraftsCompanion .status (drift/Value -1))))]
+             (.customUpdate
+              db
+              "UPDATE drafts SET status = ? WHERE id = ?"
+              .variables [(drift/Variable -1)
+                          (drift/Variable id)]))]
     num))
 
 (defn archive-draft [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         num (await
-             (.write
-              (doto (.update db (.-drafts db))
-                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
-              (schema/DraftsCompanion .status (drift/Value 1))))]
+             (.customUpdate
+              db
+              "UPDATE drafts SET status = ? WHERE id = ?"
+              .variables [(drift/Variable 1)
+                          (drift/Variable id)]))]
     num))
 
 (defn inbox-draft [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)
+  (let [^schema/AppDatabase db (db/get-db)
         num (await
-             (.write
-              (doto (.update db (.-drafts db))
-                (.where (fn [^drift-schema/Drafts tbl] (.equals (.-id tbl) id))))
-              (schema/DraftsCompanion .status (drift/Value 0))))]
+             (.customUpdate
+              db
+              "UPDATE drafts SET status = ? WHERE id = ?"
+              .variables [(drift/Variable 0)
+                          (drift/Variable id)]))]
     num))
   
 (defn list-drafts [tag-in-ids tag-out-ids
                    flag status]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -162,9 +153,7 @@
        ;"))))))
 
 (defn last-draft []
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -176,9 +165,7 @@
         ;")))))
 
 (defn get-draft [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -193,9 +180,7 @@
 
 (defn query-drafts [word tag-in-ids tag-out-ids
                     flag status]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
+  (let [^schema/AppDatabase db (db/get-db)]
     (await
      (.get
       (.customSelect
@@ -248,32 +233,3 @@
         "
          order by updated_at desc
          ;"))))))
-
-(defn update-initial-user [id]
-  (let [^electric-drift/ElectricClient
-        client @electric/elec
-        ^schema/AppDatabase db (.-db client)]
-    (await
-     (.write
-      (doto (.update db (.-drafts db))
-        (.where (fn [^drift-schema/Drafts tbl] (.equals (.-electricUserId tbl) id))))
-      (schema/DraftsCompanion
-       .electricUserId (drift/Value id))))
-    (await
-     (.write
-      (doto (.update db (.-workspaces db))
-        (.where (fn [^drift-schema/Workspaces tbl] (.equals (.-electricUserId tbl) id))))
-      (schema/WorkspacesCompanion
-       .electricUserId (drift/Value id))))
-    (await
-     (.write
-      (doto (.update db (.-tags db))
-        (.where (fn [^drift-schema/Tags tbl] (.equals (.-electricUserId tbl) id))))
-      (schema/TagsCompanion
-       .electricUserId (drift/Value id))))
-    (await
-     (.write
-      (doto (.update db (.-draftTags db))
-        (.where (fn [^drift-schema/DraftTags tbl] (.equals (.-electricUserId tbl) id))))
-      (schema/DraftTagsCompanion
-       .electricUserId (drift/Value id))))))

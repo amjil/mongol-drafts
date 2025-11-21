@@ -5,13 +5,9 @@ import 'package:drift/native.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Whether to use Electric backed by a Postgres database as a client.
-/// It would sync with the "master" Postgres database or other "SQLite" clients.
-const _kUsePostgresDriver = false;
-
 Future<String> getDatabasePath() async {
   final appDocsDir = await getApplicationDocumentsDirectory();
-  final appDir = Directory(join(appDocsDir.path, "electric"));
+  final appDir = Directory(join(appDocsDir.path, "mongol_drafts"));
   if (!await appDir.exists()) {
     await appDir.create(recursive: true);
   }

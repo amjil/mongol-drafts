@@ -8,8 +8,7 @@
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.selection :as selection-state]
-   [mongol-drafts.utils.modal :as modal]
-   [virtual-keyboard.keyboard-action :as keyboard-action]))
+   [mongol-drafts.utils.modal :as modal]))
    
 (defn bar-button [child on-press]
   (f/widget
