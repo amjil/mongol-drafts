@@ -3,6 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [virtual-keyboard.keyboard :as keyboard]
+   [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.drawer :as drawer]
    [cljd.flutter :as f]
@@ -11,6 +12,7 @@
    [mongol-drafts.widgets.toolbar :as toolbar]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]))
+   
 
 (defn widget []
   (f/widget
@@ -31,6 +33,7 @@
     [(m/Scaffold
       .onDrawerChanged
       (fn [c]
+        (keyboard-action/clear-candidates)
         (if (false? c)
           (swap! global-state/state assoc :show-stacked-keyboard false)
           (do

@@ -65,6 +65,6 @@
    
 (defn widget []
   (f/widget
-   (m/Container)
    (m/SafeArea)
+   (m/Container)
    (default-view)))

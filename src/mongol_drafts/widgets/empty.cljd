@@ -22,6 +22,6 @@
      (m/Row
       .mainAxisAlignment m.MainAxisAlignment/center
       .children [(mgl/MongolText "ᠶᠭᠤ" .style (m/TextStyle .fontSize 20))
-                 (mgl/MongolText "ᠴᠤ" .style (m/TextStyle .fontSize 20))
+                 (mgl/MongolText "᠎ᠴᠤ" .style (m/TextStyle .fontSize 20))
                  (mgl/MongolText "ᠦᠭᠡᠢ" .style (m/TextStyle .fontSize 20))])])))
 
