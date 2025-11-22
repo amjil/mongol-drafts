@@ -3,14 +3,10 @@
     [mongol-drafts.services.pref :as pref]
     [mongol-drafts.states.global :as gs]))
 
- (def default-user-id "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX")
-
  (def profile-keys
   ;; 1 key 2 type 3 default value
    [["in-app-keyboard" :bool true]
-    ["sync-data" :bool false]
-    ["user-name" :string nil]
-    ["user-id" :string default-user-id]])
+    ["sync-data" :bool false]])
 
  (defn get-profile-setting [k]
    (await
