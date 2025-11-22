@@ -11,10 +11,10 @@
    
 (defn- get-theme-subtitle [theme-mode]
   (condp = theme-mode
-    theme-state/theme-mode-light "Light"
-    theme-state/theme-mode-dark "Dark"
-    theme-state/theme-mode-system "Follow System"
-    "Not Set"))
+    theme-state/theme-mode-light "ᠴᠠᠭᠠᠨ "
+    theme-state/theme-mode-dark "ᠬᠠᠷᠠᠪᠲᠤᠷ "
+    theme-state/theme-mode-system "ᠰᠢᠰᠲ᠋ᠧᠮ ᠎ᠢ ᠳᠠᠭᠠᠬᠤ"
+    "ᠰᠢᠰᠲ᠋ᠧᠮ ᠎ᠢ ᠳᠠᠭᠠᠬᠤ"))
 
 (defn profile-view []
   (f/widget
@@ -28,25 +28,25 @@
     .crossAxisAlignment m.CrossAxisAlignment/start
     .children
     [(settings/settings-group
-      [{:title "Theme"
+      [{:title "ᠳᠡᠯᠭᠡᠴᠡ ᠎ᠶᠢᠨ ᠰᠡᠳᠦᠪ "
         :leading (.palette m/Icons)
-        :subtitle (str "Current: " theme-subtitle)
+        :subtitle (str "ᠣᠳᠣ : " theme-subtitle)
         :on-tap (fn [] (theme-dialog/show-theme-dialog ctx))}
-       {:title "App Font"
+       {:title "ᠠᠫᠫ ᠹᠦᠨᠲ "
         :leading m/Icons.font_download
-        :subtitle (str "Current: " app-font)
+        :subtitle (str "ᠣᠳᠣ : " app-font)
         :on-tap (fn [] (font-dialog/show-app-font-dialog ctx))}
-       {:title "App Font Size"
+       {:title "ᠠᠫᠫ ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ "
         :leading m/Icons.format_size
-        :subtitle (str "Current: " app-font-size)
+        :subtitle (str "ᠣᠳᠣ : " app-font-size)
         :on-tap (fn [] (font-size-dialog/show-app-font-size-dialog ctx))}
-       {:title "Draft Font"
+       {:title "ᠲᠡᠮᠳᠡᠭᠯᠡᠯ ᠎ᠦᠨ ᠹᠦᠨᠲ "
         :leading (.article m/Icons)
-        :subtitle (str "Current: " draft-font)
+        :subtitle (str "ᠣᠳᠣ : " draft-font)
         :on-tap (fn [] (font-dialog/show-draft-font-dialog ctx))}
-       {:title "Draft Font Size"
+       {:title "ᠲᠡᠮᠳᠡᠭᠯᠡᠯ ᠎ᠦᠨ ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ "
         :leading m/Icons.text_fields
-        :subtitle (str "Current: " draft-font-size)
+        :subtitle (str "ᠣᠳᠣ : " draft-font-size)
         :on-tap (fn [] (font-size-dialog/show-draft-font-size-dialog ctx))}])])))
 
 (defn default-view []
