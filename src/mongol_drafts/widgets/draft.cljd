@@ -28,7 +28,7 @@
                    show-stacked-keyboard
                    show-search-dialog]}
            global-state/state
-           {draft-font :draft-font} font-state/font-state]
+           {draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
    (m/Stack
     .children
     [(m/Scaffold
@@ -70,7 +70,7 @@
                .decoration nil
                .maxLines 1000
                .autofocus true
-               .style (m/TextStyle .fontSize 18 .height 1.8 .fontFamily draft-font))))
+               .style (m/TextStyle .fontSize draft-font-size .height 1.8 .fontFamily draft-font))))
             (if (true? show-keyboard)
               (toolbar/toolbar text-controller)
               (m/Container))]))

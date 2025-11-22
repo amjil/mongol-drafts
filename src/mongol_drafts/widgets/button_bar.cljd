@@ -1,7 +1,6 @@
 (ns mongol-drafts.widgets.button-bar
   (:require
    ["package:flutter/material.dart" :as m]
-   ["package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart" :as kv]
    [cljd.flutter :as f]
    [mongol-drafts.widgets.profile :as profile]
    [mongol-drafts.states.global :as global-state]
@@ -72,25 +71,22 @@
 
 (defn keyboard-close-button [flag]
   (f/widget
-   (kv/KeyboardDismissOnTap
-    .dismissOnCapturedTaps true
+   (m/Container
+    .height 40
     .child
-    (m/Container
-     .height 40
-     .child
-     (m/GestureDetector
-      .child (m/Icon (.keyboard_arrow_down m/Icons))
-      .onTap (fn []
-               (keyboard-action/clear-candidates)
-               (if (true? flag)
-                 (swap! global-state/state
-                        assoc
-                        :show-keyboard
-                        (not (:show-keyboard @global-state/state)))
-                 (swap! global-state/state
-                        assoc
-                        :show-stacked-keyboard
-                        (not (:show-stacked-keyboard @global-state/state))))))))))
+    (m/GestureDetector
+     .child (m/Icon (.keyboard_arrow_down m/Icons))
+     .onTap (fn []
+              (keyboard-action/clear-candidates)
+              (if (true? flag)
+                (swap! global-state/state
+                       assoc
+                       :show-keyboard
+                       (not (:show-keyboard @global-state/state)))
+                (swap! global-state/state
+                       assoc
+                       :show-stacked-keyboard
+                       (not (:show-stacked-keyboard @global-state/state)))))))))
 
 
 ;;;

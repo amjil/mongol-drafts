@@ -5,28 +5,48 @@
 ;; Font preference keys
 (def app-font-preference-key "app_font")
 (def draft-font-preference-key "draft_font")
+(def app-font-size-preference-key "app_font_size")
+(def draft-font-size-preference-key "draft_font_size")
 
 ;; Available fonts
 (def available-fonts
   ["OyunQaganTig" "OnonSoninSans"])
 
+;; Available font sizes
+(def available-font-sizes
+  [12 14 16 18 20 22 24 26 28 30])
+
 ;; Default fonts
 (def default-app-font "OyunQaganTig")
 (def default-draft-font "OyunQaganTig")
 
+;; Default font sizes
+(def default-app-font-size 18)
+(def default-draft-font-size 18)
+
 ;; Font state atom
 (def font-state
   (atom {:app-font default-app-font
-         :draft-font default-draft-font}))
+         :draft-font default-draft-font
+         :app-font-size default-app-font-size
+         :draft-font-size default-draft-font-size}))
 
 ;; Initialize font settings from preferences
 (defn init-font-settings! []
   (let [saved-app-font (await (pref/get-string app-font-preference-key))
         saved-draft-font (await (pref/get-string draft-font-preference-key))
+        saved-app-font-size (await (pref/get-int app-font-size-preference-key))
+        saved-draft-font-size (await (pref/get-int draft-font-size-preference-key))
         app-font (or saved-app-font default-app-font)
-        draft-font (or saved-draft-font default-draft-font)]
-    (swap! font-state assoc :app-font app-font :draft-font draft-font)
-    {:app-font app-font :draft-font draft-font}))
+        draft-font (or saved-draft-font default-draft-font)
+        app-font-size (or saved-app-font-size default-app-font-size)
+        draft-font-size (or saved-draft-font-size default-draft-font-size)]
+    (swap! font-state assoc :app-font app-font 
+           :draft-font draft-font
+           :app-font-size app-font-size
+           :draft-font-size draft-font-size)
+    {:app-font app-font :draft-font draft-font
+     :app-font-size app-font-size :draft-font-size draft-font-size}))
 
 ;; Get current app font
 (defn get-app-font []
@@ -45,4 +65,22 @@
 (defn set-draft-font! [font]
   (swap! font-state assoc :draft-font font)
   (await (pref/set-string draft-font-preference-key font)))
+
+;; Get current app font size
+(defn get-app-font-size []
+  (:app-font-size @font-state))
+
+;; Get current draft font size
+(defn get-draft-font-size []
+  (:draft-font-size @font-state))
+
+;; Set app font size and save to preferences
+(defn set-app-font-size! [size]
+  (swap! font-state assoc :app-font-size size)
+  (await (pref/set-int app-font-size-preference-key size)))
+
+;; Set draft font size and save to preferences
+(defn set-draft-font-size! [size]
+  (swap! font-state assoc :draft-font-size size)
+  (await (pref/set-int draft-font-size-preference-key size)))
 

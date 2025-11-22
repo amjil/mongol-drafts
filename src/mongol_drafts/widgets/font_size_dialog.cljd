@@ -1,0 +1,64 @@
+(ns mongol-drafts.widgets.font-size-dialog
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f]
+   [mongol-drafts.states.font :as font-state]))
+
+(defn font-size-dialog [_context font-type]
+  (f/widget
+   :context ctx
+   :watch [{app-font-size :app-font-size draft-font-size :draft-font-size} font-state/font-state]
+   :let [theme (-> m/Theme (.of ctx))
+         color-scheme (.-colorScheme theme)
+         brightness (.-brightness theme)
+         dialog-bg-color (if (= brightness m/Brightness.light)
+                          (-> m/Colors .white)
+                          (.-secondaryContainer color-scheme))
+         current-size (if (= font-type :app) app-font-size draft-font-size)
+         title (if (= font-type :app) "App Font Size" "Draft Font Size")]
+   (m/AlertDialog
+    .backgroundColor dialog-bg-color
+    .content
+    (m/Row
+     .children
+     [(mgl/MongolText title
+                     .style (m/TextStyle
+                             .fontSize 20
+                             .fontWeight m/FontWeight.bold
+                             .color (.-onSurface color-scheme)))
+      (m/Expanded
+       .child (m/SingleChildScrollView
+               .scrollDirection m/Axis.horizontal
+               .child
+               (m/Row
+                .mainAxisSize m/MainAxisSize.min
+                .children
+                (map (fn [size]
+                       (m/RotatedBox
+                        .quarterTurns 1
+                        .child (m/RadioListTile
+                                .title (m/Text (str size))
+                                .value size
+                                .groupValue current-size
+                                .onChanged (fn [value]
+                                            (if (= font-type :app)
+                                              (font-state/set-app-font-size! value)
+                                              (font-state/set-draft-font-size! value))
+                                            (m/Navigator.pop ctx)))))
+                     font-state/available-font-sizes))))])
+    .actions
+    [(m/TextButton
+      .onPressed (fn [] (m/Navigator.pop ctx))
+      .child (mgl/MongolText "Close"))])))
+
+(defn show-app-font-size-dialog [context]
+  (m/showDialog
+   .context context
+   .builder (fn [ctx] (font-size-dialog ctx :app))))
+
+(defn show-draft-font-size-dialog [context]
+  (m/showDialog
+   .context context
+   .builder (fn [ctx] (font-size-dialog ctx :draft))))
+
