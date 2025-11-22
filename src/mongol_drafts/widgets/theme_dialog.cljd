@@ -1,0 +1,71 @@
+(ns mongol-drafts.widgets.theme-dialog
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f]
+   [mongol-drafts.states.theme :as theme-state]))
+
+(defn theme-dialog [_context]
+  (f/widget
+   :context ctx
+   :watch [{current-mode :mode} theme-state/theme-state]
+   :let [theme (-> m/Theme (.of ctx))
+         color-scheme (.-colorScheme theme)
+         brightness (.-brightness theme)
+         dialog-bg-color (if (= brightness m/Brightness.light)
+                          (-> m/Colors .white)
+                          (.-surface color-scheme))]
+   (m/AlertDialog
+    .backgroundColor dialog-bg-color
+    .content
+    (m/Row
+     .children
+     [(mgl/MongolText "Select Theme"
+                      .style (m/TextStyle
+                              .fontSize 20
+                              .fontWeight m/FontWeight.bold
+                              .color (.-onSurface color-scheme)))
+      (m/Expanded
+       .child (m/SingleChildScrollView
+               .scrollDirection m/Axis.horizontal
+               .child
+               (m/Row
+                .mainAxisSize m/MainAxisSize.min
+                .children
+                [(m/RotatedBox
+                  .quarterTurns 1
+                  .child (m/RadioListTile
+                          .title (m/Text "Light")
+                          .value theme-state/theme-mode-light
+                          .groupValue current-mode
+                          .onChanged (fn [value]
+                                       (theme-state/set-theme-mode-with-adaptive! ctx value)
+                                       (m/Navigator.pop ctx))))
+                 (m/RotatedBox
+                  .quarterTurns 1
+                  .child (m/RadioListTile
+                          .title (m/Text "Dark")
+                          .value theme-state/theme-mode-dark
+                          .groupValue current-mode
+                          .onChanged (fn [value]
+                                       (theme-state/set-theme-mode-with-adaptive! ctx value)
+                                       (m/Navigator.pop ctx))))
+                 (m/RotatedBox
+                  .quarterTurns 1
+                  .child (m/RadioListTile
+                          .title (m/Text "Follow System")
+                          .value theme-state/theme-mode-system
+                          .groupValue current-mode
+                          .onChanged (fn [value]
+                                       (theme-state/set-theme-mode-with-adaptive! ctx value)
+                                       (m/Navigator.pop ctx))))])))])
+    .actions
+    [(m/TextButton
+      .onPressed (fn [] (m/Navigator.pop ctx))
+      .child (mgl/MongolText "Close"))])))
+
+(defn show-theme-dialog [context]
+  (m/showDialog
+   .context context
+   .builder (fn [ctx] (theme-dialog ctx))))
+

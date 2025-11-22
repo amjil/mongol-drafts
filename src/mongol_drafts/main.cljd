@@ -11,6 +11,7 @@
    [mongol-drafts.services.db :as db-service]
    [mongol-drafts.states.profile :as profile]
    [mongol-drafts.states.global :as global-state]
+   [mongol-drafts.states.theme :as theme-state]
    [mongol-drafts.services.workspace :as workspace-service]
    [mongol-drafts.widgets.draft :as draft]
    [mongol-drafts.widgets.theme :as theme]))
@@ -18,6 +19,7 @@
 (defn app []
   (f/widget
    :context ctx
+   :watch [_theme-mode theme-state/theme-state]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          info (merge keyboard-options/keyboard-option
                      {:keyboard/key-cap-border-radius 6
@@ -35,15 +37,16 @@
    (adaptive/AdaptiveTheme
     .light theme/default-light-theme
     .dark theme/default-dark-theme
-    .initial adaptive.AdaptiveThemeMode/dark
+    .initial (condp = (theme-state/get-theme-mode)
+               theme-state/theme-mode-light adaptive.AdaptiveThemeMode/light
+               theme-state/theme-mode-dark adaptive.AdaptiveThemeMode/dark
+               adaptive.AdaptiveThemeMode/system)
     .builder
     (fn [theme dark-theme]
       (m/MaterialApp
        .title "Welcome to Flutter"
        .theme theme
        .darkTheme dark-theme
-           ;;  .theme theme/default-light-theme
-           ;;  .darkTheme theme/default-dark-theme
        .debugShowCheckedModeBanner false
        .home
        (draft/widget))))))
@@ -53,6 +56,9 @@
 
   ;; load the environment variables from the .env file
   (await (.load dotenv/dotenv .fileName "assets/.env"))
+
+  ;; initialize theme mode from preferences
+  (await (theme-state/init-theme-mode!))
 
   ;; prepopulate the profile settings
   (profile/prepopulate-profile-settings)

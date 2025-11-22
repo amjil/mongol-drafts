@@ -1,21 +1,36 @@
 (ns mongol-drafts.widgets.profile
   (:require
    ["package:flutter/material.dart" :as m]
-   ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter :as f]
    [mongol-drafts.widgets.settings :as settings]
+   [mongol-drafts.widgets.theme-dialog :as theme-dialog]
    [mongol-drafts.states.profile :as profile-state]
-   [mongol-drafts.states.global :as gs]))
+   [mongol-drafts.states.global :as gs]
+   [mongol-drafts.states.theme :as theme-state]))
    
+(defn- get-theme-subtitle [theme-mode]
+  (condp = theme-mode
+    theme-state/theme-mode-light "Light"
+    theme-state/theme-mode-dark "Dark"
+    theme-state/theme-mode-system "Follow System"
+    "Not Set"))
+
 (defn profile-view []
   (f/widget
-   :watch [{profile :profile} gs/state]
+   :context ctx
+   :watch [{profile :profile} gs/state
+           {current-mode :mode} theme-state/theme-state]
+   :let [theme-subtitle (get-theme-subtitle current-mode)]
    (m/SingleChildScrollView .scrollDirection m.Axis/horizontal)
    (m/Row
     .crossAxisAlignment m.CrossAxisAlignment/start
     .children
     [(settings/settings-group
-      [{:title "In-App Keyboard"
+      [{:title "Theme"
+        :leading (.palette m/Icons)
+        :subtitle (str "Current: " theme-subtitle)
+        :on-tap (fn [] (theme-dialog/show-theme-dialog ctx))}
+       {:title "In-App Keyboard"
         :leading (.keyboard m/Icons)
         :trailing (m/RotatedBox
                    .quarterTurns -1
@@ -53,6 +68,7 @@
                (m/Expanded
                 .child
                 (profile-view))])))
+
    
 (defn widget []
   (f/widget

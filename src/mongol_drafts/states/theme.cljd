@@ -1,0 +1,65 @@
+(ns mongol-drafts.states.theme
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
+   [mongol-drafts.services.pref :as pref]))
+
+;; Theme mode constants
+(def theme-mode-light "light")
+(def theme-mode-dark "dark")
+(def theme-mode-system "system")
+
+;; Theme preference key
+(def theme-preference-key "theme_mode")
+
+;; Theme state atom
+(def theme-state
+  (atom {:mode theme-mode-system}))
+
+;; Initialize theme mode from preferences
+(defn init-theme-mode! []
+  (let [saved-mode (await (pref/get-string theme-preference-key))
+        mode (or saved-mode theme-mode-system)]
+    (swap! theme-state assoc :mode mode)
+    mode))
+
+;; Get current theme mode
+(defn get-theme-mode []
+  (:mode @theme-state))
+
+;; Set theme mode and save to preferences
+(defn set-theme-mode! [mode]
+  (swap! theme-state assoc :mode mode)
+  (await (pref/set-string theme-preference-key mode)))
+
+;; Set theme mode and update AdaptiveTheme
+(defn set-theme-mode-with-adaptive! [ctx mode]
+  (swap! theme-state assoc :mode mode)
+  (await (pref/set-string theme-preference-key mode))
+  (let [adaptive-theme (-> adaptive/AdaptiveTheme (.of ctx))]
+    (condp = mode
+      theme-mode-light (.setLight adaptive-theme)
+      theme-mode-dark (.setDark adaptive-theme)
+      (.setSystem adaptive-theme))))
+
+;; Get ThemeMode based on current preference
+(defn get-theme-mode-enum []
+  (let [mode (get-theme-mode)]
+    (condp = mode
+      theme-mode-light m/ThemeMode.light
+      theme-mode-dark m/ThemeMode.dark
+      m/ThemeMode.system)))
+
+;; Check if using system theme
+(defn is-system-theme? []
+  (= (get-theme-mode) theme-mode-system))
+
+;; Get effective brightness (for when system theme is used)
+(defn get-effective-brightness [context]
+  (let [mode (get-theme-mode)
+        brightness (-> m/MediaQuery (.of context) .-platformBrightness)]
+    (condp = mode
+      theme-mode-light m/Brightness.light
+      theme-mode-dark m/Brightness.dark
+      brightness)))
+
