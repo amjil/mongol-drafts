@@ -16,7 +16,7 @@
                           (-> m/Colors .white)
                           (.-secondaryContainer color-scheme))
          current-font (if (= font-type :app) app-font draft-font)
-         title (if (= font-type :app) "App Font" "Draft Font")]
+         title (if (= font-type :app) "ᠠᠫᠫ ᠹᠦᠨᠲ " "ᠲᠡᠮᠳᠡᠭᠯᠡᠯ ᠎ᠦᠨ ᠹᠦᠨᠲ ")]
    (m/AlertDialog
     .backgroundColor dialog-bg-color
     .content
@@ -50,7 +50,7 @@
     .actions
     [(m/TextButton
       .onPressed (fn [] (m/Navigator.pop ctx))
-      .child (mgl/MongolText "Close"))])))
+      .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ "))])))
 
 (defn show-app-font-dialog [context]
   (m/showDialog

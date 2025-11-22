@@ -22,7 +22,7 @@
     .content
     (m/Row
      .children
-     [(mgl/MongolText "Select Theme"
+     [(mgl/MongolText "ᠳᠡᠯᠭᠡᠴᠡᠨ ᠎ᠤ ᠰᠡᠳᠦᠪ ᠰᠣᠩᠭᠣᠬᠤ "
                       .style (m/TextStyle
                               .fontSize 20
                               .fontWeight m/FontWeight.bold
@@ -37,7 +37,7 @@
                 [(m/RotatedBox
                   .quarterTurns 1
                   .child (m/RadioListTile
-                          .title (m/Text "Light")
+                          .title (m/Text "ᠴᠠᠭᠠᠨ ")
                           .value theme-state/theme-mode-light
                           .groupValue current-mode
                           .onChanged (fn [value]
@@ -46,7 +46,7 @@
                  (m/RotatedBox
                   .quarterTurns 1
                   .child (m/RadioListTile
-                          .title (m/Text "Dark")
+                          .title (m/Text "ᠬᠠᠷᠠᠪᠲᠤᠷ ")
                           .value theme-state/theme-mode-dark
                           .groupValue current-mode
                           .onChanged (fn [value]
@@ -55,7 +55,7 @@
                  (m/RotatedBox
                   .quarterTurns 1
                   .child (m/RadioListTile
-                          .title (m/Text "Follow System")
+                          .title (m/Text "ᠰᠢᠰᠲ᠋ᠧᠮ ᠎ᠢ ᠳᠠᠭᠠᠬᠤ")
                           .value theme-state/theme-mode-system
                           .groupValue current-mode
                           .onChanged (fn [value]
@@ -64,7 +64,7 @@
     .actions
     [(m/TextButton
       .onPressed (fn [] (m/Navigator.pop ctx))
-      .child (mgl/MongolText "Close"))])))
+      .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ "))])))
 
 (defn show-theme-dialog [context]
   (m/showDialog

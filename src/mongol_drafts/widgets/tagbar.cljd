@@ -107,7 +107,7 @@
             (m/RotatedBox
              .quarterTurns 1
              .child
-             (m/Text "+ tag" .style (m/TextStyle .fontSize 12))))))))
+             (m/Text "+ ᠱᠣᠰᠢᠭ᠎ᠠ " .style (m/TextStyle .fontSize 12))))))))
       (m/SizedBox .height 8)]
      (map #(tag-text-button
             (get % "name")

@@ -23,6 +23,7 @@
    :managed [^m/TextEditingController
              draft-search-controller (m/TextEditingController)]
    (m/Drawer
+    .backgroundColor (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
               40))
    (m/Scaffold

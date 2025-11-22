@@ -13,10 +13,12 @@
          color-scheme (.-colorScheme theme)
          brightness (.-brightness theme)
          dialog-bg-color (if (= brightness m/Brightness.light)
-                          (-> m/Colors .white)
-                          (.-secondaryContainer color-scheme))
+                           (-> m/Colors .white)
+                           (.-secondaryContainer color-scheme))
          current-size (if (= font-type :app) app-font-size draft-font-size)
-         title (if (= font-type :app) "App Font Size" "Draft Font Size")]
+         title (if (= font-type :app)
+                 "ᠠᠫᠫ ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ "
+                 "ᠲᠡᠮᠳᠡᠭᠯᠡᠯ ᠎ᠦᠨ ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ ")]
    (m/AlertDialog
     .backgroundColor dialog-bg-color
     .content
@@ -50,7 +52,7 @@
     .actions
     [(m/TextButton
       .onPressed (fn [] (m/Navigator.pop ctx))
-      .child (mgl/MongolText "Close"))])))
+      .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ "))])))
 
 (defn show-app-font-size-dialog [context]
   (m/showDialog
