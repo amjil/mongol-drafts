@@ -14,7 +14,8 @@
      (f/widget
       (m/FractionallySizedBox
        .heightFactor 0.9)
-      (m/Scaffold)
+      (m/Scaffold
+       .backgroundColor (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer))
       .body
       (m/Container)
       (m/SafeArea .top false

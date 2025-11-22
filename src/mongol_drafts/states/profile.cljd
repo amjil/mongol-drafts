@@ -5,7 +5,7 @@
 
  (def profile-keys
   ;; 1 key 2 type 3 default value
-   [["sync-data" :bool false]])
+   [])
 
  (defn get-profile-setting [k]
    (await

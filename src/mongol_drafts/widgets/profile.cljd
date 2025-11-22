@@ -4,8 +4,6 @@
    [cljd.flutter :as f]
    [mongol-drafts.widgets.settings :as settings]
    [mongol-drafts.widgets.theme-dialog :as theme-dialog]
-   [mongol-drafts.states.profile :as profile-state]
-   [mongol-drafts.states.global :as gs]
    [mongol-drafts.states.theme :as theme-state]))
    
 (defn- get-theme-subtitle [theme-mode]
@@ -18,8 +16,7 @@
 (defn profile-view []
   (f/widget
    :context ctx
-   :watch [{profile :profile} gs/state
-           {current-mode :mode} theme-state/theme-state]
+   :watch [{current-mode :mode} theme-state/theme-state]
    :let [theme-subtitle (get-theme-subtitle current-mode)]
    (m/SingleChildScrollView .scrollDirection m.Axis/horizontal)
    (m/Row
@@ -29,16 +26,7 @@
       [{:title "Theme"
         :leading (.palette m/Icons)
         :subtitle (str "Current: " theme-subtitle)
-        :on-tap (fn [] (theme-dialog/show-theme-dialog ctx))}
-       {:title "Sync Data"
-        :leading (.sync m/Icons)
-        :trailing (m/Switch
-                   .value (get profile "sync-data" false)
-                   .onChanged (fn [value]
-                               (profile-state/set-profile-setting
-                                {:key "sync-data"
-                                 :type :bool
-                                 :value value})))}])])))
+        :on-tap (fn [] (theme-dialog/show-theme-dialog ctx))}])])))
 
 (defn default-view []
   (f/widget
