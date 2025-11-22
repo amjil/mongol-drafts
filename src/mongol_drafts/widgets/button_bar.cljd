@@ -7,8 +7,8 @@
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
-   [mongol-drafts.states.selection :as selection-state]
-   [mongol-drafts.utils.modal :as modal]))
+   [mongol-drafts.utils.modal :as modal]
+   [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
   (f/widget
@@ -81,6 +81,7 @@
      (m/GestureDetector
       .child (m/Icon (.keyboard_arrow_down m/Icons))
       .onTap (fn []
+               (keyboard-action/clear-candidates)
                (if (true? flag)
                  (swap! global-state/state
                         assoc
