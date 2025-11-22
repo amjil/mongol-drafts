@@ -13,8 +13,10 @@
          color-scheme (.-colorScheme theme)
          brightness (.-brightness theme)
          dialog-bg-color (if (= brightness m/Brightness.light)
-                          (-> m/Colors .white)
-                          (.-surface color-scheme))]
+                           (-> m/Colors .white)
+                           (.-secondaryContainer color-scheme))]
+                           
+                           
    (m/AlertDialog
     .backgroundColor dialog-bg-color
     .content

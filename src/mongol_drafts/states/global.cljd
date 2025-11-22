@@ -11,7 +11,6 @@
     :show-drawer-search false
     :show-sub-drawer-search false
     :show-search-dialog false
-    :show-system-keyboard false
     :profile-view-index 0
     :tag-on-edit false
     :current-layout "mg"

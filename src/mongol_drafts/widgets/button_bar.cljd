@@ -72,7 +72,6 @@
 
 (defn keyboard-close-button [flag]
   (f/widget
-   :watch [{show-system-keyboard :show-system-keyboard} global-state/state]
    (kv/KeyboardDismissOnTap
     .dismissOnCapturedTaps true
     .child

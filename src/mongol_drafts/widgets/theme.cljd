@@ -42,28 +42,40 @@
         1 adaptive.AdaptiveThemeMode/dark
         adaptive.AdaptiveThemeMode/system))))
 
-(def default-light-theme 
+(def default-light-theme
   (m/ThemeData
    .fontFamily "OyunQagantig"
    .scaffoldBackgroundColor (-> m/Colors .white)
    .colorScheme
    (.light m/ColorScheme
            .primary m.Colors/black
-           .onPrimary m.Colors/black
-           .surface m.Colors/black
+           .onPrimary m.Colors/white
+           .surface (-> m/Colors .white)
+           .onSurface (-> m/Colors .black87)
+           .surfaceVariant (-> m/Colors .grey .-shade100)
+           .onSurfaceVariant (-> m/Colors .black87)
            .outlineVariant (-> m/Colors .yellowAccent .-shade400)
            .secondary m.Colors/red
            .tertiary (-> m/Colors .blueGrey .-shade600)
            .primaryContainer (-> m/Colors .blueGrey .-shade50)
-           .secondaryContainer (-> m/Colors .blueGrey .-shade100)
+           .secondaryContainer (-> m/Colors .grey .-shade100)
+           .onSecondaryContainer (-> m/Colors .black87)
            .tertiaryContainer (-> m/Colors .grey .-shade200))
    .cardTheme (m/CardThemeData .color (-> m/Colors .white))
    .iconTheme (m/IconThemeData .color (-> m/Colors .blueGrey .-shade600))
-;;    .textTheme (m/TextTheme
-;;                .titleMedium (m/TextStyle .color m.Colors/white
-;;                                          .fontSize 20.0)
-;;                .bodyText1 (m/TextStyle .color m.Colors/white70
-;;                                        .fontSize 18.0))
+   .textSelectionTheme (m/TextSelectionThemeData
+                       .cursorColor (-> m/Colors .blueGrey .-shade600)
+                       .selectionColor (-> m/Colors .blueGrey .-shade200)
+                       .selectionHandleColor (-> m/Colors .blueGrey .-shade600))
+   .textButtonTheme (m/TextButtonThemeData
+                     .style (m/ButtonStyle
+                             .foregroundColor (-> m/MaterialStateProperty
+                                                  (.resolveWith (fn [_states] (-> m/Colors .blueGrey .-shade900))))))
+   ;;    .textTheme (m/TextTheme
+   ;;                .titleMedium (m/TextStyle .color m.Colors/white
+   ;;                                          .fontSize 20.0)
+   ;;                .bodyText1 (m/TextStyle .color m.Colors/white70
+   ;;                                        .fontSize 18.0))
    ))
 
 (def default-dark-theme
@@ -83,9 +95,17 @@
           .tertiaryContainer (-> m/Colors .grey .-shade700))
    .cardTheme (m/CardThemeData .color m.Colors/blueGrey)
    .iconTheme (m/IconThemeData .color (-> m/Colors .yellowAccent .-shade700))
-;;    .textTheme (m/TextTheme
-;;                .titleMedium (m/TextStyle .color m.Colors/white
-;;                                        .fontSize 20.0)
-;;                .bodyText1 (m/TextStyle .color m.Colors/white70
-;;                                          .fontSize 18.0))
+   .textSelectionTheme (m/TextSelectionThemeData
+                       .cursorColor (-> m/Colors .yellowAccent .-shade700)
+                       .selectionColor (-> m/Colors .yellowAccent .-shade400)
+                       .selectionHandleColor (-> m/Colors .yellowAccent .-shade700))
+   .textButtonTheme (m/TextButtonThemeData
+                     .style (m/ButtonStyle
+                             .foregroundColor (-> m/MaterialStateProperty
+                                                  (.resolveWith (fn [_states] (-> m/Colors .yellowAccent .-shade200))))))
+   ;;    .textTheme (m/TextTheme
+   ;;                .titleMedium (m/TextStyle .color m.Colors/white
+   ;;                                        .fontSize 20.0)
+   ;;                .bodyText1 (m/TextStyle .color m.Colors/white70
+   ;;                                          .fontSize 18.0))
    ))

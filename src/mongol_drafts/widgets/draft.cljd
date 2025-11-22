@@ -25,7 +25,6 @@
    :watch [{:keys [tag-viewable
                    show-keyboard
                    show-stacked-keyboard
-                   show-system-keyboard
                    show-search-dialog]}
            global-state/state]
    (m/Stack
@@ -73,7 +72,7 @@
             (if (true? show-keyboard)
               (toolbar/toolbar text-controller)
               (m/Container))]))
-         (if (and (true? show-keyboard) (false? show-system-keyboard))
+         (if (true? show-keyboard)
            (m/Container
             .color (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer)
             .child
@@ -84,7 +83,7 @@
               .child
               (keyboard/keyboard {}))))
            (m/Container))])))
-     (if (and (true? show-stacked-keyboard) (false? show-system-keyboard))
+     (if (true? show-stacked-keyboard)
        (m/Positioned
         .bottom 0
         .left 0

@@ -30,19 +30,6 @@
         :leading (.palette m/Icons)
         :subtitle (str "Current: " theme-subtitle)
         :on-tap (fn [] (theme-dialog/show-theme-dialog ctx))}
-       {:title "In-App Keyboard"
-        :leading (.keyboard m/Icons)
-        :trailing (m/RotatedBox
-                   .quarterTurns -1
-                   .child
-                   (m/Switch
-                    .value (get profile "in-app-keyboard" true)
-                    .onChanged (fn [value]
-                                 (profile-state/set-profile-setting
-                                  {:key "in-app-keyboard"
-                                   :type :bool
-                                   :value value}))))}
-                                 
        {:title "Sync Data"
         :leading (.sync m/Icons)
         :trailing (m/Switch
@@ -56,8 +43,7 @@
 (defn default-view []
   (f/widget
    :context ctx
-   :watch [{} gs/state]
-   (m/Padding 
+   (m/Padding
     .padding (m/EdgeInsets.all 14))
    (m/Column
     .crossAxisAlignment m.CrossAxisAlignment/start
