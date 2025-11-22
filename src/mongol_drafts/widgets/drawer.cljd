@@ -3,6 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter :as f]
+   [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.tabbar :as tabbar]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.tag :as tag-state]
@@ -55,9 +56,7 @@
            .color (if (or (true? show-drawer-search)
                           (not-empty draft-search))
                     (-> m/Theme (.of ctx) .-colorScheme .-outlineVariant)
-                    (-> m.Colors/transparent)
-                    )
-
+                    (-> m.Colors/transparent))
            .shape (m/CircleBorder
                    .side (m/BorderSide
                           .color (-> m/Theme (.of ctx) .-iconTheme .-color)
@@ -158,9 +157,10 @@
             filtered-tags :filtered-tags
             tag-search :tag-search
             show-sub-drawer-search :show-sub-drawer-search} global-state/state]
+   :managed [^m/TextEditingController controller (m/TextEditingController)]
    (m/Drawer
     .backgroundColor (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-    .width (- (-> m/MediaQuery (.of ctx) .-size .-width) 80)) 
+    .width (- (-> m/MediaQuery (.of ctx) .-size .-width) 80))
    (m/Container)
    (m/SafeArea)
    (m/Column
@@ -180,10 +180,11 @@
                         .width 2)))
         (m/InkWell
          .customBorder (m/CircleBorder)
-        ;;  .splashColor (-> m.Colors/blue)
+         ;;  .splashColor (-> m.Colors/blue)
          .onTap (fn []
                   (swap! global-state/state assoc :show-sub-drawer-search
                          (not (:show-sub-drawer-search @global-state/state)))
+                  (keyboard-action/clear-candidates)
                   (when (and
                          (false? show-sub-drawer-search)
                          (true? (:show-stacked-keyboard @global-state/state)))
@@ -196,6 +197,7 @@
        (m/SizedBox .width 20)
        (m/GestureDetector
         .onTap (fn []
+                 (keyboard-action/clear-candidates)
                  (tag-state/clear-filter))
         .child
         (m/Icon (.cancel_outlined m/Icons)))
@@ -210,7 +212,7 @@
        .children
        [(m/SizedBox .width 10)
         (if (true? show-sub-drawer-search)
-          (in-drawer-tag-search-field tag-search)
+          (in-drawer-tag-search-field controller)
           (m/Container))
         (m/Container
          .margin (.only m/EdgeInsets .top 6)
@@ -219,7 +221,7 @@
           .mainAxisAlignment m.MainAxisAlignment/spaceBetween
           .children
           [(mgl/MongolText
-            "Filter"
+            "ᠰᠢᢉᠦᠯᠲᠡᢉᠦᠷ"
             .style (m/TextStyle .fontWeight m.FontWeight/bold
                                 .fontSize 18))]))
         (m/VerticalDivider)
@@ -246,9 +248,9 @@
                    .crossAxisAlignment m/CrossAxisAlignment.start
                    .children
                    (if (empty? filter-tags)
-                     [(filtered-tag {"name" "Any"})]
+                     [(filtered-tag {"name" "ᠶᠠᠮᠠᠷ ᠎ᠴᠤ "})]
                      (map #(filtered-tag %) filter-tags))))
-                 (mgl/MongolText "OMITTED" .style (m/TextStyle .fontSize 14))
+                 (mgl/MongolText "ᠣᠷᠬᠢᠭᠳᠠᠭᠰᠠᠨ" .style (m/TextStyle .fontSize 14))
                  (m/Container
                   .color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
                   .child
@@ -256,7 +258,7 @@
                    .crossAxisAlignment m/CrossAxisAlignment.start
                    .children
                    (if (empty? omitted-tags)
-                     [(omitted-tag global-state/state {"name" "none"})]
+                     [(omitted-tag global-state/state {"name" "ᠪᠠᠢᠬᠤ ᠦᠭᠡᠢ "})]
                      (map #(omitted-tag global-state/state %)
                           omitted-tags))))]))]))
            (m/Divider)
@@ -325,10 +327,9 @@
                            .width 0.8)
               .borderRadius (.circular m/BorderRadius 10))))))
 
-(defn in-drawer-tag-search-field [text]
+(defn in-drawer-tag-search-field [^m/TextEditingController controller]
   (f/widget
    :context ctx
-   :managed [controller (m/TextEditingController .text text)]
    (m/Container
     .constraints
     (m/BoxConstraints

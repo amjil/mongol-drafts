@@ -19,12 +19,14 @@
     .left 0
     .right 0
     .bottom 360)
-   (m/Material)
+   (m/Material
+    .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer))
    (m/SafeArea .bottom false)
    (m/Container
     .width (- (-> m/MediaQuery (.of ctx) .-size .-width)
               60)
     .decoration (m/BoxDecoration
+                 .color (-> m/Theme (.of ctx) .-colorScheme .-primaryContainer)
                  .borderRadius
                  (.all m/BorderRadius (.circular m/Radius 6))
                  .border
@@ -42,7 +44,7 @@
         (m/InkWell
          .customBorder (m/CircleBorder)
          .child (m/Icon (.search_outlined m/Icons)
-                        .size 36)))
+                        .size 28)))
        (search-field)
        (m/Material
         .borderRadius (.circular m/BorderRadius 25)
@@ -53,7 +55,7 @@
                   (swap! global-state/state assoc :show-search-dialog false)
                   (swap! global-state/state assoc :show-stacked-keyboard false))
          .child (m/Icon (.cancel_outlined m/Icons)
-                        .size 36)))])
+                        .size 28)))])
      (m/Expanded
       .child
       (if (empty? contents)
