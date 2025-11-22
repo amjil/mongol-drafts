@@ -12,6 +12,7 @@
    [mongol-drafts.states.profile :as profile]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.theme :as theme-state]
+   [mongol-drafts.states.font :as font-state]
    [mongol-drafts.services.workspace :as workspace-service]
    [mongol-drafts.widgets.draft :as draft]
    [mongol-drafts.widgets.theme :as theme]))
@@ -19,24 +20,27 @@
 (defn app []
   (f/widget
    :context ctx
-   :watch [_theme-mode theme-state/theme-state]
+   :watch [{_theme-mode :mode} theme-state/theme-state
+           {app-font :app-font} font-state/font-state]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
          info (merge keyboard-options/keyboard-option
                      {:keyboard/key-cap-border-radius 6
                       :keyboard/font-size 18
                       :keyboard/key-container-color m/Colors.grey.shade500
-                      :keyboard/mongol-font-family "OyunQagantig"
+                      :keyboard/mongol-font-family app-font
                       ;; :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
                       ;; :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
                       ;; :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
                       ;; :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
                       ;; :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
                       }
-                     {:keyboard/width w})]
+                     {:keyboard/width w})
+         light-theme (theme/get-light-theme app-font)
+         dark-theme (theme/get-dark-theme app-font)]
    :bind {:info info :state (atom keyboard-options/keyboard-state)}
    (adaptive/AdaptiveTheme
-    .light theme/default-light-theme
-    .dark theme/default-dark-theme
+    .light light-theme
+    .dark dark-theme
     .initial (condp = (theme-state/get-theme-mode)
                theme-state/theme-mode-light adaptive.AdaptiveThemeMode/light
                theme-state/theme-mode-dark adaptive.AdaptiveThemeMode/dark
@@ -59,6 +63,9 @@
 
   ;; initialize theme mode from preferences
   (await (theme-state/init-theme-mode!))
+
+  ;; initialize font settings from preferences
+  (await (font-state/init-font-settings!))
 
   ;; prepopulate the profile settings
   (profile/prepopulate-profile-settings)

@@ -2,9 +2,10 @@
   (:require 
    ["package:flutter/material.dart" :as m]
    ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
-   [mongol-drafts.services.pref :as pref]))
+   [mongol-drafts.services.pref :as pref]
+   [mongol-drafts.states.font :as font-state]))
    
-(declare default-light-theme default-light-theme)
+(declare default-light-theme default-dark-theme)
 
 (defn set-dark [ctx]
   (pref/set-int "theme-setting" 1)
@@ -42,9 +43,9 @@
         1 adaptive.AdaptiveThemeMode/dark
         adaptive.AdaptiveThemeMode/system))))
 
-(def default-light-theme
+(defn get-light-theme [app-font]
   (m/ThemeData
-   .fontFamily "OyunQagantig"
+   .fontFamily app-font
    .scaffoldBackgroundColor (-> m/Colors .white)
    .colorScheme
    (.light m/ColorScheme
@@ -78,9 +79,9 @@
    ;;                                        .fontSize 18.0))
    ))
 
-(def default-dark-theme
+(defn get-dark-theme [app-font]
   (m/ThemeData
-   .fontFamily "OyunQagantig"
+   .fontFamily app-font
    .scaffoldBackgroundColor (-> m/Colors .black45)
    .colorScheme
    (.dark m/ColorScheme
@@ -109,3 +110,10 @@
    ;;                .bodyText1 (m/TextStyle .color m.Colors/white70
    ;;                                          .fontSize 18.0))
    ))
+
+;; Default themes for backward compatibility
+(def default-light-theme
+  (get-light-theme font-state/default-app-font))
+
+(def default-dark-theme
+  (get-dark-theme font-state/default-app-font))

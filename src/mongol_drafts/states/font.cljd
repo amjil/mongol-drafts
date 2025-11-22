@@ -1,0 +1,48 @@
+(ns mongol-drafts.states.font
+  (:require
+   [mongol-drafts.services.pref :as pref]))
+
+;; Font preference keys
+(def app-font-preference-key "app_font")
+(def draft-font-preference-key "draft_font")
+
+;; Available fonts
+(def available-fonts
+  ["OyunQaganTig" "OnonSoninSans"])
+
+;; Default fonts
+(def default-app-font "OyunQaganTig")
+(def default-draft-font "OyunQaganTig")
+
+;; Font state atom
+(def font-state
+  (atom {:app-font default-app-font
+         :draft-font default-draft-font}))
+
+;; Initialize font settings from preferences
+(defn init-font-settings! []
+  (let [saved-app-font (await (pref/get-string app-font-preference-key))
+        saved-draft-font (await (pref/get-string draft-font-preference-key))
+        app-font (or saved-app-font default-app-font)
+        draft-font (or saved-draft-font default-draft-font)]
+    (swap! font-state assoc :app-font app-font :draft-font draft-font)
+    {:app-font app-font :draft-font draft-font}))
+
+;; Get current app font
+(defn get-app-font []
+  (:app-font @font-state))
+
+;; Get current draft font
+(defn get-draft-font []
+  (:draft-font @font-state))
+
+;; Set app font and save to preferences
+(defn set-app-font! [font]
+  (swap! font-state assoc :app-font font)
+  (await (pref/set-string app-font-preference-key font)))
+
+;; Set draft font and save to preferences
+(defn set-draft-font! [font]
+  (swap! font-state assoc :draft-font font)
+  (await (pref/set-string draft-font-preference-key font)))
+
