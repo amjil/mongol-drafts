@@ -74,6 +74,7 @@ dev_dependencies:
   change_app_package_name: ^1.2.0
   drift_dev: ^2.18.0
   build_runner: ^2.4.9
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -92,6 +93,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/.env
+    - assets/logo.svg
     - assets/fonts/OyunQaganTig.ttf
     - assets/fonts/OyunAgulaTig.ttf
     - assets/fonts/OyunGarbiqimelTig.ttf
@@ -153,3 +155,18 @@ flutter:
         - asset: assets/fonts/OyunSoninTig.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+
+# Flutter Launcher Icons configuration
+flutter_launcher_icons:
+  android: true
+  ios: true
+  remove_alpha_ios: true
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.png"
+    background_color: "#f5f5f5"
+    theme_color: "#37474f"
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  adaptive_icon_background: "#f5f5f5"
+  adaptive_icon_foreground: "assets/icon/app_icon.png"

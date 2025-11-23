@@ -1,0 +1,61 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="paperGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f5f5f5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e8e8e8;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#37474f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#263238;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#paperGradient)" stroke="#cfd8dc" stroke-width="4"/>
+  
+  <!-- Paper shape -->
+  <rect x="140" y="100" width="232" height="312" rx="8" fill="#ffffff" stroke="#b0bec5" stroke-width="3"/>
+  
+  <!-- Paper shadow effect -->
+  <rect x="150" y="110" width="232" height="312" rx="8" fill="#fafafa" opacity="0.5"/>
+  
+  <!-- Vertical writing lines (simulating vertical Mongolian script) -->
+  <g stroke="#90caf9" stroke-width="2" fill="none" opacity="0.6">
+    <line x1="180" y1="140" x2="180" y2="380"/>
+    <line x1="220" y1="140" x2="220" y2="380"/>
+    <line x1="260" y1="140" x2="260" y2="380"/>
+    <line x1="300" y1="140" x2="300" y2="380"/>
+    <line x1="340" y1="140" x2="340" y2="380"/>
+  </g>
+  
+  <!-- Vertical text symbols in Mongolian style (abstract design) -->
+  <g fill="url(#textGradient)">
+    <!-- Left text column -->
+    <path d="M 175 150 L 185 150 L 185 200 L 175 200 Z" opacity="0.8"/>
+    <path d="M 175 210 L 185 210 L 185 260 L 175 260 Z" opacity="0.6"/>
+    <path d="M 175 270 L 185 270 L 185 320 L 175 320 Z" opacity="0.7"/>
+    
+    <!-- Middle text column -->
+    <path d="M 215 150 L 225 150 L 225 200 L 215 200 Z" opacity="0.9"/>
+    <path d="M 215 210 L 225 210 L 225 260 L 215 260 Z" opacity="0.7"/>
+    <path d="M 215 270 L 225 270 L 225 320 L 215 320 Z" opacity="0.8"/>
+    
+    <!-- Right text column -->
+    <path d="M 255 150 L 265 150 L 265 200 L 255 200 Z" opacity="0.8"/>
+    <path d="M 255 210 L 265 210 L 265 260 L 255 260 Z" opacity="0.6"/>
+    <path d="M 255 270 L 265 270 L 265 320 L 255 320 Z" opacity="0.7"/>
+    
+    <!-- More text elements -->
+    <path d="M 295 150 L 305 150 L 305 200 L 295 200 Z" opacity="0.7"/>
+    <path d="M 295 210 L 305 210 L 305 260 L 295 260 Z" opacity="0.5"/>
+  </g>
+  
+  <!-- Decorative strokes (simulating writing traces) -->
+  <path d="M 170 140 Q 180 160 170 180" stroke="#ef5350" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
+  <path d="M 250 160 Q 260 180 250 200" stroke="#ef5350" stroke-width="2.5" fill="none" opacity="0.5" stroke-linecap="round"/>
+  
+  <!-- Draft markers (small circles, indicating draft status) -->
+  <circle cx="330" cy="130" r="8" fill="#ffa726" opacity="0.8"/>
+  <circle cx="350" cy="125" r="6" fill="#ffa726" opacity="0.6"/>
+</svg>
+
