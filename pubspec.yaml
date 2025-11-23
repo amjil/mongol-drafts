@@ -39,14 +39,13 @@ dependencies:
   cupertino_icons: ^1.0.6
   device_info_plus: ^10.1.0
   mongol: ^9.0.0
-  mongol_code: ^0.3.0
+  mongol_code: ^1.0.3
   flutter_dotenv: ^5.1.0
   flutter_slidable: ^4.0.3
   flutter_styled_toast: ^2.2.1
   shared_preferences: ^2.2.3
-  vibration: ^1.9.0
+  vibration: ^3.1.4
   uuid: ^4.4.0
-  flutter_keyboard_visibility: ^5.4.1
   http: ^1.1.0
   adaptive_theme: ^3.6.0
   package_info_plus: ^8.0.0
@@ -124,5 +123,8 @@ flutter:
     - family: OyunQaganTig
       fonts:
         - asset: assets/fonts/OyunQaganTig.ttf
+    - family: OnonSoninSans
+      fonts:
+        - asset: assets/fonts/OnonSoninSans.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
