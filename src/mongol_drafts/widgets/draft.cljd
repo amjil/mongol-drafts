@@ -76,7 +76,7 @@
               (m/Container))]))
          (if (true? show-keyboard)
            (m/Container
-            .color (-> m/Theme (.of ctx) .-colorScheme .-secondaryContainer)
+            .color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
             .child
             (m/SafeArea
              .top false
@@ -111,4 +111,4 @@
       .bottom (+ 40 (keyboard/get-height info))
       .left (/ width 4)
       .child
-      (keyboard/candidates-panel nil))])))
+      (keyboard/candidates-panel (m/TextStyle. .fontSize 18 .fontFamily "OyunQaganTig")))])))

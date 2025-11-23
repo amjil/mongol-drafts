@@ -10,7 +10,7 @@
 
 ;; Available fonts
 (def available-fonts
-  ["OyunQaganTig" "OnonSoninSans"])
+  ["OyunQaganTig" "OyunAgulaTig" "OyunGarbiqimelTig" "OyunGarqagTig" "OyunGurbanUlusTig" "OyunHaraTig" "OyunHawangTig" "OyunSoninTig"])
 
 ;; Available font sizes
 (def available-font-sizes

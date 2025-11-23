@@ -93,6 +93,13 @@ flutter:
   assets:
     - assets/.env
     - assets/fonts/OyunQaganTig.ttf
+    - assets/fonts/OyunAgulaTig.ttf
+    - assets/fonts/OyunGarbiqimelTig.ttf
+    - assets/fonts/OyunGarqagTig.ttf
+    - assets/fonts/OyunGurbanUlusTig.ttf
+    - assets/fonts/OyunHaraTig.ttf
+    - assets/fonts/OyunHawangTig.ttf
+    - assets/fonts/OyunSoninTig.ttf
     - assets/data.zip
     - assets/next.zip
 
@@ -123,8 +130,26 @@ flutter:
     - family: OyunQaganTig
       fonts:
         - asset: assets/fonts/OyunQaganTig.ttf
-    - family: OnonSoninSans
+    - family: OyunAgulaTig
       fonts:
-        - asset: assets/fonts/OnonSoninSans.ttf
+        - asset: assets/fonts/OyunAgulaTig.ttf
+    - family: OyunGarbiqimelTig
+      fonts:
+        - asset: assets/fonts/OyunGarbiqimelTig.ttf
+    - family: OyunGarqagTig
+      fonts:
+        - asset: assets/fonts/OyunGarqagTig.ttf
+    - family: OyunGurbanUlusTig
+      fonts:
+        - asset: assets/fonts/OyunGurbanUlusTig.ttf
+    - family: OyunHaraTig
+      fonts:
+        - asset: assets/fonts/OyunHaraTig.ttf
+    - family: OyunHawangTig
+      fonts:
+        - asset: assets/fonts/OyunHawangTig.ttf
+    - family: OyunSoninTig
+      fonts:
+        - asset: assets/fonts/OyunSoninTig.ttf
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
