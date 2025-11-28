@@ -42,28 +42,28 @@
                  (m/Padding
                   .padding (m.EdgeInsets/symmetric .horizontal 10)
                   .child
-                  (m/Icon (.inbox_outlined m/Icons)
+                  (m/Icon m/Icons.inbox_outlined
                           .color (-> m/Theme (.of ctx) .-iconTheme .-color))))
                 (m/Tab
                  .icon
                  (m/Padding
                   .padding (m.EdgeInsets/symmetric .horizontal 10)
                   .child
-                  (m/Icon (.flag_outlined m/Icons)
+                  (m/Icon m/Icons.flag_outlined
                           .color (-> m/Theme (.of ctx) .-iconTheme .-color))))
                 (m/Tab
                  .icon
                  (m/Padding
                   .padding (m.EdgeInsets/symmetric .horizontal 10)
                   .child
-                  (m/Icon (.archive_outlined m/Icons)
+                  (m/Icon m/Icons.archive_outlined
                           .color (-> m/Theme (.of ctx) .-iconTheme .-color))))
                 (m/Tab
                  .icon
                  (m/Padding
                   .padding (m.EdgeInsets/symmetric .horizontal 10)
                   .child
-                  (m/Icon (.delete_outlined m/Icons)
+                  (m/Icon m/Icons.delete_outlined
                           .color (-> m/Theme (.of ctx) .-iconTheme .-color))))]))])
 
            (m/Expanded

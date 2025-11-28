@@ -80,7 +80,7 @@
    (m/Column
     .children
     [(m/GestureDetector
-      .child (m/Icon (.menu m/Icons))
+      .child (m/Icon m/Icons.menu)
       .onTap (fn []
                (dart:core/print "menu button >>")))
      (m/Expanded
@@ -95,32 +95,32 @@
         .children
         [(m/SizedBox .height 8)
          (toolbar-button
-          (m/Icon (.arrow_back_outlined m/Icons))
+          (m/Icon m/Icons.arrow_back_outlined)
           (fn [] (selection-state/cursor-up controller)))
          (toolbar-button
-          (m/Icon (.arrow_forward_outlined m/Icons))
+          (m/Icon m/Icons.arrow_forward_outlined)
           (fn [] (selection-state/cursor-down controller)))
          (toolbar-text-button
-          (m/Icon (.arrow_back_outlined m/Icons))
+          (m/Icon m/Icons.arrow_back_outlined)
           (fn [] (selection-state/cursor-before-word controller)))
          (toolbar-text-button
-          (m/Icon (.arrow_forward_outlined m/Icons))
+          (m/Icon m/Icons.arrow_forward_outlined)
           (fn [] (selection-state/cursor-after-word controller)))
          (m/SizedBox .height 8)
          (toolbar-button-normal
-          (m/Icon (.date_range_outlined m/Icons))
+          (m/Icon m/Icons.date_range_outlined)
           (fn []
             (keyboard-action/on-key-press
              {:key-type :string
               :text (subs (.toString (.now DateTime)) 0 19)}
              nil)))
          (toolbar-button-normal
-          (m/Icon (.copy m/Icons))
+          (m/Icon m/Icons.copy)
           (fn [] (selection-state/copy controller)))
          (toolbar-button-normal
-          (m/Icon (.paste m/Icons))
+          (m/Icon m/Icons.paste)
           (fn [] (selection-state/paste controller)))
          (toolbar-button-normal
-          (m/Icon (.select_all m/Icons))
+          (m/Icon m/Icons.select_all)
           (fn [] (selection-state/select-all controller)))])))
      (button/keyboard-close-button true)])))

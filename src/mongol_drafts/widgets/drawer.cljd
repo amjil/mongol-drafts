@@ -46,9 +46,14 @@
       [(m/Row
         .children
         [(m/SizedBox .width 10)
-         (m/Icon (.arrow_circle_down m/Icons))
-         (m/SizedBox .width 20)
-         (m/Icon (.add_outlined m/Icons))])
+         (f/widget
+          :get [m/Navigator]
+          :context ctx
+          (m/GestureDetector
+           .onTap (fn []
+                    (.pop navigator ctx))
+           .child
+           (m/Icon m/Icons.arrow_circle_down)))])
        (m/Spacer)
        (m/Row
         .children
@@ -75,7 +80,7 @@
                       (swap! global-state/state assoc :show-stacked-keyboard false))))
           (m/Padding
            .padding (.all m/EdgeInsets 2)
-           .child (m/Icon (.search m/Icons)
+           .child (m/Icon m/Icons.search
                           .size 18)))
          (m/SizedBox .width 20)
          (m/GestureDetector
@@ -84,9 +89,9 @@
                    (tag-state/clear-filter)
                    (draft-state/query-drafts "" false))
           .child
-          (m/Icon (.cancel_outlined m/Icons)))
+          (m/Icon m/Icons.cancel_outlined))
          (m/SizedBox .width 20)
-         (m/Icon (.pending_outlined m/Icons))
+         (m/Icon m/Icons.pending_outlined)
          (m/SizedBox .width 10)])])
      (m/Divider)
      (m/Expanded
@@ -107,7 +112,7 @@
            .children
            [(m/Padding
              .padding (.fromLTRB m/EdgeInsets 8 10 8 0)
-             .child (m/Icon (.filter_list_outlined m/Icons)))
+             .child (m/Icon m/Icons.filter_list_outlined))
             (m/SizedBox .height 10)
             (mgl/MongolText
              (clojure.string/join
@@ -130,7 +135,7 @@
     .padding (.all m/EdgeInsets 10)
     .child
     (m/Column
-     .children [(m/Icon (.sell_rounded m/Icons)
+     .children [(m/Icon m/Icons.sell_rounded
                         .size 16)
                 (m/SizedBox .height 4)
                 (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
@@ -145,7 +150,7 @@
     .padding (.all m/EdgeInsets 10)
     .child
     (m/Column
-     .children [(m/Icon (.do_disturb_alt m/Icons)
+     .children [(m/Icon m/Icons.do_disturb_alt
                         .size 16)
                 (m/SizedBox .height 4)
                 (mgl/MongolText (get tag "name") .style (m/TextStyle .fontSize 18))]))))
@@ -193,7 +198,7 @@
                     (swap! global-state/state assoc :show-stacked-keyboard false))))
         (m/Padding
          .padding (.all m/EdgeInsets 2)
-         .child (m/Icon (.search m/Icons)
+         .child (m/Icon m/Icons.search
                         .size 18)))
 
        (m/SizedBox .width 20)
@@ -202,9 +207,9 @@
                  (keyboard-action/clear-candidates)
                  (tag-state/clear-filter))
         .child
-        (m/Icon (.cancel_outlined m/Icons)))
+        (m/Icon m/Icons.cancel_outlined))
        (m/SizedBox .width 20)
-       (m/Icon (.pending_outlined m/Icons))
+       (m/Icon m/Icons.pending_outlined)
        (m/SizedBox .width 10)])
      (m/Divider)
      (m/Expanded
@@ -295,7 +300,7 @@
                                  .onTap (fn []
                                           (tag-state/add-omitted-tag (nth filtered-tags i)))
                                  .child
-                                 (m/Icon (.do_disturb_alt m/Icons)
+                                 (m/Icon m/Icons.do_disturb_alt
                                          .size 16))]))))))]))]))])))
 
 (defn in-drawer-draft-search-field 

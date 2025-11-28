@@ -29,7 +29,7 @@
     .children
     [(settings/settings-group
       [{:title "ᠳᠡᠯᠭᠡᠴᠡ ᠎ᠶᠢᠨ ᠰᠡᠳᠦᠪ "
-        :leading (.palette m/Icons)
+        :leading m/Icons.palette
         :subtitle (str "ᠣᠳᠣ : " theme-subtitle)
         :on-tap (fn [] (theme-dialog/show-theme-dialog ctx))}
        {:title "ᠠᠫᠫ ᠹᠦᠨᠲ "
@@ -41,7 +41,7 @@
         :subtitle (str "ᠣᠳᠣ : " app-font-size)
         :on-tap (fn [] (font-size-dialog/show-app-font-size-dialog ctx))}
        {:title "ᠲᠡᠮᠳᠡᠭᠯᠡᠯ ᠎ᠦᠨ ᠹᠦᠨᠲ "
-        :leading (.article m/Icons)
+        :leading m/Icons.article
         :subtitle (str "ᠣᠳᠣ : " draft-font)
         :on-tap (fn [] (font-dialog/show-draft-font-dialog ctx))}
        {:title "ᠲᠡᠮᠳᠡᠭᠯᠡᠯ ᠎ᠦᠨ ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ "

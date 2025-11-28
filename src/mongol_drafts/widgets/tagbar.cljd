@@ -26,7 +26,7 @@
                   (m/Padding
                    .padding (.all m/EdgeInsets 4)
                    .child
-                   (m/Icon (.remove_circle m/Icons)
+                   (m/Icon m/Icons.remove_circle
                            .size 14)))
                  (m/SizedBox .height 4)
                  (m/RotatedBox
@@ -69,7 +69,7 @@
         .child
         (m/Padding
          .padding (.all m/EdgeInsets 2)
-         .child (m/Icon (.flag m/Icons)
+         .child (m/Icon m/Icons.flag
                         .color (if (= 1 flag)
                                  (-> m/Theme (.of ctx) .-colorScheme .-secondary)
                                  nil)))))

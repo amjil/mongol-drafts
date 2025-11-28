@@ -33,16 +33,16 @@
     .mainAxisAlignment m.MainAxisAlignment/spaceAround
     .children
     [(bar-button
-      (m/Icon (.article_outlined m/Icons))
+      (m/Icon m/Icons.article_outlined)
       (fn []
         (-> m/Scaffold (.of ctx) (.openDrawer))))
      (bar-button
-      (m/Icon (.add m/Icons))
+      (m/Icon m/Icons.add)
       (fn []
         (await (draft-state/new-draft))
         (draft-state/focus-on-draft controller)))
      (bar-button
-      (m/Icon (.sell_outlined m/Icons))
+      (m/Icon m/Icons.sell_outlined)
       (fn []
         (swap! global-state/state
                assoc
@@ -53,16 +53,16 @@
      (m/Text
       (str char-count "c" word-count "w"))
      (bar-button
-      (m/Icon (.arrow_drop_down m/Icons))
+      (m/Icon m/Icons.arrow_drop_down)
       (fn [] nil))
      (bar-button
-      (m/Icon (.search m/Icons))
+      (m/Icon m/Icons.search)
       (fn []
         (swap! global-state/state assoc :show-search-dialog true)
         (swap! global-state/state assoc :show-stacked-keyboard true)
         (swap! global-state/state assoc :show-keyboard false)))
      (bar-button
-      (m/Icon (.view_sidebar_outlined m/Icons))
+      (m/Icon m/Icons.view_sidebar_outlined)
       (fn []
         (modal/modal-bottom-sheet ctx (profile/widget))
         (swap! global-state/state assoc :show-search-dialog false)))])))
@@ -75,7 +75,7 @@
     .height 40
     .child
     (m/GestureDetector
-     .child (m/Icon (.keyboard_arrow_down m/Icons))
+     .child (m/Icon m/Icons.keyboard_arrow_down)
      .onTap (fn []
               (keyboard-action/clear-candidates)
               (if (true? flag)

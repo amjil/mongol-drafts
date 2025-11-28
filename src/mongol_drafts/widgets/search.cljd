@@ -43,7 +43,7 @@
         .child
         (m/InkWell
          .customBorder (m/CircleBorder)
-         .child (m/Icon (.search_outlined m/Icons)
+         .child (m/Icon m/Icons.search_outlined
                         .size 28)))
        (search-field)
        (m/Material
@@ -54,7 +54,7 @@
          .onTap (fn []
                   (swap! global-state/state assoc :show-search-dialog false)
                   (swap! global-state/state assoc :show-stacked-keyboard false))
-         .child (m/Icon (.cancel_outlined m/Icons)
+         .child (m/Icon m/Icons.cancel_outlined
                         .size 28)))])
      (m/Expanded
       .child
@@ -83,7 +83,7 @@
      (m/IconButton .onPressed
                    (fn []
                      (.clear controller))
-                   .icon (m/Icon (.clear m/Icons)))
+                   .icon (m/Icon m/Icons.clear))
      .isDense true
      ;;  Todo : when hintText is present Text cursor position error
       ;; .hintText "Search"
