@@ -89,3 +89,7 @@
 (defn update-tag-search [content]
   (swap! gs/state assoc :tag-search content)
   (update-filtered-tags))
+  
+
+(defn close-tag-edit []
+  (swap! gs/state assoc :tag-on-edit false))

@@ -1,0 +1,18 @@
+(ns mongol-drafts.utils.keyboard
+  (:require
+   [mongol-drafts.states.global :as global-state]
+   [mongol-drafts.states.tag :as tag-state]
+   [virtual-keyboard.input-control :as control]
+   [virtual-keyboard.keyboard-action :as keyboard-action]
+   [clojure.string :as str]))
+
+
+(defn handle-enter []
+  (let [tag-on-edit (:tag-on-edit @global-state/state)
+        text (str/trim (control/get-text))]
+    (if (true? tag-on-edit)
+      (do
+        (tag-state/add-draft-tag text)
+        (keyboard-action/clear-candidates)
+        (control/reset-text ""))
+      (control/insert-text "\n")))) 
