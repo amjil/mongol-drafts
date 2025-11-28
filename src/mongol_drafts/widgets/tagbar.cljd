@@ -14,16 +14,20 @@
     .borderRadius (.circular m/BorderRadius 10)
     ;; .color (-> m.Colors/blueGrey .-shade200)
     )
-   (m/InkWell
-    .customBorder (m/CircleBorder)
-    .onTap on-press)
    (m/Padding
     .padding (.all m/EdgeInsets 6))
    (m/Row
     .children [(m/Column
                 .children
-                [(m/Icon (.remove_circle m/Icons)
-                         .size 14)
+                [(m/InkWell
+                  .customBorder (m/CircleBorder)
+                  .onTap on-press
+                  .child
+                  (m/Padding
+                   .padding (.all m/EdgeInsets 4)
+                   .child
+                   (m/Icon (.remove_circle m/Icons)
+                           .size 14)))
                  (m/SizedBox .height 4)
                  (m/RotatedBox
                   .quarterTurns 1
