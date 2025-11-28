@@ -94,7 +94,7 @@
                              (.clear controller))))
             .controller controller
             .style (m/TextStyle .fontSize 14)
-            .maxLines 2
+            .maxLines 1
             .minLines 1
             .decoration nil)
            (m/GestureDetector
