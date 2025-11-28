@@ -29,6 +29,7 @@
    (m/Scaffold
     .onDrawerChanged
     (fn [c]
+      (keyboard-action/clear-candidates)
       (when (false? c)
         (swap! global-state/state assoc :show-stacked-keyboard false))
       (when (true? c)

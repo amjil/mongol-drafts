@@ -3,6 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    [cljd.flutter :as f]
+   [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.states.draft :as draft-state]))
@@ -91,10 +92,11 @@
                            (let [text (.substring x 0
                                                   (dec (.-length x)))]
                              (tag-state/add-draft-tag text)
+                             (keyboard-action/clear-candidates)
                              (.clear controller))))
             .controller controller
             .style (m/TextStyle .fontSize 14)
-            .maxLines 1
+            .maxLines 2
             .minLines 1
             .decoration nil)
            (m/GestureDetector
@@ -102,6 +104,7 @@
                      (swap! global-state/state assoc :tag-on-edit true)
                      (when (false? (:show-keyboard @global-state/state))
                        (swap! global-state/state assoc :show-keyboard true))
+                     (keyboard-action/clear-candidates)
                      (.requestFocus focus))
             .child
             (m/RotatedBox
