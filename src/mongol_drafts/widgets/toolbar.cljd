@@ -25,7 +25,7 @@
        .child
        (m/IconTheme
         .data (m/IconThemeData
-               .color (-> m/Theme (.of ctx) .-colorScheme .-onSecondaryContainer))
+               .color (-> m/Theme (.of ctx) .-iconTheme .-color))
         .child child)))))))
 
 (defn toolbar-button-normal [child on-press]
@@ -41,7 +41,7 @@
     .child
     (m/IconTheme
      .data (m/IconThemeData
-            .color (-> m/Theme (.of ctx) .-colorScheme .-onSecondaryContainer))
+            .color (-> m/Theme (.of ctx) .-iconTheme .-color))
      .child child))))
 
 (defn toolbar-text-button [child on-press]
@@ -112,7 +112,7 @@
           (fn []
             (keyboard-action/on-key-press
              {:key-type :string
-              :text (.toString (.now DateTime))}
+              :text (subs (.toString (.now DateTime)) 0 19)}
              nil)))
          (toolbar-button-normal
           (m/Icon (.copy m/Icons))
