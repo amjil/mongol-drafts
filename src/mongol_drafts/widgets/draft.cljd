@@ -62,7 +62,7 @@
             (m/Expanded
              .child
              (m/Padding
-              .padding (.all m/EdgeInsets 6)
+              .padding (m/EdgeInsets.symmetric .horizontal 24 .vertical 32)
               .child
               (mgl/MongolTextField
                .controller text-controller
