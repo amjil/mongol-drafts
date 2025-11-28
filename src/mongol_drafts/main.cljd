@@ -85,9 +85,10 @@
   (await
    (db-service/init-db))
 
-  ;; read the data.zip & next.zip
-  (zip-utils/read-json-from-asset-zip kc/data "assets/data.zip")
-  (zip-utils/read-json-from-asset-zip kc/next "assets/next.zip")
+  ;; load the data.zip & next.zip
+  (zip-utils/load-assets-parallel
+    [[kc/data "assets/data.zip"]
+     [kc/next "assets/next.zip"]])
 
   (let [workspace (await (workspace-service/get-or-create-default))]
     (swap! global-state/state assoc :workspace workspace))
