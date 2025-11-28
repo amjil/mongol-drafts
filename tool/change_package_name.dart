@@ -14,10 +14,13 @@ void main() async {
   // 2. Modify Android build.gradle.kts
   await modifyAndroidBuildGradle(newPackageName);
 
-  // 3. Modify iOS project.pbxproj
+  // 3. Move Kotlin files to new package directory
+  await moveKotlinFiles(newPackageName);
+
+  // 4. Modify iOS project.pbxproj
   await modifyIOSProject(newPackageName);
 
-  // 4. Modify macOS project.pbxproj (if exists)
+  // 5. Modify macOS project.pbxproj (if exists)
   await modifyMacOSProject(newPackageName);
 
   print('\n✅ Package name change completed!');
@@ -78,6 +81,84 @@ Future<void> modifyAndroidBuildGradle(String newPackageName) async {
 
   if (modified) {
     await file.writeAsString(content);
+  }
+}
+
+Future<void> moveKotlinFiles(String newPackageName) async {
+  final kotlinDir = Directory('android/app/src/main/kotlin');
+  if (!await kotlinDir.exists()) {
+    print('⚠️  Kotlin directory does not exist, skipping file move');
+    return;
+  }
+
+  // Find all .kt files in the kotlin directory
+  final kotlinFiles = await kotlinDir
+      .list(recursive: true)
+      .where((entity) => entity is File && entity.path.endsWith('.kt'))
+      .cast<File>()
+      .toList();
+
+  if (kotlinFiles.isEmpty) {
+    print('⚠️  No Kotlin files found, skipping file move');
+    return;
+  }
+
+  // Convert package name to directory path
+  final newPackagePath = newPackageName.replaceAll('.', '/');
+  final newPackageDir = Directory('${kotlinDir.path}/$newPackagePath');
+
+  // Create new directory structure
+  await newPackageDir.create(recursive: true);
+  print('✓ Created new package directory: $newPackagePath');
+
+  // Process each Kotlin file
+  for (final file in kotlinFiles) {
+    final content = await file.readAsString();
+    
+    // Extract old package name from file content
+    final packageRegex = RegExp(r'^package\s+([^\s;]+)', multiLine: true);
+    final match = packageRegex.firstMatch(content);
+    
+    if (match == null) {
+      print('⚠️  No package declaration found in ${file.path}, skipping');
+      continue;
+    }
+
+    final oldPackageName = match.group(1)!;
+    
+    // Skip if package name is already correct
+    if (oldPackageName == newPackageName) {
+      print('✓ Package name already correct in ${file.path}');
+      continue;
+    }
+
+    // Update package declaration
+    final newContent = content.replaceFirst(
+      packageRegex,
+      'package $newPackageName',
+    );
+
+    // Create new file path
+    final fileName = file.path.split('/').last;
+    final newFile = File('${newPackageDir.path}/$fileName');
+
+    // Write updated content to new location
+    await newFile.writeAsString(newContent);
+    print('✓ Moved and updated ${file.path} -> ${newFile.path}');
+
+    // Delete old file
+    await file.delete();
+
+    // Try to remove old directory if empty
+    final oldDir = file.parent;
+    try {
+      if (await oldDir.list().isEmpty) {
+        await oldDir.delete(recursive: true);
+        print('✓ Removed empty directory: ${oldDir.path}');
+      }
+    } catch (e) {
+      // Ignore errors when trying to delete directories
+    }
   }
 }
 
