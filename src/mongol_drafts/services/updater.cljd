@@ -1,0 +1,76 @@
+(ns mongol-drafts.services.updater
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:flutter_dotenv/flutter_dotenv.dart" :as dotenv]
+   ["package:package_info_plus/package_info_plus.dart" :as pip]
+   ["package:permission_handler/permission_handler.dart" :as ph]
+   ["package:path_provider/path_provider.dart" :as pp]
+   ["package:open_filex/open_filex.dart" :refer [OpenFilex]]
+   ["package:dio/dio.dart" :as dio]
+   ["package:mongol/mongol.dart" :as mgl]
+   [cljd.flutter :as f]))
+
+(defn get-version-json-url []
+  (.get dotenv/dotenv "VERSION_JSON_URL"))
+
+(defn check-update
+  [on-update-found]
+  (let [info (await (pip.PackageInfo/fromPlatform))
+        current-build (.-buildNumber info)
+        client (dio/Dio.)
+        resp (await (.get client (get-version-json-url)))
+        data (.-data resp)
+        remote-build (get data "versionCode")]
+    (when (> remote-build current-build)
+      (on-update-found
+       {:versionCode remote-build
+        :downloadUrl (get data "downloadUrl")
+        :changelog (get data "changelog")}))))
+
+(defn request-storage-permission []
+  ;; "Android 13+ may not need this"
+  (try
+    (let [status (.request (.-storage ph/Permission))]
+      status)
+    (catch Exception e
+      (dart:core/print e))))
+
+
+(defn download-and-install [apk-url progress-cb]
+  (let [tmp-dir (await (pp/getTemporaryDirectory))
+        save-path (str (.-path tmp-dir) "update.apk")
+        client (dio/Dio.)]
+    (.download client
+               apk-url
+               save-path
+               .onReceiveProgress (fn [received total]
+                                    (when progress-cb
+                                      (progress-cb received total))))
+                                      
+    (.open OpenFilex save-path)))
+    
+
+(defn show-update-dialog [ctx info]
+  (let [apk (:downloadUrl info)
+        on-update-click (fn [] (download-and-install
+                                 apk (fn [received total]
+                                       (dart:core/print (str "received: " received " total: " total)))))]
+                                       
+    (m/showDialog 
+     .context ctx
+     .barrierDismissible true
+     .builder (f/build 
+                (m/AlertDialog 
+                 .content
+                 (m/Row 
+                  .children 
+                  [(mgl/MongolText (str "New version found v" (:versionCode info)))
+                   (mgl/MongolText (:changelog info))])
+                 .actions 
+                 [(m/TextButton .child (mgl/MongolText "Not now")
+                                .onPressed (fn [] (m/Navigator.pop ctx)))
+                  (m/TextButton .child (mgl/MongolText "Update now")
+                                .onPressed on-update-click)])))))
+
+
+                  
