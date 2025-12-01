@@ -80,6 +80,8 @@
   ;; set the control
   (control/set-control)
 
+  (global-state/set-build-number)
+
 
   ;; initialize the database
   (await

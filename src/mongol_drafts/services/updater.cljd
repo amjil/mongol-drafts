@@ -12,6 +12,9 @@
    ["dart:io" :as io]
    [cljd.flutter :as f]))
 
+(declare show-update-dialog
+         show-no-new-version-dialog)
+
 (defn get-version-json-url []
   (.get dotenv/dotenv "VERSION_JSON_URL"))
 
@@ -28,6 +31,17 @@
        {:versionCode remote-build
         :downloadUrl (get data "downloadUrl")
         :changelog (get data "changelog")}))))
+
+(defn check-update-with-dialog [ctx]
+  (let [info (await (pip.PackageInfo/fromPlatform))
+        current-build (.-buildNumber info)
+        client (dio/Dio.)
+        resp (await (.get client (get-version-json-url)))
+        data (.-data resp)
+        remote-build (get data "versionCode")]
+    (if (= (compare remote-build current-build) 1)
+      (show-update-dialog ctx info)
+      (show-no-new-version-dialog ctx))))
 
 (defn request-storage-permission []
   ;; "Android 13+ may not need this"
@@ -92,3 +106,16 @@
                   (m/TextButton .child (mgl/MongolText "Update now")
                                 .onPressed on-update-click)])))))
 
+
+(defn show-no-new-version-dialog [ctx]
+  (m/showDialog 
+   .context ctx
+   .barrierDismissible true
+   .builder (f/build
+             (m/AlertDialog
+              .content
+              (m/Center
+               .child
+               (m/Row
+                .children
+                [(mgl/MongolText "No new version found")]))))))

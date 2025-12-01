@@ -1,6 +1,7 @@
 (ns mongol-drafts.states.global
   (:require 
    ["package:flutter/material.dart" :as m]
+   ["package:package_info_plus/package_info_plus.dart" :as pip]
    [virtual-keyboard.options :as keyboard-options]))
 
 (def state
@@ -15,3 +16,11 @@
     :tag-on-edit false
     :current-layout "mg"
     :draft/tabbar-index 0}))
+
+
+(def build-number (atom nil))
+
+(defn set-build-number []
+  (-> (pip/PackageInfo.fromPlatform)
+      (.then (fn [info]
+               (reset! build-number (.-buildNumber info))))))
