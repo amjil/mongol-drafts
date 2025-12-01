@@ -8,6 +8,8 @@
    ["package:open_filex/open_filex.dart" :refer [OpenFilex]]
    ["package:dio/dio.dart" :as dio]
    ["package:mongol/mongol.dart" :as mgl]
+   ["package:url_launcher/url_launcher.dart" :as url-launcher]
+   ["dart:io" :as io]
    [cljd.flutter :as f]))
 
 (defn get-version-json-url []
@@ -50,11 +52,29 @@
     (.open OpenFilex save-path)))
     
 
+(defn get-app-store-url []
+  (let [app-id (.get dotenv/dotenv "APP_STORE_ID")]
+    (if app-id
+      (str "https://apps.apple.com/app/id" app-id)
+      nil)))
+
+(defn open-app-store [app-store-url]
+  (let [uri (dart:core/Uri.parse app-store-url)]
+    (await (url-launcher/launchUrl uri .mode url-launcher/LaunchMode.externalApplication))))
+
 (defn show-update-dialog [ctx info]
-  (let [apk (:downloadUrl info)
-        on-update-click (fn [] (download-and-install
-                                 apk (fn [received total]
-                                       (dart:core/print (str "received: " received " total: " total)))))]
+  (let [is-ios (io/Platform.isIOS)
+        apk (:downloadUrl info)
+        app-store-url (get-app-store-url)
+        on-update-click (fn []
+                          (m/Navigator.pop ctx)
+                          (if is-ios
+                            (if app-store-url
+                              (open-app-store app-store-url)
+                              (dart:core/print "App Store URL not configured"))
+                            (download-and-install
+                             apk (fn [received total]
+                                   (dart:core/print (str "received: " received " total: " total))))))]
                                        
     (m/showDialog 
      .context ctx
@@ -72,5 +92,3 @@
                   (m/TextButton .child (mgl/MongolText "Update now")
                                 .onPressed on-update-click)])))))
 
-
-                  
