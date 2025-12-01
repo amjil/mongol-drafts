@@ -10,10 +10,37 @@
    ["package:mongol/mongol.dart" :as mgl]
    ["package:url_launcher/url_launcher.dart" :as url-launcher]
    ["dart:io" :as io]
-   [cljd.flutter :as f]))
+   [cljd.flutter :as f]
+   [clojure.string :as str]))
 
 (declare show-update-dialog
          show-no-new-version-dialog)
+
+
+(defn- parse-version [version]
+  (let [parts (str/split version #"\.")
+        major (dart:core/int.parse (first parts))
+        minor (dart:core/int.parse (second parts))
+        patch (dart:core/int.parse (nth parts 2))]
+    {:major major :minor minor :patch patch}))
+
+(defn compare-version [v1 v2]
+  (if (= v1 v2)
+    0
+    (let [v1-parsed (parse-version v1)
+          v2-parsed (parse-version v2)]
+      (loop [xs v1-parsed
+             ys v2-parsed]
+        (cond
+          (and (empty? xs) (empty? ys)) 0
+          (empty? xs) -1
+          (empty? ys) 1
+          :else (let [x (first xs)
+                      y (first ys)]
+                  (if (= x y)
+                    (recur (rest xs) (rest ys))
+                    (compare x y))))))))
+      
 
 (defn get-version-json-url []
   (.get dotenv/dotenv "VERSION_JSON_URL"))
@@ -26,7 +53,7 @@
         resp (await (.get client (get-version-json-url)))
         data (.-data resp)
         remote-build (get data "versionCode")]
-    (when (> remote-build current-build)
+    (when (> (compare-version remote-build current-build) 0)
       (on-update-found
        {:versionCode remote-build
         :downloadUrl (get data "downloadUrl")
@@ -39,7 +66,7 @@
         resp (await (.get client (get-version-json-url)))
         data (.-data resp)
         remote-build (get data "versionCode")]
-    (if (= (compare remote-build current-build) 1)
+    (if (> (compare-version remote-build current-build) 0)
       (show-update-dialog ctx info)
       (show-no-new-version-dialog ctx))))
 
