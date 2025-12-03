@@ -7,6 +7,7 @@
    [virtual-keyboard.options :as keyboard-options]
    [virtual-keyboard.keyboard-candidates :as kc]
    [virtual-keyboard.zip-utils :as zip-utils]
+   [virtual-keyboard.fst-reader :as fst-reader]
    [cljd.flutter :as f]
    [mongol-drafts.services.db :as db-service]
    [mongol-drafts.states.profile :as profile]
@@ -89,8 +90,9 @@
 
   ;; load the data.zip & next.zip
   (zip-utils/load-assets-parallel
-    [[kc/data "assets/data.zip"]
-     [kc/next "assets/next.zip"]])
+    [[kc/next "assets/next.zip"]])
+    
+  (fst-reader/ensure-loaded)
 
   (let [workspace (await (workspace-service/get-or-create-default))]
     (swap! global-state/state assoc :workspace workspace))
