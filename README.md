@@ -1,6 +1,6 @@
 # mongol_drafts
 
-A Flutter app purpose-built for traditional Mongolian drafting. It delivers a consistent vertical writing experience across desktop and mobile while integrating tightly with custom menu bar and virtual keyboard components.
+A Flutter app purpose-built for traditional Mongolian drafting. It delivers a consistent vertical writing experience on mobile while integrating tightly with custom menu bar and virtual keyboard components.
 
 ## Feature Overview
 
