@@ -96,7 +96,7 @@
 (defn get-app-store-url []
   (let [app-id (.get dotenv/dotenv "APP_STORE_ID")]
     (if app-id
-      (str "https://apps.apple.com/app/id" app-id)
+      (str "https://apps.apple.com/app/" app-id)
       nil)))
 
 (defn open-app-store [app-store-url]

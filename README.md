@@ -2,6 +2,11 @@
 
 A Flutter app purpose-built for traditional Mongolian drafting. It delivers a consistent vertical writing experience on mobile while integrating tightly with custom menu bar and virtual keyboard components.
 
+## Download
+
+- **iOS**: Available on the [App Store](https://apps.apple.com/app/6756122733)
+- **Android**: Download the latest APK from [GitHub Releases](https://github.com/amjil/mongol-drafts/releases/latest/download/app-release.apk)
+
 ## Feature Overview
 
 - **Vertical Mongolian drafting** using the `mongol` package and `MongolTextField`, tuned for long-form layouts with generous line height, monospace feel, and live preview.
