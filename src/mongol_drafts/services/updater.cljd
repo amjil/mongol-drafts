@@ -63,11 +63,15 @@
   (let [info (await (pip.PackageInfo/fromPlatform))
         current-build (.-buildNumber info)
         client (dio/Dio.)
-        resp (await (.get client (get-version-json-url)))
+        version-json-url (get-version-json-url)
+        resp (await (.get client version-json-url))
         data (.-data resp)
         remote-build (get data "versionCode")]
     (if (> (compare-version remote-build current-build) 0)
-      (show-update-dialog ctx info)
+      (let [info {:versionCode remote-build
+                  :downloadUrl (get data "downloadUrl")
+                  :changelog (get data "changelog")}]
+        (show-update-dialog ctx info))
       (show-no-new-version-dialog ctx))))
 
 (defn request-storage-permission []
@@ -116,22 +120,24 @@
                             (download-and-install
                              apk (fn [received total]
                                    (dart:core/print (str "received: " received " total: " total))))))]
-                                       
-    (m/showDialog 
+
+    (m/showDialog
      .context ctx
      .barrierDismissible true
-     .builder (f/build 
-                (m/AlertDialog 
-                 .content
-                 (m/Row 
-                  .children 
-                  [(mgl/MongolText (str "New version found v" (:versionCode info)))
-                   (mgl/MongolText (:changelog info))])
-                 .actions 
-                 [(m/TextButton .child (mgl/MongolText "Not now")
-                                .onPressed (fn [] (m/Navigator.pop ctx)))
-                  (m/TextButton .child (mgl/MongolText "Update now")
-                                .onPressed on-update-click)])))))
+     .builder (f/build
+               (m/AlertDialog
+                .content
+                (m/Row
+                 .children
+                 [(mgl/MongolText (str "New version found: " (:versionCode info)))
+                  (if (empty? (get info "changelog"))
+                    (m/SizedBox)
+                    (mgl/MongolText (get info "changelog")))])
+                .actions
+                [(m/TextButton .child (mgl/MongolText "Not now")
+                               .onPressed (fn [] (m/Navigator.pop ctx)))
+                 (m/TextButton .child (mgl/MongolText "Update now")
+                               .onPressed on-update-click)])))))
 
 
 (defn show-no-new-version-dialog [ctx]
