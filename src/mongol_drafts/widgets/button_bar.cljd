@@ -23,7 +23,7 @@
       .padding (.all m/EdgeInsets 2)
       .child child)))))
 
-(defn topbar [controller]
+(defn topbar [controller quote-widget]
   (f/widget
    :context ctx
    :watch [{char-count :editor/chars
@@ -53,8 +53,11 @@
      (m/Text
       (str char-count "c" word-count "w"))
      (bar-button
-      (m/Icon m/Icons.arrow_drop_down)
-      (fn [] nil))
+      (m/Icon m/Icons.share)
+      (fn [] 
+        ;; Todo open sentence editor
+        (.push (-> m/Navigator (.of ctx)) (m/MaterialPageRoute .builder (fn [ctx] quote-widget)))
+        nil))
      (bar-button
       (m/Icon m/Icons.search)
       (fn []

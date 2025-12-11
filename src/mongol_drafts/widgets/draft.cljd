@@ -10,6 +10,7 @@
    [mongol-drafts.widgets.search :as search]
    [mongol-drafts.widgets.tagbar :as tagbar]
    [mongol-drafts.widgets.toolbar :as toolbar]
+   [mongol-drafts.widgets.quote-editor :as quote-editor]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.font :as font-state]
@@ -51,7 +52,7 @@
        .child
        (m/Column
         .children
-        [(button-bar/topbar text-controller)
+        [(button-bar/topbar text-controller (quote-editor/widget))
          (m/Expanded
           .child
           (m/Row

@@ -84,9 +84,7 @@
     [(m/GestureDetector
       .child (m/Icon m/Icons.menu)
       .onTap (fn []
-               ;; Todo open sentence editor
-               (.push (-> m/Navigator (.of ctx)) (m/MaterialPageRoute .builder (fn [ctx] (quote-editor/widget))))
-               nil))
+                (dart:core/print "toolbar menu button >>.")))
      (m/Expanded
       .child
       (m/SingleChildScrollView
