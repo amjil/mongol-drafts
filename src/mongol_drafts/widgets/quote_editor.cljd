@@ -207,15 +207,20 @@
                               .offset (m/Offset 0 -2))])
     .child
     (m/Column
-     .crossAxisAlignment m.CrossAxisAlignment/start
+     ;; Fill the parent container
+     .mainAxisSize m.MainAxisSize/max
+     .crossAxisAlignment m.CrossAxisAlignment/stretch
      .children
-     [(m/Icon (ph/PhosphorIconsFill.quotes)
-              .size 20
-              .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))
+     [(m/Row
+       .mainAxisSize m.MainAxisSize/max
+       .mainAxisAlignment m.MainAxisAlignment/start
+       .children [(m/Icon (ph/PhosphorIconsFill.quotes)
+                          .size 20
+                          .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))])
       (m/SizedBox .height 20)
       (m/Row
        .mainAxisSize m.MainAxisSize/min
-       .crossAxisAlignment m.CrossAxisAlignment/start
+       .mainAxisAlignment m.MainAxisAlignment/start
        .children
        [(mgl/MongolText
          (or @content-state "")
