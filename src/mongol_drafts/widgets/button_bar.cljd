@@ -97,3 +97,17 @@
     .children
     [(keyboard-close-button false)])))
 
+(defn sentence-editor-bar [save-fn]
+  (f/widget
+   :context ctx
+   (m/Row
+    .mainAxisSize m.MainAxisSize/max
+    .mainAxisAlignment m.MainAxisAlignment/spaceBetween
+    .children
+    [(bar-button
+      (m/Icon m/Icons.arrow_back)
+      (fn []
+        (-> m/Navigator (.of ctx) .pop)))
+     (bar-button
+      (m/Icon m/Icons.share)
+      save-fn)])))

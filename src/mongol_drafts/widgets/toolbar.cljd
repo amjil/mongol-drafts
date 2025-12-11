@@ -1,9 +1,11 @@
 (ns mongol-drafts.widgets.toolbar
   (:require
    ["package:flutter/material.dart" :as m]
+   ["dart:async" :as async]
    [cljd.flutter :as f]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.selection :as selection-state]
+   [mongol-drafts.widgets.sentence-editor :as sentence-editor]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.button-bar :as button]))
 
@@ -82,7 +84,9 @@
     [(m/GestureDetector
       .child (m/Icon m/Icons.menu)
       .onTap (fn []
-               (dart:core/print "menu button >>")))
+               ;; Todo open sentence editor
+               (.push (-> m/Navigator (.of ctx)) (m/MaterialPageRoute .builder (fn [ctx] (sentence-editor/widget))))
+               nil))
      (m/Expanded
       .child
       (m/SingleChildScrollView
