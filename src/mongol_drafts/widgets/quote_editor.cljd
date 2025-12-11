@@ -9,7 +9,6 @@
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.font :as font-state]
    [mongol-drafts.widgets.button-bar :as button-bar]
-   [mongol-drafts.widgets.drawer :as drawer]
    [virtual-keyboard.keyboard :as keyboard]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.utils.keyboard :as keyboard-utils]))
@@ -180,38 +179,59 @@
   (f/widget
    :context ctx
    :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
+   :let [color-scheme (-> m/Theme (.of ctx) .-colorScheme)
+         ;; Neutral grey stroke to avoid warm tint
+         border-color (-> m/Colors.grey (.withOpacity 0.35))]
    (m/Expanded)
    (m/Center)
    (m/Padding
     .padding (m/EdgeInsets.symmetric .horizontal 16 .vertical 8))
-   (m/Row
-    .mainAxisSize m.MainAxisSize/min
-    .crossAxisAlignment m.CrossAxisAlignment/start
-    .children
-    [(m/Stack
-      .children
-      [(m/Positioned
-        .top 0
-        .left 0
-        .child
-        (m/Icon (ph/PhosphorIconsFill.quotes)
-                .size 20
-                .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant)))
-       (m/Padding
-        .padding (m/EdgeInsets.only .top 12 .left 28 .right 8 .bottom 8)
-        .child
-        (mgl/MongolText
+   (m/Container
+    .padding (m/EdgeInsets.all 16)
+    .decoration (m/BoxDecoration
+                 ;; 3D look: light stroke + top/bottom shadows
+                 .color (.-surface color-scheme)
+                 .border (m/Border.all
+                          .color border-color
+                          .width 1)
+                 .borderRadius (m/BorderRadius.circular 12)
+                 .boxShadow [(m/BoxShadow
+                              .color (-> m/Colors.black (.withOpacity 0.08))
+                              .blurRadius 12
+                              .spreadRadius 1
+                              .offset (m/Offset 0 6))
+                             (m/BoxShadow
+                              .color (-> m/Colors.white (.withOpacity 0.7))
+                              .blurRadius 6
+                              .spreadRadius 0
+                              .offset (m/Offset 0 -2))])
+    .child
+    (m/Column
+     .crossAxisAlignment m.CrossAxisAlignment/start
+     .children
+     [(m/Icon (ph/PhosphorIconsFill.quotes)
+              .size 20
+              .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))
+      (m/SizedBox .height 20)
+      (m/Row
+       .mainAxisSize m.MainAxisSize/min
+       .crossAxisAlignment m.CrossAxisAlignment/start
+       .children
+       [(mgl/MongolText
          (or @content-state "")
-         .style (m/TextStyle .fontSize draft-font-size .height 1.8 .fontFamily draft-font)))])
-     (m/SizedBox .width 24)
-     (m/Column
-      .mainAxisAlignment m.MainAxisAlignment/end
-      .children
-      [(mgl/MongolText "--")
-       (m/SizedBox .height 4)
-       (mgl/MongolText
-        (or @author-state "")
-        .style (m/TextStyle .fontSize 16))])])))
+         .style (m/TextStyle .fontSize draft-font-size
+                             .height 1.8
+                             .fontFamily draft-font
+                             .fontWeight m/FontWeight.bold))
+        (m/SizedBox .width 24)
+        (m/Column
+         .mainAxisAlignment m.MainAxisAlignment/end
+         .children
+         [(mgl/MongolText "--")
+          (m/SizedBox .height 4)
+          (mgl/MongolText
+           (or @author-state "")
+           .style (m/TextStyle .fontSize 16))])])]))))
 
 
 (defn widget []
@@ -229,8 +249,8 @@
         (fn []
           (dart:core/print "share sentence >>.")))
        (if (nil? image-path)
-        (m/SizedBox)
-        (image-section))
+         (m/SizedBox)
+         (image-section))
        (preview-section)])
      (m/Column
       .children
