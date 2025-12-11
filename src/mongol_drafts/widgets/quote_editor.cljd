@@ -144,7 +144,7 @@
                 .size 20
                 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant)))
        (m/Padding
-        .padding (m/EdgeInsets.only .top 12 .left 28 .right 8 .bottom 8)
+        .padding (m/EdgeInsets.only .left 28)
         .child
         (mgl/MongolTextField
          .controller content-controller
@@ -153,20 +153,28 @@
                   (keyboard-action/clear-candidates))
          .onChanged (fn [x] (reset! content-state x))
          .maxLength 500
-         .decoration nil
+         .decoration (m/InputDecoration
+                      .hintText "Quote"
+                      .hintStyle (m/TextStyle .color m.Colors/grey))
          .maxLines 5
          .style (m/TextStyle .fontSize draft-font-size .height 1.8 .fontFamily draft-font)))])
-     (m/VerticalDivider .width 1 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))
      (m/SizedBox .width 24)
-     (mgl/MongolText "Author" .style (m/TextStyle .fontSize 14 .fontWeight m.FontWeight/bold
-                                                  .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant)))
-     (mgl/MongolTextField
-      .decoration nil
-      .controller author-controller
-      .onChanged (fn [x] (reset! author-state x))
-      .maxLines 1
-      .style (m/TextStyle .fontSize 16))
-     (m/VerticalDivider .width 1 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))])))
+     (m/RotatedBox
+      .quarterTurns 1
+      .child
+      (m/TextField
+       .decoration (m/InputDecoration
+                    .hintText "Author"
+                    .border (m/OutlineInputBorder
+                             .borderRadius (.circular m/BorderRadius 40)
+                             .borderSide (m/BorderSide
+                                          .width 0.2
+                                          .color m.Colors/blueGrey))
+                    .hintStyle (m/TextStyle .color m.Colors/grey))
+       .controller author-controller
+       .onChanged (fn [x] (reset! author-state x))
+       .maxLines 1
+       .style (m/TextStyle .fontSize 16)))])))
 
 (defn- preview-section []
   (f/widget
