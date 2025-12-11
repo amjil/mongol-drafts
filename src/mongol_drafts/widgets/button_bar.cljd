@@ -97,7 +97,7 @@
     .children
     [(keyboard-close-button false)])))
 
-(defn sentence-editor-bar [preview-state save-fn]
+(defn quote-editor-bar [preview-state save-fn]
   (f/widget
    :context ctx
    :watch [preview preview-state]
@@ -105,20 +105,25 @@
     .mainAxisSize m.MainAxisSize/max
     .mainAxisAlignment m.MainAxisAlignment/spaceBetween
     .children
-    [(bar-button
-      (m/Icon m/Icons.arrow_back)
-      (fn []
-        (-> m/Navigator (.of ctx) .pop)))
-     (m/Row
-      .children
-      [(if preview
-         (bar-button
-          (m/Icon m/Icons.edit)
-          (fn [] (reset! preview-state false)))
-         (bar-button
-          (m/Icon m/Icons.preview)
-          (fn [] (reset! preview-state true))))
-       (m/SizedBox .width 20)
-       (bar-button
-        (m/Icon m/Icons.share)
-        save-fn)])])))
+    [(m/Padding
+      .padding (m/EdgeInsets.only .left 10)
+      .child (bar-button
+              (m/Icon m/Icons.arrow_back)
+              (fn []
+                (-> m/Navigator (.of ctx) .pop))))
+     (m/Padding 
+      .padding (m/EdgeInsets.only .right 10)
+      .child (m/Row
+              .children
+              [(if (true? preview)
+                 (bar-button
+                  (m/Icon m/Icons.edit)
+                  (fn [] (reset! preview-state false)))
+                 (bar-button
+                  (m/Icon m/Icons.preview)
+                  (fn [] (reset! preview-state true))))
+               (m/SizedBox .width 20)
+               (bar-button
+                (m/Icon m/Icons.share)
+                save-fn)]))])))
+     
