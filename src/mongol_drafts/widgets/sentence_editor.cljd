@@ -7,10 +7,7 @@
    ["dart:convert" :as convert]
    [cljd.flutter :as f]
    [mongol-drafts.states.global :as global-state]
-   [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.font :as font-state]
-   [mongol-drafts.services.draft :as draft-service]
-   [mongol-drafts.services.workspace :as workspace-service]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.drawer :as drawer]
    [virtual-keyboard.keyboard :as keyboard]
@@ -99,17 +96,95 @@
      :author ""
      :source ""}))
 
-(defn widget []
+(def image-path-state (atom nil))
+
+(defn- image-section []
   (f/widget
    :context ctx
-   :let [width (-> m/MediaQuery (.of ctx) .-size .-width)
-         initial-data (load-sentence-data)
-         image-path-state (atom (:image-path initial-data))]
-   :managed [^m/TextEditingController content-controller (m/TextEditingController. .text (initial-data :content))
-             ^m/TextEditingController author-controller (m/TextEditingController. .text (initial-data :author))
-             ^m/TextEditingController source-controller (m/TextEditingController. .text (initial-data :source))]
-   :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state
-           image-path image-path-state]
+   :let [width (-> m/MediaQuery (.of ctx) .-size .-width)]
+   :watch [image-path image-path-state]
+   (m/Container
+    .width width
+    .height 80
+    .margin (m/EdgeInsets.all 16)
+    .decoration (m/BoxDecoration
+                 .color (-> m/Theme (.of ctx) .-colorScheme .-surfaceVariant)
+                 .borderRadius (m/BorderRadius.circular 8))
+    .child
+    (m/Stack
+     .children
+     [(if image-path
+        (m/ClipRRect
+         .borderRadius (m/BorderRadius.circular 8)
+         .child
+         (m/Image.file
+          (io/File image-path)
+          .width width
+          .height 100
+          .fit m.BoxFit/cover))
+        (m/Center
+         .child
+         (m/Icon m/Icons.add_photo_alternate .size 48 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))))
+      (m/Positioned
+       .top 8
+       .right 8
+       .child
+       (m/IconButton
+        .icon (m/Icon m/Icons.edit)
+        .onPressed (fn []
+                     (show-image-source-dialog
+                      ctx
+                      (fn [path]
+                        (reset! image-path-state path))))))]))))
+
+
+(defn- content-section []
+  (f/widget
+   :managed [^m/TextEditingController content-controller (m/TextEditingController.)
+             ^m/TextEditingController author-controller (m/TextEditingController.)
+             ^m/TextEditingController source-controller (m/TextEditingController.)]
+   :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
+   (m/Expanded
+    .child
+    (m/Padding
+     .padding (m/EdgeInsets.symmetric .horizontal 16 .vertical 8)
+     .child
+     (m/SingleChildScrollView
+      .scrollDirection m.Axis/horizontal
+      .child
+      (m/Row
+       .crossAxisAlignment m.CrossAxisAlignment/start
+       .children
+       [(mgl/MongolText "Author" .style (m/TextStyle .fontSize 14 .fontWeight m.FontWeight/bold))
+        (m/SizedBox .width 16)
+        (mgl/MongolTextField
+         .controller author-controller
+         ;; .onChanged (fn [x]
+         ;;              (dart:core/print "author changed >>." x))
+         .style (m/TextStyle .fontSize 16))
+        (m/SizedBox .width 16)
+        (mgl/MongolText "Source" .style (m/TextStyle .fontSize 14 .fontWeight m.FontWeight/bold))
+        (m/SizedBox .width 16)
+        (mgl/MongolTextField
+         .controller source-controller
+         .style (m/TextStyle .fontSize 16))
+        (m/SizedBox .width 16)
+        (mgl/MongolText "Content" .style (m/TextStyle .fontSize 14 .fontWeight m.FontWeight/bold))
+        (m/SizedBox .width 16)
+        (m/Padding
+         .padding (m/EdgeInsets.all 4)
+         .child
+         (mgl/MongolTextField
+          .controller content-controller
+          .onTap (fn []
+                   (swap! global-state/state assoc :show-keyboard true)
+                   (keyboard-action/clear-candidates))
+          .maxLength 500
+          .maxLines 10
+          .style (m/TextStyle .fontSize draft-font-size .height 1.8 .fontFamily draft-font)))]))))))
+
+(defn widget []
+  (f/widget
    (m/Scaffold
     .drawer (drawer/left-drawer))
    .body
@@ -123,78 +198,8 @@
       .child
       (m/Column
        .children
-       [(m/Container
-         .width width
-         .height 80
-         .margin (m/EdgeInsets.all 16)
-         .decoration (m/BoxDecoration
-                      .color (-> m/Theme (.of ctx) .-colorScheme .-surfaceVariant)
-                      .borderRadius (m/BorderRadius.circular 8))
-         .child
-         (m/Stack
-          .children
-          [(if image-path
-             (m/ClipRRect
-              .borderRadius (m/BorderRadius.circular 8)
-              .child
-              (m/Image.file
-               (io/File image-path)
-               .width width
-               .height 100
-               .fit m.BoxFit/cover))
-             (m/Center
-              .child
-              (m/Icon m/Icons.add_photo_alternate .size 48 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))))
-           (m/Positioned
-            .top 8
-            .right 8
-            .child
-            (m/IconButton
-             .icon (m/Icon m/Icons.edit)
-             .onPressed (fn []
-                          (show-image-source-dialog
-                           ctx
-                           (fn [path]
-                             (reset! image-path-state path))))))]))
-
-        (m/Expanded
-         .child
-         (m/Padding
-          .padding (m/EdgeInsets.symmetric .horizontal 16 .vertical 8)
-          .child
-          (m/SingleChildScrollView
-           .scrollDirection m.Axis/horizontal
-           .child
-           (m/Row
-            .crossAxisAlignment m.CrossAxisAlignment/start
-            .children
-            [(mgl/MongolText "Author" .style (m/TextStyle .fontSize 14 .fontWeight m.FontWeight/bold))
-             (m/SizedBox .width 16)
-             (mgl/MongolTextField
-              .controller author-controller
-              ;; .onChanged (fn [x]
-              ;;              (dart:core/print "author changed >>." x))
-              .style (m/TextStyle .fontSize 16))
-             (m/SizedBox .width 16)
-             (mgl/MongolText "Source" .style (m/TextStyle .fontSize 14 .fontWeight m.FontWeight/bold))
-             (m/SizedBox .width 16)
-             (mgl/MongolTextField
-              .controller source-controller
-              .style (m/TextStyle .fontSize 16))
-             (m/SizedBox .width 16)
-             (mgl/MongolText "Content" .style (m/TextStyle .fontSize 14 .fontWeight m.FontWeight/bold))
-             (m/SizedBox .width 16)
-             (m/Padding
-              .padding (m/EdgeInsets.all 4)
-              .child
-              (mgl/MongolTextField
-               .controller content-controller
-               .onTap (fn []
-                        (swap! global-state/state assoc :show-keyboard true)
-                        (keyboard-action/clear-candidates))
-               .maxLength 500
-               .maxLines 10
-               .style (m/TextStyle .fontSize draft-font-size .height 1.8 .fontFamily draft-font)))]))))]))
+       [(image-section)
+        (content-section)]))
      (keyboard/keyboard {:custom-fns {:on-return keyboard-utils/handle-enter}})])))
       
 
