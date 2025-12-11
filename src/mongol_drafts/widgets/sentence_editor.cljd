@@ -98,6 +98,9 @@
      :source ""}))
 
 (def image-path-state (atom nil))
+(def preview-state (atom false))
+(def content-state (atom ""))
+(def author-state (atom ""))
 
 (defn- image-section []
   (f/widget
@@ -139,7 +142,7 @@
                         (reset! image-path-state path))))))]))))
 
 
-(defn- content-section []
+(defn- edit-section []
   (f/widget
    :context ctx
    :managed [^m/TextEditingController content-controller (m/TextEditingController.)
@@ -170,6 +173,7 @@
          .onTap (fn []
                   (swap! global-state/state assoc :show-keyboard true)
                   (keyboard-action/clear-candidates))
+         .onChanged (fn [x] (reset! content-state x))
          .maxLength 500
          .decoration nil
          .maxLines 5
@@ -181,27 +185,75 @@
      (mgl/MongolTextField
       .decoration nil
       .controller author-controller
+      .onChanged (fn [x] (reset! author-state x))
       .maxLines 1
       .style (m/TextStyle .fontSize 16))
      (m/VerticalDivider .width 1 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))])))
 
+(defn- preview-section []
+  (f/widget
+   :context ctx
+   :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
+   (m/Expanded)
+   (m/Padding
+    .padding (m/EdgeInsets.symmetric .horizontal 16 .vertical 8))
+   (m/Row
+    .crossAxisAlignment m.CrossAxisAlignment/start
+    .children
+    [(m/Stack
+      .children
+      [(m/Positioned
+        .top 0
+        .left 0
+        .child
+        (m/Icon (ph/PhosphorIconsFill.quotes)
+                .size 20
+                .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant)))
+       (m/Padding
+        .padding (m/EdgeInsets.only .top 12 .left 28 .right 8 .bottom 8)
+        .child
+        (mgl/MongolText
+         (or @content-state "")
+         .style (m/TextStyle .fontSize draft-font-size .height 1.8 .fontFamily draft-font)))])
+     (m/SizedBox .width 24)
+     (m/Column
+      .mainAxisAlignment m.MainAxisAlignment/end
+      .children
+      [(mgl/MongolText "--")
+       (m/SizedBox .height 4)
+       (mgl/MongolText
+        (or @author-state "")
+        .style (m/TextStyle .fontSize 16))])])))
+
+
 (defn widget []
   (f/widget
+   :watch [preview preview-state]
    (m/Scaffold
     .drawer (drawer/left-drawer))
    .body
    (m/SafeArea)
-   (m/Column
-    .children
-    [(button-bar/sentence-editor-bar
-       (fn []
-         (dart:core/print "share sentence >>.")))
-     (m/Expanded
-      .child
-      (m/Column
-       .children
-       [(image-section)
-        (content-section)]))
-     (keyboard/keyboard {:custom-fns {:on-return keyboard-utils/handle-enter}})])))
+   (if preview
+     (m/Column 
+      .children 
+      [(button-bar/sentence-editor-bar
+        preview-state
+        (fn []
+          (dart:core/print "share sentence >>.")))
+       (image-section)
+       (preview-section)])
+     (m/Column
+      .children
+      [(button-bar/sentence-editor-bar
+        preview-state
+        (fn []
+          (dart:core/print "share sentence >>.")))
+       (m/Expanded
+        .child
+        (m/Column
+         .children
+         [(image-section)
+          (edit-section)]))
+       (keyboard/keyboard {:custom-fns {:on-return keyboard-utils/handle-enter}})]))))
       
 
