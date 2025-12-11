@@ -32,10 +32,18 @@
 (defn- show-image-source-dialog [ctx on-image-selected]
   (m/showDialog
    .context ctx
+   .barrierColor (-> m/Colors.black (.withOpacity 0.45))
    .builder
    (fn [ctx]
-     (m/AlertDialog
-      .content (m/Row
+     (let [theme (-> m/Theme (.of ctx))
+           color-scheme (.-colorScheme theme)
+           brightness (.-brightness theme)
+           dialog-bg-color (if (= brightness m/Brightness.light)
+                            (-> m/Colors .white)
+                            (.-secondaryContainer color-scheme))]
+       (m/AlertDialog
+        .backgroundColor dialog-bg-color
+        .content (m/Row
                 .mainAxisSize m.MainAxisSize/min
                 .children
                 [(mgl/MongolListTile
@@ -65,7 +73,7 @@
       .actions
       [(m/TextButton
         .onPressed (fn [] (-> m/Navigator (.of ctx) .pop))
-        .child (mgl/MongolText "Cancel"))]))))
+        .child (mgl/MongolText "Cancel"))])))))
 
 (defn- load-sentence-data []
   (if-let [draft (:draft @global-state/state)]
