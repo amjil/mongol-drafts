@@ -84,7 +84,7 @@
            preview preview-state]
    (m/Container
     .width width
-    .height 80
+    .height (if (true? preview) 160 80)
     .margin (m/EdgeInsets.all 16)
     .decoration (m/BoxDecoration
                  .color (-> m/Theme (.of ctx) .-colorScheme .-surfaceVariant)
@@ -99,7 +99,7 @@
          (m/Image.file
           (io/File image-path)
           .width width
-          .height 100
+          .height (if (true? preview) 160 100)
           .fit m.BoxFit/cover))
         (m/Center
          .child
@@ -210,32 +210,34 @@
     .mainAxisSize m.MainAxisSize/max
     .crossAxisAlignment m.CrossAxisAlignment/stretch
     .children
-    [(m/Row
-      .mainAxisSize m.MainAxisSize/min
-      .mainAxisAlignment m.MainAxisAlignment/center
-      .children
-      [(m/Column
-        .crossAxisAlignment m.CrossAxisAlignment/start
-        .children
-        [(m/Icon (ph/PhosphorIconsFill.quotes)
-                 .size 20
-                 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))
-         (m/SizedBox .height 20)
-         (mgl/MongolText
-          (or @content-state "Example quote")
-          .style (m/TextStyle .fontSize draft-font-size
-                              .height 1.8
-                              .fontFamily draft-font
-                              .fontWeight m/FontWeight.bold))])
-       (m/SizedBox .width 24)
-       (m/Column
-        .mainAxisAlignment m.MainAxisAlignment/center
-        .children
-        [(mgl/MongolText "--")
-         (m/SizedBox .height 4)
-         (mgl/MongolText
-          (or @author-state "Example author")
-          .style (m/TextStyle .fontSize 16))])])])))
+    [(m/Expanded
+      .child
+      (m/Row
+       .mainAxisSize m.MainAxisSize/min
+       .mainAxisAlignment m.MainAxisAlignment/center
+       .children
+       [(m/Column
+         .crossAxisAlignment m.CrossAxisAlignment/start
+         .children
+         [(m/Icon (ph/PhosphorIconsFill.quotes)
+                  .size 20
+                  .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))
+          (m/SizedBox .height 20)
+          (mgl/MongolText
+           (or @content-state "Example quote")
+           .style (m/TextStyle .fontSize draft-font-size
+                               .height 1.8
+                               .fontFamily draft-font
+                               .fontWeight m/FontWeight.bold))])
+        (m/SizedBox .width 24)
+        (m/Column
+         .mainAxisAlignment m.MainAxisAlignment/end
+         .children
+         [(mgl/MongolText "--")
+          (m/SizedBox .height 4)
+          (mgl/MongolText
+           (or @author-state "Example author")
+           .style (m/TextStyle .fontSize 16))])]))])))
 
 
 (defn widget []
