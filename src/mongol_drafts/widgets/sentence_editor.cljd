@@ -145,8 +145,8 @@
 (defn- edit-section []
   (f/widget
    :context ctx
-   :managed [^m/TextEditingController content-controller (m/TextEditingController.)
-             ^m/TextEditingController author-controller (m/TextEditingController.)]
+   :managed [^m/TextEditingController content-controller (m/TextEditingController. .text (or @content-state ""))
+             ^m/TextEditingController author-controller (m/TextEditingController. .text (or @author-state ""))]
    :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
    (m/Expanded)
    (m/Padding
@@ -195,9 +195,11 @@
    :context ctx
    :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
    (m/Expanded)
+   (m/Center)
    (m/Padding
     .padding (m/EdgeInsets.symmetric .horizontal 16 .vertical 8))
    (m/Row
+    .mainAxisSize m.MainAxisSize/min
     .crossAxisAlignment m.CrossAxisAlignment/start
     .children
     [(m/Stack
