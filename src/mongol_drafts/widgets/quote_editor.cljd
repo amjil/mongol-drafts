@@ -204,39 +204,38 @@
                               .color (-> m/Colors.white (.withOpacity 0.7))
                               .blurRadius 6
                               .spreadRadius 0
-                              .offset (m/Offset 0 -2))])
-    .child
-    (m/Column
-     ;; Fill the parent container
-     .mainAxisSize m.MainAxisSize/max
-     .crossAxisAlignment m.CrossAxisAlignment/stretch
-     .children
-     [(m/Row
-       .mainAxisSize m.MainAxisSize/max
-       .mainAxisAlignment m.MainAxisAlignment/start
-       .children [(m/Icon (ph/PhosphorIconsFill.quotes)
-                          .size 20
-                          .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))])
-      (m/SizedBox .height 20)
-      (m/Row
-       .mainAxisSize m.MainAxisSize/min
-       .mainAxisAlignment m.MainAxisAlignment/start
-       .children
-       [(mgl/MongolText
-         (or @content-state "")
-         .style (m/TextStyle .fontSize draft-font-size
-                             .height 1.8
-                             .fontFamily draft-font
-                             .fontWeight m/FontWeight.bold))
-        (m/SizedBox .width 24)
-        (m/Column
-         .mainAxisAlignment m.MainAxisAlignment/end
-         .children
-         [(mgl/MongolText "--")
-          (m/SizedBox .height 4)
-          (mgl/MongolText
-           (or @author-state "")
-           .style (m/TextStyle .fontSize 16))])])]))))
+                              .offset (m/Offset 0 -2))]))
+   (m/Column
+    ;; Fill the parent container
+    .mainAxisSize m.MainAxisSize/max
+    .crossAxisAlignment m.CrossAxisAlignment/stretch
+    .children
+    [(m/Row
+      .mainAxisSize m.MainAxisSize/min
+      .mainAxisAlignment m.MainAxisAlignment/center
+      .children
+      [(m/Column
+        .crossAxisAlignment m.CrossAxisAlignment/start
+        .children
+        [(m/Icon (ph/PhosphorIconsFill.quotes)
+                 .size 20
+                 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))
+         (m/SizedBox .height 20)
+         (mgl/MongolText
+          (or @content-state "Example quote")
+          .style (m/TextStyle .fontSize draft-font-size
+                              .height 1.8
+                              .fontFamily draft-font
+                              .fontWeight m/FontWeight.bold))])
+       (m/SizedBox .width 24)
+       (m/Column
+        .mainAxisAlignment m.MainAxisAlignment/center
+        .children
+        [(mgl/MongolText "--")
+         (m/SizedBox .height 4)
+         (mgl/MongolText
+          (or @author-state "Example author")
+          .style (m/TextStyle .fontSize 16))])])])))
 
 
 (defn widget []
@@ -270,8 +269,8 @@
          [(m/Column
            .children
            [(image-section)
-            (edit-section)])]))
-
+            (edit-section)])
+          (keyboard/candidates (m/TextStyle. .fontSize 18 .fontFamily "OyunQaganTig"))]))
        (keyboard/keyboard {:custom-fns {:on-return keyboard-utils/handle-enter}})]))))
       
 
