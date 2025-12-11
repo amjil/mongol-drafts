@@ -1,9 +1,9 @@
-(ns mongol-drafts.widgets.sentence-editor
+(ns mongol-drafts.widgets.quote-editor
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-  ["package:image_picker/image_picker.dart" :as image-picker]
-  ["package:phosphor_flutter/phosphor_flutter.dart" :as ph]
+   ["package:image_picker/image_picker.dart" :as image-picker]
+   ["package:phosphor_flutter/phosphor_flutter.dart" :as ph]
    ["dart:io" :as io]
    ["dart:convert" :as convert]
    [cljd.flutter :as f]
@@ -73,30 +73,6 @@
         .onPressed (fn [] (-> m/Navigator (.of ctx) .pop))
         .child (mgl/MongolText "Cancel"))])))))
 
-(defn- load-sentence-data []
-  (if-let [draft (:draft @global-state/state)]
-    (let [content (get draft "content")]
-      (if (and content (not= "" content))
-        (try
-          (let [data (convert/jsonDecode content)]
-            {:image-path (get data "image-path")
-             :content (get data "content" "")
-             :author (get data "author" "")
-             :source (get data "source" "")})
-          (catch Exception e
-            {:image-path nil
-             :content content
-             :author ""
-             :source ""}))
-        {:image-path nil
-         :content ""
-         :author ""
-         :source ""}))
-    {:image-path nil
-     :content ""
-     :author ""
-     :source ""}))
-
 (def image-path-state (atom nil))
 (def preview-state (atom false))
 (def content-state (atom ""))
@@ -106,7 +82,8 @@
   (f/widget
    :context ctx
    :let [width (-> m/MediaQuery (.of ctx) .-size .-width)]
-   :watch [image-path image-path-state]
+   :watch [image-path image-path-state
+           preview preview-state]
    (m/Container
     .width width
     .height 80
@@ -129,17 +106,19 @@
         (m/Center
          .child
          (m/Icon m/Icons.add_photo_alternate .size 48 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))))
-      (m/Positioned
-       .top 8
-       .right 8
-       .child
-       (m/IconButton
-        .icon (m/Icon m/Icons.edit)
-        .onPressed (fn []
-                     (show-image-source-dialog
-                      ctx
-                      (fn [path]
-                        (reset! image-path-state path))))))]))))
+      (if (true? preview)
+        (m/SizedBox)
+        (m/Positioned
+         .top 8
+         .right 8
+         .child
+         (m/IconButton
+          .icon (m/Icon m/Icons.edit)
+          .onPressed (fn []
+                       (show-image-source-dialog
+                        ctx
+                        (fn [path]
+                          (reset! image-path-state path)))))))]))))
 
 
 (defn- edit-section []
@@ -230,19 +209,22 @@
 
 (defn widget []
   (f/widget
-   :watch [preview preview-state]
+   :watch [preview preview-state
+           image-path image-path-state]
    (m/Scaffold
     .drawer (drawer/left-drawer))
    .body
    (m/SafeArea)
    (if preview
-     (m/Column 
-      .children 
+     (m/Column
+      .children
       [(button-bar/sentence-editor-bar
         preview-state
         (fn []
           (dart:core/print "share sentence >>.")))
-       (image-section)
+       (if (nil? image-path)
+        (m/SizedBox)
+        (image-section))
        (preview-section)])
      (m/Column
       .children

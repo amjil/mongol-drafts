@@ -5,7 +5,7 @@
    [cljd.flutter :as f]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.selection :as selection-state]
-   [mongol-drafts.widgets.sentence-editor :as sentence-editor]
+   [mongol-drafts.widgets.quote-editor :as quote-editor]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.button-bar :as button]))
 
@@ -85,7 +85,7 @@
       .child (m/Icon m/Icons.menu)
       .onTap (fn []
                ;; Todo open sentence editor
-               (.push (-> m/Navigator (.of ctx)) (m/MaterialPageRoute .builder (fn [ctx] (sentence-editor/widget))))
+               (.push (-> m/Navigator (.of ctx)) (m/MaterialPageRoute .builder (fn [ctx] (quote-editor/widget))))
                nil))
      (m/Expanded
       .child
