@@ -6,7 +6,7 @@
    [mongol-drafts.widgets.quote.state :as state]
    [mongol-drafts.widgets.quote.image :as quote-image]
    [mongol-drafts.widgets.quote.edit :as quote-edit]
-   [mongol-drafts.widgets.quote.preview :as quote-preview]
+   [mongol-drafts.widgets.quote.screenshot :as quote-screenshot]
    [virtual-keyboard.keyboard :as keyboard]
    [mongol-drafts.utils.keyboard :as keyboard-utils]))
 
@@ -19,16 +19,7 @@
    .body
    (m/SafeArea)
    (if preview
-     (m/Column
-      .children
-      [(button-bar/quote-editor-bar
-        state/preview-state
-        (fn []
-          (dart:core/print "share sentence >>.")))
-       (if (nil? image-path)
-         (m/SizedBox)
-         (quote-image/image-section))
-       (quote-preview/preview-section)])
+     (quote-screenshot/screenshot-section)
      (m/Column
       .children
       [(button-bar/quote-editor-bar

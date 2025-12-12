@@ -1,0 +1,30 @@
+(ns mongol-drafts.widgets.quote.screenshot
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:screenshot/screenshot.dart" :as screenshot]
+   ["package:permission_handler/permission_handler.dart" :as ph]
+   [cljd.flutter :as f]
+   [mongol-drafts.widgets.button-bar :as button-bar]
+   [mongol-drafts.widgets.quote.image :as quote-image]
+   [mongol-drafts.widgets.quote.preview :as quote-preview]
+   [mongol-drafts.widgets.quote.state :as state]))
+
+
+
+(defn screenshot-section []
+  (f/widget
+   :watch [image-path state/image-path-state]
+   :managed [screenshot-controller (screenshot/ScreenshotController.)]
+   (screenshot/Screenshot    
+    .controller screenshot-controller
+    .child
+    (m/Column
+     .children
+     [(button-bar/quote-editor-bar
+       state/preview-state
+       (fn []
+         (dart:core/print "share sentence >>.")))
+      (if (nil? image-path)
+        (m/SizedBox)
+        (quote-image/image-section))
+      (quote-preview/preview-section)]))))
