@@ -12,7 +12,7 @@
 (def preview-font-state (atom {:font font-state/default-draft-font
                                :font-size font-state/default-draft-font-size
                                :text-color m/Colors.white
-                               :author-color (-> m/Colors.white (.withOpacity 0.95))}))
+                               :background-color (-> m/Colors.deepPurple (.withOpacity 0.9))}))
 
 (defn get-preview-font []
   (:font @preview-font-state))
@@ -23,8 +23,8 @@
 (defn get-preview-text-color []
   (:text-color @preview-font-state))
 
-(defn get-preview-author-color []
-  (:author-color @preview-font-state))
+(defn get-preview-background-color []
+  (:background-color @preview-font-state))
 
 (defn set-preview-font! [font]
   (swap! preview-font-state assoc :font font))
@@ -35,5 +35,5 @@
 (defn set-preview-text-color! [color]
   (swap! preview-font-state assoc :text-color color))
 
-(defn set-preview-author-color! [color]
-  (swap! preview-font-state assoc :author-color color))
+(defn set-preview-background-color! [color]
+  (swap! preview-font-state assoc :background-color color))

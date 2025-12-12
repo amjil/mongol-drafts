@@ -122,52 +122,57 @@
    (m/AlertDialog
     .backgroundColor dialog-bg-color
     .content
-    (m/Column
+    (m/Row
      .mainAxisSize m/MainAxisSize.min
      .crossAxisAlignment m/CrossAxisAlignment.start
      .children
-     [(mgl/MongolText "ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠎ᠤ ᠦᠩᠭᠡ"
-                     .style (m/TextStyle
-                             .fontSize 20
-                             .fontWeight m/FontWeight.bold
-                             .color (.-onSurface color-scheme)))
+     [(mgl/MongolText "ᠦᠰᠦᠭ ᠎ᠦᠨ ᠦᠩᠭᠡ"
+                      .style (m/TextStyle
+                              .fontSize 20
+                              .fontWeight m/FontWeight.bold
+                              .color (.-onSurface color-scheme)))
       (m/SizedBox .height 16)
-      (m/Wrap
-       .spacing 8
-       .runSpacing 8
-       .children
-       (map (fn [color]
-              (m/GestureDetector
-               .onTap (fn [] (quote-state/set-preview-text-color! color))
-               .child
-               (m/Container
-                .width 40
-                .height 40
-                .decoration (m/BoxDecoration
-                             .color color
-                             .shape m/BoxShape.circle
-                             .border (m/Border.all
-                                      .width (if (= color preview-text-color) 3 1)
-                                      .color (if (= color preview-text-color)
-                                               (.-primary color-scheme)
-                                               (.-outline color-scheme)))
-                             .boxShadow (if (= color preview-text-color)
-                                         [(m/BoxShadow
-                                           .color (-> (.-primary color-scheme) (.withOpacity 0.5))
-                                           .blurRadius 8
-                                           .spreadRadius 2)]
-                                         [])))))
-            available-colors))])
+      (m/Expanded
+       .child
+       (m/SingleChildScrollView
+        .child
+        (m/Wrap
+         .direction m/Axis.vertical
+         .spacing 8
+         .runSpacing 8
+         .children
+         (map (fn [color]
+                (m/GestureDetector
+                 .onTap (fn [] (quote-state/set-preview-text-color! color))
+                 .child
+                 (m/Container
+                  .width 40
+                  .height 40
+                  .decoration (m/BoxDecoration
+                               .color color
+                               .shape m/BoxShape.circle
+                               .border (m/Border.all
+                                        .width (if (= color preview-text-color) 3 1)
+                                        .color (if (= color preview-text-color)
+                                                 (.-primary color-scheme)
+                                                 (.-outline color-scheme)))
+                               .boxShadow (if (= color preview-text-color)
+                                            [(m/BoxShadow
+                                              .color (-> (.-primary color-scheme) (.withOpacity 0.5))
+                                              .blurRadius 8
+                                              .spreadRadius 2)]
+                                            [])))))
+              available-colors))))])
     .actions
     [(m/TextButton
       .onPressed (fn [] (m/Navigator.pop ctx))
       .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ"))])))
 
-;; Author color dialog
-(defn author-color-dialog [_context]
+;; Background color dialog
+(defn background-color-dialog [_context]
   (f/widget
    :context ctx
-   :watch [{preview-author-color :author-color} quote-state/preview-font-state]
+   :watch [{preview-background-color :background-color} quote-state/preview-font-state]
    :let [theme (-> m/Theme (.of ctx))
          color-scheme (.-colorScheme theme)
          brightness (.-brightness theme)
@@ -177,42 +182,47 @@
    (m/AlertDialog
     .backgroundColor dialog-bg-color
     .content
-    (m/Column
+    (m/Row
      .mainAxisSize m/MainAxisSize.min
      .crossAxisAlignment m/CrossAxisAlignment.start
      .children
-     [(mgl/MongolText "ᠵᠢᠷᠤᠭᠤᠨ ᠎ᠤ ᠦᠩᠭᠡ"
-                     .style (m/TextStyle
-                             .fontSize 20
-                             .fontWeight m/FontWeight.bold
-                             .color (.-onSurface color-scheme)))
+     [(mgl/MongolText "ᠠᠷᠤ ᠎ᠶᠢᠨ  ᠦᠩᠭᠡ"
+                      .style (m/TextStyle
+                              .fontSize 20
+                              .fontWeight m/FontWeight.bold
+                              .color (.-onSurface color-scheme)))
       (m/SizedBox .height 16)
-      (m/Wrap
-       .spacing 8
-       .runSpacing 8
-       .children
-       (map (fn [color]
-              (m/GestureDetector
-               .onTap (fn [] (quote-state/set-preview-author-color! color))
-               .child
-               (m/Container
-                .width 40
-                .height 40
-                .decoration (m/BoxDecoration
-                             .color color
-                             .shape m/BoxShape.circle
-                             .border (m/Border.all
-                                      .width (if (= color preview-author-color) 3 1)
-                                      .color (if (= color preview-author-color)
-                                               (.-primary color-scheme)
-                                               (.-outline color-scheme)))
-                             .boxShadow (if (= color preview-author-color)
-                                         [(m/BoxShadow
-                                           .color (-> (.-primary color-scheme) (.withOpacity 0.5))
-                                           .blurRadius 8
-                                           .spreadRadius 2)]
-                                         [])))))
-            available-colors))])
+      (m/Expanded
+       .child
+       (m/SingleChildScrollView
+        .child
+        (m/Wrap
+         .direction m/Axis.vertical
+         .spacing 8
+         .runSpacing 8
+         .children
+         (map (fn [color]
+                (m/GestureDetector
+                 .onTap (fn [] (quote-state/set-preview-background-color! color))
+                 .child
+                 (m/Container
+                  .width 40
+                  .height 40
+                  .decoration (m/BoxDecoration
+                               .color color
+                               .shape m/BoxShape.circle
+                               .border (m/Border.all
+                                        .width (if (= color preview-background-color) 3 1)
+                                        .color (if (= color preview-background-color)
+                                                 (.-primary color-scheme)
+                                                 (.-outline color-scheme)))
+                               .boxShadow (if (= color preview-background-color)
+                                            [(m/BoxShadow
+                                              .color (-> (.-primary color-scheme) (.withOpacity 0.5))
+                                              .blurRadius 8
+                                              .spreadRadius 2)]
+                                            [])))))
+              available-colors))))])
     .actions
     [(m/TextButton
       .onPressed (fn [] (m/Navigator.pop ctx))
@@ -239,12 +249,12 @@
    .barrierColor (-> m/Colors.black (.withOpacity 0.5))
    .builder (fn [ctx] (text-color-dialog ctx))))
 
-;; Show author color dialog
-(defn show-author-color-dialog [context]
+;; Show background color dialog
+(defn show-background-color-dialog [context]
   (m/showDialog
    .context context
    .barrierColor (-> m/Colors.black (.withOpacity 0.5))
-   .builder (fn [ctx] (author-color-dialog ctx))))
+   .builder (fn [ctx] (background-color-dialog ctx))))
 
 ;; Keep old function for backward compatibility (if needed)
 (defn show-font-settings-dialog [context]
