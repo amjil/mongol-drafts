@@ -4,20 +4,19 @@
    ["package:mongol/mongol.dart" :as mgl]
    ["package:phosphor_flutter/phosphor_flutter.dart" :as ph]
    [cljd.flutter :as f]
-   [mongol-drafts.states.font :as font-state]
    [mongol-drafts.widgets.quote.state :as state]))
 
 (defn preview-section []
   (f/widget
-   :context ctx
-   :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
+   :watch [{preview-font :font preview-font-size :font-size} state/preview-font-state]
    :let [;; Modern gradient colors - appealing to young people
          gradient-start (-> m/Colors.deepPurple (.withOpacity 0.9))
          gradient-end (-> m/Colors.pinkAccent (.withOpacity 0.8))
          ;; Decorative accent color
          accent-color (-> m/Colors.amberAccent (.withOpacity 0.25))
          text-color m/Colors.white
-         author-color (-> m/Colors.white (.withOpacity 0.95))]
+         author-color (-> m/Colors.white (.withOpacity 0.95))
+         author-font-size (- preview-font-size 2)]
    (m/Expanded)
    (m/Center)
    (m/Padding
@@ -90,9 +89,9 @@
              .child
              (mgl/MongolText
               (or @state/content-state "Example quote")
-              .style (m/TextStyle .fontSize draft-font-size
+              .style (m/TextStyle .fontSize preview-font-size
                                   .height 1.9
-                                  .fontFamily draft-font
+                                  .fontFamily preview-font
                                   .fontWeight m/FontWeight.w600
                                   .color text-color
                                   .letterSpacing 0.5)
@@ -119,7 +118,7 @@
                (m/SizedBox .height 6)
                (mgl/MongolText
                 (or @state/author-state "Example author")
-                .style (m/TextStyle .fontSize 18
+                .style (m/TextStyle .fontSize author-font-size
                                     .color author-color
                                     .fontWeight m/FontWeight.w500
                                     .letterSpacing 0.3))]))])]))])])))))

@@ -1,6 +1,24 @@
-(ns mongol-drafts.widgets.quote.state)
+(ns mongol-drafts.widgets.quote.state
+  (:require
+   [mongol-drafts.states.font :as font-state]))
 
 (def image-path-state (atom nil))
 (def preview-state (atom false))
 (def content-state (atom ""))
 (def author-state (atom ""))
+
+;; Preview-specific font settings (initialized from global draft font settings)
+(def preview-font-state (atom {:font font-state/default-draft-font
+                               :font-size font-state/default-draft-font-size}))
+
+(defn get-preview-font []
+  (:font @preview-font-state))
+
+(defn get-preview-font-size []
+  (:font-size @preview-font-state))
+
+(defn set-preview-font! [font]
+  (swap! preview-font-state assoc :font font))
+
+(defn set-preview-font-size! [size]
+  (swap! preview-font-state assoc :font-size size))
