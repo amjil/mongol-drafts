@@ -1,5 +1,6 @@
 (ns mongol-drafts.widgets.quote.state
   (:require
+   ["package:flutter/material.dart" :as m]
    [mongol-drafts.states.font :as font-state]))
 
 (def image-path-state (atom nil))
@@ -9,7 +10,9 @@
 
 ;; Preview-specific font settings (initialized from global draft font settings)
 (def preview-font-state (atom {:font font-state/default-draft-font
-                               :font-size font-state/default-draft-font-size}))
+                               :font-size font-state/default-draft-font-size
+                               :text-color m/Colors.white
+                               :author-color (-> m/Colors.white (.withOpacity 0.95))}))
 
 (defn get-preview-font []
   (:font @preview-font-state))
@@ -17,8 +20,20 @@
 (defn get-preview-font-size []
   (:font-size @preview-font-state))
 
+(defn get-preview-text-color []
+  (:text-color @preview-font-state))
+
+(defn get-preview-author-color []
+  (:author-color @preview-font-state))
+
 (defn set-preview-font! [font]
   (swap! preview-font-state assoc :font font))
 
 (defn set-preview-font-size! [size]
   (swap! preview-font-state assoc :font-size size))
+
+(defn set-preview-text-color! [color]
+  (swap! preview-font-state assoc :text-color color))
+
+(defn set-preview-author-color! [color]
+  (swap! preview-font-state assoc :author-color color))

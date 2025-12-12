@@ -6,10 +6,27 @@
    [mongol-drafts.states.font :as font-state]
    [mongol-drafts.widgets.quote.state :as quote-state]))
 
+(def available-colors
+  [m/Colors.white
+   m/Colors.black
+   m/Colors.red
+   m/Colors.blue
+   m/Colors.green
+   m/Colors.yellow
+   m/Colors.orange
+   m/Colors.purple
+   m/Colors.pink
+   m/Colors.cyan
+   m/Colors.amber
+   m/Colors.indigo])
+
 (defn font-settings-dialog [_context]
   (f/widget
    :context ctx
-   :watch [{preview-font :font preview-font-size :font-size} quote-state/preview-font-state]
+   :watch [{preview-font :font 
+            preview-font-size :font-size
+            preview-text-color :text-color
+            preview-author-color :author-color} quote-state/preview-font-state]
    :let [theme (-> m/Theme (.of ctx))
          color-scheme (.-colorScheme theme)
          brightness (.-brightness theme)
@@ -102,7 +119,83 @@
             (mgl/MongolText (str (last font-state/available-font-sizes) "pt")
                             .style (m/TextStyle
                                     .fontSize 12
-                                    .color (.-onSurfaceVariant color-scheme)))])])])))
+                                    .color (.-onSurfaceVariant color-scheme)))])])
+        (m/SizedBox .width 20)
+        ;; Text color selection
+        (m/Column
+         .mainAxisSize m.MainAxisSize/min
+         .crossAxisAlignment m.CrossAxisAlignment/start
+         .children
+         [(mgl/MongolText "ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠎ᠤ ᠦᠩᠭᠡ"
+                          .style (m/TextStyle
+                                  .fontSize 16
+                                  .fontWeight m/FontWeight.w500
+                                  .color (.-onSurface color-scheme)))
+          (m/SizedBox .height 8)
+          (m/Wrap
+           .spacing 8
+           .runSpacing 8
+           .children
+           (map (fn [color]
+                  (m/GestureDetector
+                   .onTap (fn [] (quote-state/set-preview-text-color! color))
+                   .child
+                   (m/Container
+                    .width 32
+                    .height 32
+                    .decoration (m/BoxDecoration
+                                 .color color
+                                 .shape m/BoxShape.circle
+                                 .border (m/Border.all
+                                          .width (if (= color preview-text-color) 3 1)
+                                          .color (if (= color preview-text-color)
+                                                   (.-primary color-scheme)
+                                                   (.-outline color-scheme)))
+                                 .boxShadow (if (= color preview-text-color)
+                                             [(m/BoxShadow
+                                               .color (-> (.-primary color-scheme) (.withOpacity 0.5))
+                                               .blurRadius 8
+                                               .spreadRadius 2)]
+                                             [])))))
+                available-colors))])
+        (m/SizedBox .width 20)
+        ;; Author color selection
+        (m/Column
+         .mainAxisSize m.MainAxisSize/min
+         .crossAxisAlignment m.CrossAxisAlignment/start
+         .children
+         [(mgl/MongolText "ᠵᠢᠷᠤᠭᠤᠨ ᠎ᠤ ᠦᠩᠭᠡ"
+                          .style (m/TextStyle
+                                  .fontSize 16
+                                  .fontWeight m/FontWeight.w500
+                                  .color (.-onSurface color-scheme)))
+          (m/SizedBox .height 8)
+          (m/Wrap
+           .spacing 8
+           .runSpacing 8
+           .children
+           (map (fn [color]
+                  (m/GestureDetector
+                   .onTap (fn [] (quote-state/set-preview-author-color! color))
+                   .child
+                   (m/Container
+                    .width 32
+                    .height 32
+                    .decoration (m/BoxDecoration
+                                 .color color
+                                 .shape m/BoxShape.circle
+                                 .border (m/Border.all
+                                          .width (if (= color preview-author-color) 3 1)
+                                          .color (if (= color preview-author-color)
+                                                   (.-primary color-scheme)
+                                                   (.-outline color-scheme)))
+                                 .boxShadow (if (= color preview-author-color)
+                                             [(m/BoxShadow
+                                               .color (-> (.-primary color-scheme) (.withOpacity 0.5))
+                                               .blurRadius 8
+                                               .spreadRadius 2)]
+                                             [])))))
+                available-colors))])])))
     ;; Close button
     .actions [(m/TextButton
                .onPressed (fn [] (m/Navigator.pop ctx))

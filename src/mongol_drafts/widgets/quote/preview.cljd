@@ -8,14 +8,17 @@
 
 (defn preview-section []
   (f/widget
-   :watch [{preview-font :font preview-font-size :font-size} state/preview-font-state]
+   :watch [{preview-font :font 
+            preview-font-size :font-size
+            preview-text-color :text-color
+            preview-author-color :author-color} state/preview-font-state]
    :let [;; Modern gradient colors - appealing to young people
          gradient-start (-> m/Colors.deepPurple (.withOpacity 0.9))
          gradient-end (-> m/Colors.pinkAccent (.withOpacity 0.8))
          ;; Decorative accent color
          accent-color (-> m/Colors.amberAccent (.withOpacity 0.25))
-         text-color m/Colors.white
-         author-color (-> m/Colors.white (.withOpacity 0.95))
+         text-color preview-text-color
+         author-color preview-author-color
          author-font-size (- preview-font-size 2)]
    (m/Expanded)
    (m/Center)
