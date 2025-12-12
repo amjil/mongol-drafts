@@ -250,14 +250,20 @@
                      .size 26
                      .color text-color))
             (m/SizedBox .height 24)
-            (mgl/MongolText
-             (or @content-state "Example quote")
-             .style (m/TextStyle .fontSize draft-font-size
-                                 .height 1.9
-                                 .fontFamily draft-font
-                                 .fontWeight m/FontWeight.w600
-                                 .color text-color
-                                 .letterSpacing 0.5))])
+            (m/Container
+             .padding (m/EdgeInsets.symmetric .horizontal 14 .vertical 8)
+             .decoration (m/BoxDecoration
+                          .color (-> m/Colors.white (.withOpacity 0.15))
+                          .borderRadius (m/BorderRadius.circular 14))
+             .child
+             (mgl/MongolText
+              (or @content-state "Example quote")
+              .style (m/TextStyle .fontSize draft-font-size
+                                  .height 1.9
+                                  .fontFamily draft-font
+                                  .fontWeight m/FontWeight.w600
+                                  .color text-color
+                                  .letterSpacing 0.5)))])
           (m/SizedBox .width 32)
           (m/Column
            .mainAxisAlignment m.MainAxisAlignment/end
