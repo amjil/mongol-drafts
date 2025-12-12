@@ -1,0 +1,123 @@
+(ns mongol-drafts.widgets.quote.preview
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   ["package:phosphor_flutter/phosphor_flutter.dart" :as ph]
+   [cljd.flutter :as f]
+   [mongol-drafts.states.font :as font-state]
+   [mongol-drafts.widgets.quote.state :as state]))
+
+(defn preview-section []
+  (f/widget
+   :context ctx
+   :watch [{draft-font :draft-font draft-font-size :draft-font-size} font-state/font-state]
+   :let [;; Modern gradient colors - appealing to young people
+         gradient-start (-> m/Colors.deepPurple (.withOpacity 0.9))
+         gradient-end (-> m/Colors.pinkAccent (.withOpacity 0.8))
+         ;; Decorative accent color
+         accent-color (-> m/Colors.amberAccent (.withOpacity 0.25))
+         text-color m/Colors.white
+         author-color (-> m/Colors.white (.withOpacity 0.95))]
+   (m/Expanded)
+   (m/Center)
+   (m/Padding
+    .padding (m/EdgeInsets.symmetric .horizontal 20 .vertical 12)
+    .child
+   (m/Container
+    .padding (m/EdgeInsets.all 24)
+    .decoration (m/BoxDecoration
+                 ;; Modern gradient background
+                 .gradient (m/LinearGradient
+                            .begin (m/Alignment.topLeft)
+                            .end (m/Alignment.bottomRight)
+                            .colors [gradient-start gradient-end])
+                 ;; Soft rounded corners
+                 .borderRadius (m/BorderRadius.circular 20)
+                 ;; Modern shadow effects - softer and more depth
+                 .boxShadow [(m/BoxShadow
+                              .color (-> m/Colors.deepPurple (.withOpacity 0.3))
+                              .blurRadius 20
+                              .spreadRadius 2
+                              .offset (m/Offset 0 8))
+                             (m/BoxShadow
+                              .color (-> m/Colors.pinkAccent (.withOpacity 0.2))
+                              .blurRadius 15
+                              .spreadRadius -2
+                              .offset (m/Offset 0 -4))])
+    .child
+   (m/Stack
+    .children
+    [;; Decorative background element
+     (m/Positioned
+      .top -30
+      .right -30
+      .child
+      (m/Container
+       .width 150
+       .height 150
+       .decoration (m/BoxDecoration
+                    .shape m/BoxShape.circle
+                    .color accent-color)))
+     ;; Main content
+     (m/Column
+      .mainAxisSize m.MainAxisSize/max
+      .crossAxisAlignment m.CrossAxisAlignment/stretch
+      .children
+      [(m/Expanded
+        .child
+        (m/Row
+         .mainAxisSize m.MainAxisSize/min
+         .mainAxisAlignment m.MainAxisAlignment/center
+         .children
+         [(m/Column
+           .crossAxisAlignment m.CrossAxisAlignment/start
+           .children
+           [(m/Container
+             .padding (m/EdgeInsets.all 10)
+             .decoration (m/BoxDecoration
+                          .color (-> m/Colors.white (.withOpacity 0.2))
+                          .borderRadius (m/BorderRadius.circular 10))
+             .child
+             (m/Icon (ph/PhosphorIconsFill.quotes)
+                     .size 26
+                     .color text-color))
+            (m/SizedBox .height 24)
+            (m/Container
+             .padding (m/EdgeInsets.symmetric .horizontal 14 .vertical 8)
+             .decoration (m/BoxDecoration
+                          .color (-> m/Colors.white (.withOpacity 0.15))
+                          .borderRadius (m/BorderRadius.circular 14))
+             .child
+             (mgl/MongolText
+              (or @state/content-state "Example quote")
+              .style (m/TextStyle .fontSize draft-font-size
+                                  .height 1.9
+                                  .fontFamily draft-font
+                                  .fontWeight m/FontWeight.w600
+                                  .color text-color
+                                  .letterSpacing 0.5)))])
+          (m/SizedBox .width 32)
+          (m/Column
+           .mainAxisAlignment m.MainAxisAlignment/end
+           .crossAxisAlignment m.CrossAxisAlignment/end
+           .children
+           [(m/Container
+             .padding (m/EdgeInsets.symmetric .horizontal 14 .vertical 8)
+             .decoration (m/BoxDecoration
+                          .color (-> m/Colors.white (.withOpacity 0.15))
+                          .borderRadius (m/BorderRadius.circular 14))
+             .child
+             (m/Column
+              .crossAxisAlignment m.CrossAxisAlignment/end
+              .children
+              [(mgl/MongolText "--"
+                               .style (m/TextStyle .fontSize 14
+                                                   .color author-color
+                                                   .fontWeight m/FontWeight.w300))
+               (m/SizedBox .height 6)
+               (mgl/MongolText
+                (or @state/author-state "Example author")
+                .style (m/TextStyle .fontSize 18
+                                    .color author-color
+                                    .fontWeight m/FontWeight.w500
+                                    .letterSpacing 0.3))]))])]))])])))))

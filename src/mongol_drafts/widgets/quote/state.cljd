@@ -1,0 +1,6 @@
+(ns mongol-drafts.widgets.quote.state)
+
+(def image-path-state (atom nil))
+(def preview-state (atom false))
+(def content-state (atom ""))
+(def author-state (atom ""))

@@ -1,0 +1,108 @@
+(ns mongol-drafts.widgets.quote.image
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:mongol/mongol.dart" :as mgl]
+   ["package:image_picker/image_picker.dart" :as image-picker]
+   ["dart:io" :as io]
+   [cljd.flutter :as f]
+   [mongol-drafts.widgets.quote.state :as state]))
+
+(defn- pick-image []
+  (let [picker (image-picker/ImagePicker.)
+        image (await (.pickImage picker .source image-picker/ImageSource.gallery))]
+    (when image
+      (.path image))))
+
+(defn- take-photo []
+  (let [picker (image-picker/ImagePicker.)
+        image (await (.pickImage picker .source image-picker/ImageSource.camera))]
+    (when image
+      (.path image))))
+
+(defn- show-image-source-dialog [ctx on-image-selected]
+  (m/showDialog
+   .context ctx
+   .barrierColor (-> m/Colors.black (.withOpacity 0.45))
+   .builder
+   (fn [ctx]
+     (let [theme (-> m/Theme (.of ctx))
+           color-scheme (.-colorScheme theme)
+           brightness (.-brightness theme)
+           dialog-bg-color (if (= brightness m/Brightness.light)
+                            (-> m/Colors .white)
+                            (.-secondaryContainer color-scheme))]
+       (m/AlertDialog
+        .backgroundColor dialog-bg-color
+        .content (m/Row
+                .mainAxisSize m.MainAxisSize/min
+                .children
+                [(mgl/MongolListTile
+                  .leading (m/Icon m/Icons.photo_library)
+                  .title (mgl/MongolText "Select from Gallery")
+                  .onTap (fn []
+                           (-> m/Navigator (.of ctx) .pop)
+                           (-> (pick-image)
+                               (.then (fn [image-path]
+                                        (when image-path
+                                          (on-image-selected image-path)))))))
+                 (mgl/MongolListTile
+                  .leading (m/Icon m/Icons.camera_alt)
+                  .title (mgl/MongolText "Take Photo")
+                  .onTap (fn []
+                           (-> m/Navigator (.of ctx) .pop)
+                           (-> (take-photo)
+                               (.then (fn [image-path]
+                                        (when image-path
+                                          (on-image-selected image-path)))))))
+                 (mgl/MongolListTile
+                  .leading (m/Icon m/Icons.delete)
+                  .title (mgl/MongolText "Delete Image")
+                  .onTap (fn []
+                           (-> m/Navigator (.of ctx) .pop)
+                           (on-image-selected nil)))])
+      .actions
+      [(m/TextButton
+        .onPressed (fn [] (-> m/Navigator (.of ctx) .pop))
+        .child (mgl/MongolText "Cancel"))])))))
+
+(defn image-section []
+  (f/widget
+   :context ctx
+   :let [width (-> m/MediaQuery (.of ctx) .-size .-width)]
+   :watch [image-path state/image-path-state
+           preview state/preview-state]
+   (m/Container
+    .width width
+    .height (if (true? preview) 160 80)
+    .margin (m/EdgeInsets.all 16)
+    .decoration (m/BoxDecoration
+                 .color (-> m/Theme (.of ctx) .-colorScheme .-surfaceVariant)
+                 .borderRadius (m/BorderRadius.circular 8))
+    .child
+    (m/Stack
+     .children
+     [(if image-path
+        (m/ClipRRect
+         .borderRadius (m/BorderRadius.circular 8)
+         .child
+         (m/Image.file
+          (io/File image-path)
+          .width width
+          .height (if (true? preview) 160 100)
+          .fit m.BoxFit/cover))
+        (m/Center
+         .child
+         (m/Icon m/Icons.add_photo_alternate .size 48 .color (-> m/Theme (.of ctx) .-colorScheme .-onSurfaceVariant))))
+      (if (true? preview)
+        (m/SizedBox)
+        (m/Positioned
+         .top 8
+         .right 8
+         .child
+         (m/IconButton
+          .icon (m/Icon m/Icons.edit)
+          .onPressed (fn []
+                       (show-image-source-dialog
+                        ctx
+                        (fn [path]
+                          (reset! state/image-path-state path)))))))]))))
