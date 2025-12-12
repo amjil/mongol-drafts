@@ -95,7 +95,9 @@
                                   .fontFamily draft-font
                                   .fontWeight m/FontWeight.w600
                                   .color text-color
-                                  .letterSpacing 0.5)))])
+                                  .letterSpacing 0.5)
+              .maxLines 10
+              .overflow m/TextOverflow.ellipsis))])
           (m/SizedBox .width 32)
           (m/Column
            .mainAxisAlignment m.MainAxisAlignment/end
