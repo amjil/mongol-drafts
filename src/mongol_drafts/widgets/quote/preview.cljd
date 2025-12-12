@@ -19,7 +19,6 @@
          ;; Glassmorphism effect colors - more modern semi-transparent effect
          glass-color (-> m/Colors.white (.withOpacity 0.25))
          glass-border (-> m/Colors.white (.withOpacity 0.7))
-         glass-border-inner (-> m/Colors.white (.withOpacity 0.5))
          ;; Decorative elements - more vibrant colors
          accent-color-1 (-> m/Colors.white (.withOpacity 0.4))
          accent-color-2 (-> m/Colors.white (.withOpacity 0.2))
@@ -67,39 +66,40 @@
                               .offset (m/Offset 0 8))])
     .child
     (m/Container
-     .padding (m/EdgeInsets.all 4)
+    ;;  .padding (m/EdgeInsets.all 4)
      .decoration (m/BoxDecoration
                   .borderRadius (m/BorderRadius.circular 20)
-                  ;; Inner border - enhancing 3D effect
-                  .border (m/Border.all
-                           .width 1.5
-                           .color glass-border-inner))
+                  ;; Removed inner border to keep clean edges
+                  )
      .child
-     (m/Stack
-      .children
-      [;; Decorative background elements - multiple circles creating layers
-       (m/Positioned
-        .top -40
-        .right -40
-        .child
-        (m/Container
-         .width 180
-         .height 180
-         .decoration (m/BoxDecoration
-                      .shape m/BoxShape.circle
-                      .gradient (m/RadialGradient
-                                 .colors [accent-color-1 accent-color-2]
-                                 .stops [0.0 1.0]))))
-       (m/Positioned
-        .bottom -20
-        .left -20
-        .child
-        (m/Container
-         .width 120
-         .height 120
-         .decoration (m/BoxDecoration
-                      .shape m/BoxShape.circle
-                      .color accent-color-2)))
+     (m/ClipRRect
+      .borderRadius (m/BorderRadius.circular 20)
+      .child
+      (m/Stack
+       .children
+       [;; Decorative background elements - multiple circles creating layers
+        (m/Positioned
+         .top 12
+         .right 12
+         .child
+         (m/Container
+          .width 160
+          .height 160
+          .decoration (m/BoxDecoration
+                       .shape m/BoxShape.circle
+                       .gradient (m/RadialGradient
+                                  .colors [accent-color-1 accent-color-2]
+                                  .stops [0.0 1.0]))))
+        (m/Positioned
+         .bottom 12
+         .left 12
+         .child
+         (m/Container
+          .width 120
+          .height 120
+          .decoration (m/BoxDecoration
+                       .shape m/BoxShape.circle
+                       .color accent-color-2)))
        ;; Main content area
        (m/Column
         .mainAxisSize m.MainAxisSize/max
@@ -188,18 +188,18 @@
                 [(m/Container
                   .padding (m/EdgeInsets.only .bottom 8)
                   .child
-                  (mgl/MongolText "——"
+                 (mgl/MongolText "—"
                                   .style (m/TextStyle .fontSize 16
-                                                      .color author-color
+                                                      .color text-color
                                                       .fontWeight m/FontWeight.w400
                                                       .letterSpacing 2)))
                  (mgl/MongolText
                   (or @state/author-state "Example author")
-                  .style (m/TextStyle .fontSize author-font-size
-                                      .color author-color
+                  .style (m/TextStyle .fontSize (- preview-font-size 2)
+                                      .color text-color
                                       .fontWeight m/FontWeight.w600
                                       .letterSpacing 0.5
                                       .shadows [(m/Shadow
                                                  .color (-> m/Colors.black (.withOpacity 0.1))
                                                  .blurRadius 3
-                                                 .offset (m/Offset 0 1))]))]))])]))])]))))))
+                                                 .offset (m/Offset 0 1))]))]))])]))])])))))))
