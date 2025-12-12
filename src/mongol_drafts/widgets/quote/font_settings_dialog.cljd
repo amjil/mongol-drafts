@@ -20,189 +20,232 @@
    m/Colors.amber
    m/Colors.indigo])
 
-(defn font-settings-dialog [_context]
+;; Font selection dialog
+(defn font-selection-dialog [_context]
   (f/widget
    :context ctx
-   :watch [{preview-font :font 
-            preview-font-size :font-size
-            preview-text-color :text-color
-            preview-author-color :author-color} quote-state/preview-font-state]
+   :watch [{preview-font :font} quote-state/preview-font-state]
    :let [theme (-> m/Theme (.of ctx))
          color-scheme (.-colorScheme theme)
          brightness (.-brightness theme)
          dialog-bg-color (if (= brightness m/Brightness.light)
-                           (-> m/Colors .white (.withOpacity 0.9))
-                           (-> (.-secondaryContainer color-scheme) (.withOpacity 0.9)))]
+                           (-> m/Colors .white)
+                           (.-secondaryContainer color-scheme))]
    (m/AlertDialog
-    .backgroundColor m/Colors.transparent
+    .backgroundColor dialog-bg-color
     .content
-    (m/Container
-     .padding (m/EdgeInsets.all 20)
-     .decoration (m/BoxDecoration
-                  .color dialog-bg-color
-                  .borderRadius (m/BorderRadius.circular 16)
-                  .boxShadow [(m/BoxShadow
-                               .color (-> m/Colors.black (.withOpacity 0.2))
-                               .blurRadius 10
-                               .spreadRadius 2
-                               .offset (m/Offset 0 4))])
-     .child
-     (m/SingleChildScrollView
-      .scrollDirection m/Axis.horizontal
-      .child
-      (m/Row
-       .mainAxisSize m.MainAxisSize/min
-       .crossAxisAlignment m.CrossAxisAlignment/stretch
-       .children
-       [(mgl/MongolText "ᠹᠦᠨᠲ ᠰᠡᠳᠦᠪ"
-                        .style (m/TextStyle
-                                .fontSize 22
-                                .fontWeight m/FontWeight.bold
-                                .color (.-onSurface color-scheme)))
-        (m/SizedBox .width 20)
-        ;; Font family selection
-        (mgl/MongolText "ᠹᠦᠨᠲ"
-                        .style (m/TextStyle
-                                .fontSize 16
-                                .fontWeight m/FontWeight.w500
-                                .color (.-onSurface color-scheme)))
-        (m/SizedBox .width 8)
-        (m/Row
-         .mainAxisSize m.MainAxisSize/min
-         .children
-         (map (fn [font-name]
-                (m/RotatedBox
-                 .quarterTurns 1
-                 .child (m/RadioListTile
-                         .title (m/Text font-name)
-                         .value font-name
-                         .groupValue preview-font
-                         .onChanged (fn [value]
-                                      (quote-state/set-preview-font! value)))))
-              font-state/available-fonts))
-        (m/SizedBox .width 20)
-        ;; Font size selection
-        (m/Row
-         .mainAxisSize m.MainAxisSize/min
-         .crossAxisAlignment m.CrossAxisAlignment/start
-         .children
-         [(mgl/MongolText "ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ"
-                          .style (m/TextStyle
-                                  .fontSize 16
-                                  .fontWeight m/FontWeight.w500
-                                  .color (.-onSurface color-scheme)))
-          (m/SizedBox .width 8)
-          (m/RotatedBox
-           .quarterTurns 1
-           .child
-           (m/Slider
-            .value (double preview-font-size)
-            .min (double (first font-state/available-font-sizes))
-            .max (double (last font-state/available-font-sizes))
-            .divisions (- (count font-state/available-font-sizes) 1)
-            .label (str preview-font-size "pt")
-            .onChanged (fn [value]
-                         (quote-state/set-preview-font-size! (int value)))))
-          (m/SizedBox .width 8)
-          (m/Column
-           .mainAxisAlignment m.MainAxisAlignment/spaceBetween
-           .children
-           [(mgl/MongolText (str (first font-state/available-font-sizes) "pt")
-                            .style (m/TextStyle
-                                    .fontSize 12
-                                    .color (.-onSurfaceVariant color-scheme)))
-            (mgl/MongolText (str preview-font-size "pt")
-                            .style (m/TextStyle
-                                    .fontSize 14
-                                    .fontWeight m/FontWeight.bold
-                                    .color (.-primary color-scheme)))
-            (mgl/MongolText (str (last font-state/available-font-sizes) "pt")
-                            .style (m/TextStyle
-                                    .fontSize 12
-                                    .color (.-onSurfaceVariant color-scheme)))])])
-        (m/SizedBox .width 20)
-        ;; Text color selection
-        (m/Column
-         .mainAxisSize m.MainAxisSize/min
-         .crossAxisAlignment m.CrossAxisAlignment/start
-         .children
-         [(mgl/MongolText "ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠎ᠤ ᠦᠩᠭᠡ"
-                          .style (m/TextStyle
-                                  .fontSize 16
-                                  .fontWeight m/FontWeight.w500
-                                  .color (.-onSurface color-scheme)))
-          (m/SizedBox .height 8)
-          (m/Wrap
-           .spacing 8
-           .runSpacing 8
-           .children
-           (map (fn [color]
-                  (m/GestureDetector
-                   .onTap (fn [] (quote-state/set-preview-text-color! color))
-                   .child
-                   (m/Container
-                    .width 32
-                    .height 32
-                    .decoration (m/BoxDecoration
-                                 .color color
-                                 .shape m/BoxShape.circle
-                                 .border (m/Border.all
-                                          .width (if (= color preview-text-color) 3 1)
-                                          .color (if (= color preview-text-color)
-                                                   (.-primary color-scheme)
-                                                   (.-outline color-scheme)))
-                                 .boxShadow (if (= color preview-text-color)
-                                             [(m/BoxShadow
-                                               .color (-> (.-primary color-scheme) (.withOpacity 0.5))
-                                               .blurRadius 8
-                                               .spreadRadius 2)]
-                                             [])))))
-                available-colors))])
-        (m/SizedBox .width 20)
-        ;; Author color selection
-        (m/Column
-         .mainAxisSize m.MainAxisSize/min
-         .crossAxisAlignment m.CrossAxisAlignment/start
-         .children
-         [(mgl/MongolText "ᠵᠢᠷᠤᠭᠤᠨ ᠎ᠤ ᠦᠩᠭᠡ"
-                          .style (m/TextStyle
-                                  .fontSize 16
-                                  .fontWeight m/FontWeight.w500
-                                  .color (.-onSurface color-scheme)))
-          (m/SizedBox .height 8)
-          (m/Wrap
-           .spacing 8
-           .runSpacing 8
-           .children
-           (map (fn [color]
-                  (m/GestureDetector
-                   .onTap (fn [] (quote-state/set-preview-author-color! color))
-                   .child
-                   (m/Container
-                    .width 32
-                    .height 32
-                    .decoration (m/BoxDecoration
-                                 .color color
-                                 .shape m/BoxShape.circle
-                                 .border (m/Border.all
-                                          .width (if (= color preview-author-color) 3 1)
-                                          .color (if (= color preview-author-color)
-                                                   (.-primary color-scheme)
-                                                   (.-outline color-scheme)))
-                                 .boxShadow (if (= color preview-author-color)
-                                             [(m/BoxShadow
-                                               .color (-> (.-primary color-scheme) (.withOpacity 0.5))
-                                               .blurRadius 8
-                                               .spreadRadius 2)]
-                                             [])))))
-                available-colors))])])))
-    ;; Close button
-    .actions [(m/TextButton
-               .onPressed (fn [] (m/Navigator.pop ctx))
-               .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ"))])))
+    (m/Row
+     .children
+     [(mgl/MongolText "ᠹᠦᠨᠲ"
+                     .style (m/TextStyle
+                             .fontSize 20
+                             .fontWeight m/FontWeight.bold
+                             .color (.-onSurface color-scheme)))
+      (m/Expanded
+       .child (m/SingleChildScrollView
+               .scrollDirection m/Axis.horizontal
+               .child
+               (m/Row
+                .mainAxisSize m/MainAxisSize.min
+                .children
+                (map (fn [font-name]
+                       (m/RotatedBox
+                        .quarterTurns 1
+                        .child (m/RadioListTile
+                                .title (m/Text font-name)
+                                .value font-name
+                                .groupValue preview-font
+                                .onChanged (fn [value]
+                                            (quote-state/set-preview-font! value)
+                                            (m/Navigator.pop ctx)))))
+                     font-state/available-fonts))))])
+    .actions
+    [(m/TextButton
+      .onPressed (fn [] (m/Navigator.pop ctx))
+      .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ"))])))
 
-(defn show-font-settings-dialog [context]
+;; Font size dialog
+(defn font-size-dialog [_context]
+  (f/widget
+   :context ctx
+   :watch [{preview-font-size :font-size} quote-state/preview-font-state]
+   :let [theme (-> m/Theme (.of ctx))
+         color-scheme (.-colorScheme theme)
+         brightness (.-brightness theme)
+         dialog-bg-color (if (= brightness m/Brightness.light)
+                           (-> m/Colors .white)
+                           (.-secondaryContainer color-scheme))]
+   (m/AlertDialog
+    .backgroundColor dialog-bg-color
+    .content
+    (m/Row
+     .children
+     [(mgl/MongolText "ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ"
+                     .style (m/TextStyle
+                             .fontSize 20
+                             .fontWeight m/FontWeight.bold
+                             .color (.-onSurface color-scheme)))
+      (m/Expanded
+       .child (m/SingleChildScrollView
+               .scrollDirection m/Axis.horizontal
+               .child
+               (m/Row
+                .mainAxisSize m/MainAxisSize.min
+                .children
+                (map (fn [size]
+                       (m/RotatedBox
+                        .quarterTurns 1
+                        .child (m/RadioListTile
+                                .title (m/Text (str size))
+                                .value size
+                                .groupValue preview-font-size
+                                .onChanged (fn [value]
+                                            (quote-state/set-preview-font-size! value)
+                                            (m/Navigator.pop ctx)))))
+                     font-state/available-font-sizes))))])
+    .actions
+    [(m/TextButton
+      .onPressed (fn [] (m/Navigator.pop ctx))
+      .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ"))])))
+
+;; Text color dialog
+(defn text-color-dialog [_context]
+  (f/widget
+   :context ctx
+   :watch [{preview-text-color :text-color} quote-state/preview-font-state]
+   :let [theme (-> m/Theme (.of ctx))
+         color-scheme (.-colorScheme theme)
+         brightness (.-brightness theme)
+         dialog-bg-color (if (= brightness m/Brightness.light)
+                           (-> m/Colors .white)
+                           (.-secondaryContainer color-scheme))]
+   (m/AlertDialog
+    .backgroundColor dialog-bg-color
+    .content
+    (m/Column
+     .mainAxisSize m/MainAxisSize.min
+     .crossAxisAlignment m/CrossAxisAlignment.start
+     .children
+     [(mgl/MongolText "ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠎ᠤ ᠦᠩᠭᠡ"
+                     .style (m/TextStyle
+                             .fontSize 20
+                             .fontWeight m/FontWeight.bold
+                             .color (.-onSurface color-scheme)))
+      (m/SizedBox .height 16)
+      (m/Wrap
+       .spacing 8
+       .runSpacing 8
+       .children
+       (map (fn [color]
+              (m/GestureDetector
+               .onTap (fn [] (quote-state/set-preview-text-color! color))
+               .child
+               (m/Container
+                .width 40
+                .height 40
+                .decoration (m/BoxDecoration
+                             .color color
+                             .shape m/BoxShape.circle
+                             .border (m/Border.all
+                                      .width (if (= color preview-text-color) 3 1)
+                                      .color (if (= color preview-text-color)
+                                               (.-primary color-scheme)
+                                               (.-outline color-scheme)))
+                             .boxShadow (if (= color preview-text-color)
+                                         [(m/BoxShadow
+                                           .color (-> (.-primary color-scheme) (.withOpacity 0.5))
+                                           .blurRadius 8
+                                           .spreadRadius 2)]
+                                         [])))))
+            available-colors))])
+    .actions
+    [(m/TextButton
+      .onPressed (fn [] (m/Navigator.pop ctx))
+      .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ"))])))
+
+;; Author color dialog
+(defn author-color-dialog [_context]
+  (f/widget
+   :context ctx
+   :watch [{preview-author-color :author-color} quote-state/preview-font-state]
+   :let [theme (-> m/Theme (.of ctx))
+         color-scheme (.-colorScheme theme)
+         brightness (.-brightness theme)
+         dialog-bg-color (if (= brightness m/Brightness.light)
+                           (-> m/Colors .white)
+                           (.-secondaryContainer color-scheme))]
+   (m/AlertDialog
+    .backgroundColor dialog-bg-color
+    .content
+    (m/Column
+     .mainAxisSize m/MainAxisSize.min
+     .crossAxisAlignment m/CrossAxisAlignment.start
+     .children
+     [(mgl/MongolText "ᠵᠢᠷᠤᠭᠤᠨ ᠎ᠤ ᠦᠩᠭᠡ"
+                     .style (m/TextStyle
+                             .fontSize 20
+                             .fontWeight m/FontWeight.bold
+                             .color (.-onSurface color-scheme)))
+      (m/SizedBox .height 16)
+      (m/Wrap
+       .spacing 8
+       .runSpacing 8
+       .children
+       (map (fn [color]
+              (m/GestureDetector
+               .onTap (fn [] (quote-state/set-preview-author-color! color))
+               .child
+               (m/Container
+                .width 40
+                .height 40
+                .decoration (m/BoxDecoration
+                             .color color
+                             .shape m/BoxShape.circle
+                             .border (m/Border.all
+                                      .width (if (= color preview-author-color) 3 1)
+                                      .color (if (= color preview-author-color)
+                                               (.-primary color-scheme)
+                                               (.-outline color-scheme)))
+                             .boxShadow (if (= color preview-author-color)
+                                         [(m/BoxShadow
+                                           .color (-> (.-primary color-scheme) (.withOpacity 0.5))
+                                           .blurRadius 8
+                                           .spreadRadius 2)]
+                                         [])))))
+            available-colors))])
+    .actions
+    [(m/TextButton
+      .onPressed (fn [] (m/Navigator.pop ctx))
+      .child (mgl/MongolText "ᠬᠠᠭᠠᠬᠤ"))])))
+
+;; Show font selection dialog
+(defn show-font-selection-dialog [context]
   (m/showDialog
    .context context
    .barrierColor (-> m/Colors.black (.withOpacity 0.5))
-   .builder (fn [ctx] (font-settings-dialog ctx))))
+   .builder (fn [ctx] (font-selection-dialog ctx))))
+
+;; Show font size dialog
+(defn show-font-size-dialog [context]
+  (m/showDialog
+   .context context
+   .barrierColor (-> m/Colors.black (.withOpacity 0.5))
+   .builder (fn [ctx] (font-size-dialog ctx))))
+
+;; Show text color dialog
+(defn show-text-color-dialog [context]
+  (m/showDialog
+   .context context
+   .barrierColor (-> m/Colors.black (.withOpacity 0.5))
+   .builder (fn [ctx] (text-color-dialog ctx))))
+
+;; Show author color dialog
+(defn show-author-color-dialog [context]
+  (m/showDialog
+   .context context
+   .barrierColor (-> m/Colors.black (.withOpacity 0.5))
+   .builder (fn [ctx] (author-color-dialog ctx))))
+
+;; Keep old function for backward compatibility (if needed)
+(defn show-font-settings-dialog [context]
+  (show-font-selection-dialog context))

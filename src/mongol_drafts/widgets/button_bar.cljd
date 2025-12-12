@@ -7,7 +7,7 @@
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
    [mongol-drafts.utils.modal :as modal]
-   [mongol-drafts.widgets.quote.font-settings-dialog :as font-settings-dialog]
+   [mongol-drafts.widgets.quote.settings-dialog :as settings-dialog]
    [virtual-keyboard.keyboard-action :as keyboard-action]))
    
 (defn bar-button [child on-press]
@@ -120,8 +120,8 @@
       .child (m/Row
               .children
               [(bar-button
-                (m/Icon m/Icons.text_fields)
-                (fn [] (font-settings-dialog/show-font-settings-dialog ctx)))
+                (m/Icon m/Icons.settings)
+                (fn [] (settings-dialog/show-settings-dialog ctx)))
                (m/SizedBox .width 20)
                (if (true? preview)
                  (bar-button
