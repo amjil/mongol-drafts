@@ -104,108 +104,112 @@
         .children
         [(m/Expanded
           .child
-          (m/SingleChildScrollView
-           .scrollDirection m/Axis.horizontal
+          (m/Center
            .child
-           (m/Row
-            .mainAxisSize m.MainAxisSize/min
-            .mainAxisAlignment m.MainAxisAlignment/center
-            .children
-            [(m/Column
-              .crossAxisAlignment m.CrossAxisAlignment/start
-              .children
-              [;; Icon container - more modern frosted glass effect
-               (m/Container
-                .padding (m/EdgeInsets.all 14)
-                .decoration (m/BoxDecoration
-                             .color icon-bg
-                             .borderRadius (m/BorderRadius.circular 16)
-                             .border (m/Border.all
-                                      .width 1
-                                      .color (-> m/Colors.white (.withOpacity 0.5)))
-                             .boxShadow [(m/BoxShadow
-                                          .color (-> m/Colors.black (.withOpacity 0.1))
-                                          .blurRadius 8
-                                          .spreadRadius 0
-                                          .offset (m/Offset 0 4))])
-                .child
-                (m/Icon (ph/PhosphorIconsFill.quotes)
-                        .size 24
-                        .color text-color))
-               (m/SizedBox .height 20)
-               ;; Quote text container - glassmorphism card effect
-               (m/Expanded
-                .child
-                (m/SingleChildScrollView
-                 .scrollDirection m/Axis.horizontal
+           (m/SingleChildScrollView
+            .scrollDirection m/Axis.horizontal
+            .child
+            (m/Row
+             .mainAxisSize m.MainAxisSize/min
+             .mainAxisAlignment m.MainAxisAlignment/center
+             .children
+             [(m/Column
+               .crossAxisAlignment m.CrossAxisAlignment/start
+               .children
+               [;; Icon container - more modern frosted glass effect
+                (m/Container
+                 .padding (m/EdgeInsets.all 14)
+                 .decoration (m/BoxDecoration
+                              .color icon-bg
+                              .borderRadius (m/BorderRadius.circular 16)
+                              .border (m/Border.all
+                                       .width 1
+                                       .color (-> m/Colors.white (.withOpacity 0.5)))
+                              .boxShadow [(m/BoxShadow
+                                           .color (-> m/Colors.black (.withOpacity 0.1))
+                                           .blurRadius 8
+                                           .spreadRadius 0
+                                           .offset (m/Offset 0 4))])
                  .child
-                 (m/Container
-                  .padding (m/EdgeInsets.symmetric .horizontal 18 .vertical 14)
-                  .decoration (m/BoxDecoration
-                               .color glass-color
-                               .borderRadius (m/BorderRadius.circular 18)
-                               .border (m/Border.all
-                                        .width 1
-                                        .color (-> m/Colors.white (.withOpacity 0.5)))
-                               .boxShadow [(m/BoxShadow
-                                            .color (-> m/Colors.black (.withOpacity 0.08))
-                                            .blurRadius 12
-                                            .spreadRadius 0
-                                            .offset (m/Offset 0 4))])
+                 (m/Icon (ph/PhosphorIconsFill.quotes)
+                         .size 24
+                         .color text-color))
+                (m/SizedBox .height 20)
+                ;; Quote text container - glassmorphism card effect
+                (m/Expanded
+                 .child
+                 (m/SingleChildScrollView
+                  .scrollDirection m/Axis.horizontal
                   .child
-                  (mgl/MongolText
-                   (or @state/content-state "Example quote")
-                   .style (m/TextStyle .fontSize preview-font-size
-                                       .height 2.0
-                                       .fontFamily preview-font
-                                       .fontWeight m/FontWeight.w700
-                                       .color text-color
-                                       .letterSpacing 0.6
-                                       .shadows [(m/Shadow
-                                                  .color (-> m/Colors.black (.withOpacity 0.15))
-                                                  .blurRadius 4
-                                                  .offset (m/Offset 0 2))])
-                   .maxLines 5
-                   .overflow m/TextOverflow.ellipsis))))])
-             (m/SizedBox .width 36)
-             (m/Column
-              .mainAxisAlignment m.MainAxisAlignment/end
-              .crossAxisAlignment m.CrossAxisAlignment/end
-              .children
-              [;; Author info container - more refined style
-               (m/Container
-                .padding (m/EdgeInsets.symmetric .horizontal 18 .vertical 12)
-                .decoration (m/BoxDecoration
-                             .color glass-color
-                             .borderRadius (m/BorderRadius.circular 18)
-                             .border (m/Border.all
-                                      .width 1
-                                      .color (-> m/Colors.white (.withOpacity 0.5)))
-                             .boxShadow [(m/BoxShadow
-                                          .color (-> m/Colors.black (.withOpacity 0.08))
-                                          .blurRadius 12
-                                          .spreadRadius 0
-                                          .offset (m/Offset 0 4))])
-                .child
+                  (m/Container
+                   .padding (m/EdgeInsets.symmetric .horizontal 18 .vertical 14)
+                   .decoration (m/BoxDecoration
+                                .color glass-color
+                                .borderRadius (m/BorderRadius.circular 18)
+                                .border (m/Border.all
+                                         .width 1
+                                         .color (-> m/Colors.white (.withOpacity 0.5)))
+                                .boxShadow [(m/BoxShadow
+                                             .color (-> m/Colors.black (.withOpacity 0.08))
+                                             .blurRadius 12
+                                             .spreadRadius 0
+                                             .offset (m/Offset 0 4))])
+                   .child
+                   (mgl/MongolText
+                    (or @state/content-state "Example quote")
+                    .style (m/TextStyle .fontSize preview-font-size
+                                        .height 2.0
+                                        .fontFamily preview-font
+                                        .fontWeight m/FontWeight.w700
+                                        .color text-color
+                                        .letterSpacing 0.6
+                                        .shadows [(m/Shadow
+                                                   .color (-> m/Colors.black (.withOpacity 0.15))
+                                                   .blurRadius 4
+                                                   .offset (m/Offset 0 2))])
+                    .maxLines 5
+                    .overflow m/TextOverflow.ellipsis))))])
+              (m/SizedBox .width 36)
+              (if (empty? @state/author-state)
+                (m/SizedBox)
                 (m/Column
+                 .mainAxisAlignment m.MainAxisAlignment/end
                  .crossAxisAlignment m.CrossAxisAlignment/end
                  .children
-                 [(m/Container
-                   .padding (m/EdgeInsets.only .bottom 8)
+                 [;; Author info container - more refined style
+                  (m/Container
+                   .padding (m/EdgeInsets.symmetric .horizontal 18 .vertical 12)
+                   .decoration (m/BoxDecoration
+                                .color glass-color
+                                .borderRadius (m/BorderRadius.circular 18)
+                                .border (m/Border.all
+                                         .width 1
+                                         .color (-> m/Colors.white (.withOpacity 0.5)))
+                                .boxShadow [(m/BoxShadow
+                                             .color (-> m/Colors.black (.withOpacity 0.08))
+                                             .blurRadius 12
+                                             .spreadRadius 0
+                                             .offset (m/Offset 0 4))])
                    .child
-                   (mgl/MongolText "—"
-                                   .style (m/TextStyle .fontSize 16
-                                                       .color text-color
-                                                       .fontWeight m/FontWeight.w400
-                                                       .letterSpacing 2)))
-                  (mgl/MongolText
-                   (or @state/author-state "Example author")
-                   .style (m/TextStyle .fontSize (- preview-font-size 2)
-                                       .color text-color
-                                       .fontFamily preview-font
-                                       .fontWeight m/FontWeight.w600
-                                       .letterSpacing 0.5
-                                       .shadows [(m/Shadow
-                                                  .color (-> m/Colors.black (.withOpacity 0.1))
-                                                  .blurRadius 3
-                                                  .offset (m/Offset 0 1))]))]))])])))])]))))))
+                   (m/Column
+                    .crossAxisAlignment m.CrossAxisAlignment/end
+                    .children
+                    [(m/Container
+                      .padding (m/EdgeInsets.only .bottom 8)
+                      .child
+                      (mgl/MongolText "—"
+                                      .style (m/TextStyle .fontSize 16
+                                                          .color text-color
+                                                          .fontWeight m/FontWeight.w400
+                                                          .letterSpacing 2)))
+                     (mgl/MongolText
+                      (or @state/author-state "Example author")
+                      .style (m/TextStyle .fontSize (- preview-font-size 2)
+                                          .color text-color
+                                          .fontFamily preview-font
+                                          .fontWeight m/FontWeight.w600
+                                          .letterSpacing 0.5
+                                          .shadows [(m/Shadow
+                                                     .color (-> m/Colors.black (.withOpacity 0.1))
+                                                     .blurRadius 3
+                                                     .offset (m/Offset 0 1))]))]))]))]))))])]))))))

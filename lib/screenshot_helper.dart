@@ -39,7 +39,7 @@ Future<void> saveScreenshot(
     // Handle permission errors
     await _handlePermissionError(ctx, status, isSimulator);
   } catch (error) {
-    _showToast(ctx, 'Failed to save: ${error.toString()}');
+    _showToast(ctx, 'ᠬᠠᠳᠠᠭᠠᠯᠠᠵᠤ ᠴᠢᠳᠠᠭᠰᠠᠨ ᠦᠭᠡᠢ : ${error.toString()}');
   }
 }
 
@@ -57,7 +57,8 @@ Future<bool> _captureAndSave(
   try {
     final imageBytes = await screenshotController.capture(pixelRatio: 3.0);
     if (imageBytes == null) {
-      _showToast(ctx, 'Screenshot failed, please try again');
+      _showToast(ctx,
+          'ᠳᠡᠯᠭᠡᠴᠡ ᠎ᠶᠢᠨ ᠵᠢᠷᠤᠭ ᠠᠪᠤᠯᠲᠠ ᠠᠮᠵᠢᠯᠲᠠ ᠦᠭᠡᠢ ᠪᠣᠯᠤᠯ᠎ᠠ ᠂ᠲᠠ ᠳᠠᠬᠢᠨ ᠲᠤᠷᠰᠢᠨ᠎ᠠ᠎ᠤᠤ ');
       return false;
     }
 
@@ -66,7 +67,7 @@ Future<bool> _captureAndSave(
       quality: 90,
       name: 'quote_${DateTime.now().millisecondsSinceEpoch}',
     );
-    _showToast(ctx, 'Saved to gallery');
+    _showToast(ctx, 'ᠵᠢᠷᠤᠭ ᠠᠮᠵᠢᠯᠲᠠ ᠎ᠲᠠᠢ ᠬᠠᠳᠠᠭᠠᠯᠠᠭᠳᠠᠯ᠎ᠠ ');
     return true;
   } catch (_) {
     return false;

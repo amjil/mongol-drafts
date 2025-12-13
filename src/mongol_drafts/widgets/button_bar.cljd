@@ -128,7 +128,7 @@
                    (fn [] (settings-dialog/show-settings-dialog ctx)))
                   (m/SizedBox .width 20)
                   (bar-button
-                   (m/Icon m/Icons.share)
+                   (m/Icon m/Icons.download_for_offline)
                    save-fn)
                   (m/SizedBox .width 20)
                   (bar-button
