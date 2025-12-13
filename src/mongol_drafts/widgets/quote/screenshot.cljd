@@ -2,7 +2,7 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:screenshot/screenshot.dart" :as screenshot]
-   ["package:permission_handler/permission_handler.dart" :as ph]
+   ["package:mongol_drafts/screenshot_helper.dart" :as screenshot-helper]
    [cljd.flutter :as f]
    [mongol-drafts.widgets.button-bar :as button-bar]
    [mongol-drafts.widgets.quote.image :as quote-image]
@@ -11,11 +11,15 @@
 
 
 
+(defn save-screenshot [ctx screenshot-controller]
+  (await (screenshot-helper/saveScreenshot ctx screenshot-controller)))
+
 (defn screenshot-section []
   (f/widget
+   :context ctx
    :watch [image-path state/image-path-state]
    :managed [screenshot-controller (screenshot/ScreenshotController.)]
-   (screenshot/Screenshot    
+   (screenshot/Screenshot
     .controller screenshot-controller
     .child
     (m/Column
@@ -23,7 +27,8 @@
      [(button-bar/quote-editor-bar
        state/preview-state
        (fn []
-         (dart:core/print "share sentence >>.")))
+         (dart:core/print "save-screenshot button clicked")
+         (save-screenshot ctx screenshot-controller)))
       (if (nil? image-path)
         (m/SizedBox)
         (quote-image/image-section))
