@@ -3,6 +3,7 @@
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
    ["package:phosphor_flutter/phosphor_flutter.dart" :as ph]
+   ["package:qr_flutter/qr_flutter.dart" :as qr]
    [cljd.flutter :as f]
    [mongol-drafts.widgets.quote.state :as state]))
 
@@ -97,6 +98,28 @@
          .decoration (m/BoxDecoration
                       .shape m/BoxShape.circle
                       .color accent-color-2)))
+                      
+       ;; Todo add a site adress for this quote and a qr code
+       (m/Positioned
+        .bottom 12
+        .right 0
+        .child
+        (m/Container
+         .decoration (m/BoxDecoration
+                      .shape m/BoxShape.circle
+                      .color accent-color-2)
+         .child (m/Column
+                 .children
+                 [(qr/QrImageView 
+                    .data "https://draft.amjil.net"
+                    .size 40
+                    .version qr/QrVersions.auto
+                    .foregroundColor (m/Colors.grey.withOpacity 0.7))
+                  (mgl/MongolText "https://draft.amjil.net"
+                                  .style (m/TextStyle .fontSize 12
+                                                      .color (m/Colors.grey.withOpacity 0.7)
+                                                      .fontWeight m/FontWeight.w600))])))
+
        ;; Main content area
        (m/Column
         .mainAxisSize m.MainAxisSize/max
@@ -169,7 +192,7 @@
                                                    .offset (m/Offset 0 2))])
                     .maxLines 5
                     .overflow m/TextOverflow.ellipsis))))])
-              (m/SizedBox .width 36)
+              (m/SizedBox .width (if (empty? @state/author-state) 0 36))
               (if (empty? @state/author-state)
                 (m/SizedBox)
                 (m/Column
