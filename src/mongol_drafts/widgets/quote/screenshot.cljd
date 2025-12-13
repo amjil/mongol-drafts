@@ -19,17 +19,21 @@
    :context ctx
    :watch [image-path state/image-path-state]
    :managed [screenshot-controller (screenshot/ScreenshotController.)]
-   (screenshot/Screenshot
-    .controller screenshot-controller
-    .child
-    (m/Column
-     .children
-     [(button-bar/quote-editor-bar
-       state/preview-state
-       (fn []
-         (dart:core/print "save-screenshot button clicked")
-         (save-screenshot ctx screenshot-controller)))
-      (if (nil? image-path)
-        (m/SizedBox)
-        (quote-image/image-section))
-      (quote-preview/preview-section)]))))
+   (m/Column
+    .children
+    [(button-bar/quote-editor-bar
+      state/preview-state
+      (fn []
+        (dart:core/print "save-screenshot button clicked")
+        (save-screenshot ctx screenshot-controller)))
+     (m/Expanded
+      .child
+      (screenshot/Screenshot
+       .controller screenshot-controller
+       .child
+       (m/Column
+        .children
+        [(if (nil? image-path)
+           (m/SizedBox)
+           (quote-image/image-section))
+         (quote-preview/preview-section)])))])))

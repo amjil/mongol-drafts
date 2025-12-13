@@ -119,19 +119,28 @@
       .padding (m/EdgeInsets.only .right 10)
       .child (m/Row
               .children
-              [(bar-button
-                (m/Icon m/Icons.settings)
-                (fn [] (settings-dialog/show-settings-dialog ctx)))
-               (m/SizedBox .width 20)
-               (if (true? preview)
-                 (bar-button
-                  (m/Icon m/Icons.edit)
-                  (fn [] (reset! preview-state false)))
+              (cond-> []
+
+                (true? preview)
+                (concat
+                 [(bar-button
+                   (m/Icon m/Icons.settings)
+                   (fn [] (settings-dialog/show-settings-dialog ctx)))
+                  (m/SizedBox .width 20)
+                  (bar-button
+                   (m/Icon m/Icons.share)
+                   save-fn)
+                  (m/SizedBox .width 20)
+                  (bar-button
+                   (m/Icon m/Icons.edit)
+                   (fn [] (reset! preview-state false)))])
+
+                (false? preview)
+                (conj
                  (bar-button
                   (m/Icon m/Icons.preview)
-                  (fn [] (reset! preview-state true))))
-               (m/SizedBox .width 20)
-               (bar-button
-                (m/Icon m/Icons.share)
-                save-fn)]))])))
+                  (fn [] (reset! preview-state true)))))))])))
+                  
+               
+                 
      
