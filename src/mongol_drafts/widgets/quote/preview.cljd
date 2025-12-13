@@ -24,16 +24,12 @@
          accent-color-1 (-> m/Colors.white (.withOpacity 0.4))
          accent-color-2 (-> m/Colors.white (.withOpacity 0.2))
          text-color preview-text-color
-         ;; Author info color - clearer
-         author-color (-> m/Colors.white (.withOpacity 0.98))
-         author-font-size (- preview-font-size 2)
          ;; Icon background - more modern frosted glass effect
          icon-bg (-> m/Colors.white (.withOpacity 0.3))]
    (m/Expanded)
    (m/Center)
    (m/Padding
-    .padding (m/EdgeInsets.symmetric .horizontal 16 .vertical 16)
-    .child
+    .padding (m/EdgeInsets.only .left 16 .right 16 .bottom 16))
    (m/Container
     .padding (m/EdgeInsets.all 18)
     .decoration (m/BoxDecoration
@@ -44,7 +40,7 @@
                             .colors [gradient-start gradient-mid gradient-end]
                             .stops [0.0 0.5 1.0])
                  ;; Larger border radius - more modern
-                 .borderRadius (m/BorderRadius.circular 28)
+                 .borderRadius (m/BorderRadius.circular 18)
                  ;; 3D border effect - wider and more prominent border
                  .border (m/Border.all
                           .width 3.0
@@ -215,7 +211,7 @@
                                              .offset (m/Offset 0 4))])
                    .child
                    (m/Column
-                    .crossAxisAlignment m.CrossAxisAlignment/end
+                    .crossAxisAlignment m.CrossAxisAlignment/center
                     .children
                     [(m/Container
                       .padding (m/EdgeInsets.only .bottom 8)
@@ -235,4 +231,4 @@
                                           .shadows [(m/Shadow
                                                      .color (-> m/Colors.black (.withOpacity 0.1))
                                                      .blurRadius 3
-                                                     .offset (m/Offset 0 1))]))]))]))]))))])]))))))
+                                                     .offset (m/Offset 0 1))]))]))]))]))))])])))))

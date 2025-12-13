@@ -57,8 +57,8 @@
                                 .color (.-outlineVariant color-scheme)))
           .child
           (m/Column
-           .mainAxisSize m/MainAxisSize.min
            .crossAxisAlignment m/CrossAxisAlignment.start
+           .mainAxisAlignment m/MainAxisAlignment.spaceAround
            .children
            [(mgl/MongolText "ᠹᠦᠨᠲ"
                             .style (m/TextStyle
@@ -85,8 +85,8 @@
                                 .color (.-outlineVariant color-scheme)))
           .child
           (m/Column
-           .mainAxisSize m/MainAxisSize.min
            .crossAxisAlignment m/CrossAxisAlignment.start
+           .mainAxisAlignment m/MainAxisAlignment.spaceAround
            .children
            [(mgl/MongolText "ᠹᠦᠨᠲ ᠎ᠶᠢᠨ ᠬᠡᠮᠵᠢᠶ᠎ᠡ"
                             .style (m/TextStyle
@@ -113,10 +113,10 @@
                                 .color (.-outlineVariant color-scheme)))
           .child
           (m/Column
-           .mainAxisSize m/MainAxisSize.min
            .crossAxisAlignment m/CrossAxisAlignment.start
+           .mainAxisAlignment m/MainAxisAlignment.spaceAround
            .children
-           [(mgl/MongolText "ᠦᠨᠳᠦᠰᠦᠲᠡᠨ ᠎ᠤ ᠦᠩᠭᠡ"
+           [(mgl/MongolText "ᠦᠰᠦᠭ ᠎ᠦᠨ ᠦᠩᠭᠡ"
                             .style (m/TextStyle
                                     .fontSize 16
                                     .fontWeight m/FontWeight.w500
@@ -146,8 +146,8 @@
                                 .color (.-outlineVariant color-scheme)))
           .child
           (m/Column
-           .mainAxisSize m/MainAxisSize.min
            .crossAxisAlignment m/CrossAxisAlignment.start
+           .mainAxisAlignment m/MainAxisAlignment.spaceAround
            .children
            [(mgl/MongolText "ᠠᠷᠤ ᠎ᠶᠢᠨ ᠦᠩᠭᠡ"
                             .style (m/TextStyle
