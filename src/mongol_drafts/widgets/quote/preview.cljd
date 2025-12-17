@@ -186,7 +186,7 @@
                                                    .color (-> m/Colors.black (.withOpacity 0.15))
                                                    .blurRadius 4
                                                    .offset (m/Offset 0 2))])
-                    .maxLines 5
+                    .maxLines 10
                     .overflow m/TextOverflow.ellipsis))))])
               (m/SizedBox .width (if (empty? @state/author-state) 0 36))
               (if (empty? @state/author-state)

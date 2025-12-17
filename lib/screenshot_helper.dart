@@ -19,17 +19,64 @@ Future<bool> _isIOSSimulator() async {
   }
 }
 
+/// Get Android SDK version
+Future<int?> _getAndroidSdkVersion() async {
+  if (!Platform.isAndroid) return null;
+  try {
+    final androidInfo = await DeviceInfoPlugin().androidInfo;
+    return androidInfo.version.sdkInt;
+  } catch (_) {
+    return null;
+  }
+}
+
 Future<void> saveScreenshot(
   BuildContext ctx,
   ScreenshotController screenshotController,
 ) async {
   try {
-    final status = await _requestPhotoPermission();
     final isSimulator = await _isIOSSimulator();
+    
+    // For iOS, try to save directly first (iOS 11+ may not require runtime permission)
+    // Only need NSPhotoLibraryAddUsageDescription in Info.plist
+    if (Platform.isIOS) {
+      debugPrint('iOS device detected, isSimulator: $isSimulator');
+      // Try to save directly first
+      final success = await _captureAndSave(ctx, screenshotController);
+      if (success) {
+        debugPrint('Successfully saved screenshot on iOS');
+        return;
+      }
+      
+      // If direct save failed, try requesting permission
+      debugPrint('Direct save failed, requesting permission...');
+      final status = await _requestPhotoPermission();
+      debugPrint('Permission status: $status');
+      
+      // Try again after requesting permission
+      if (status.isGranted || status.isLimited || (isSimulator && status.isPermanentlyDenied)) {
+        final retrySuccess = await _captureAndSave(ctx, screenshotController);
+        if (retrySuccess) {
+          debugPrint('Successfully saved after permission request');
+          return;
+        }
+      }
+      
+      // Handle permission errors
+      await _handlePermissionError(ctx, status, isSimulator);
+      return;
+    }
+    
+    // Android permission handling
+    final status = await _requestPhotoPermission();
+    final androidSdkVersion = await _getAndroidSdkVersion();
+    final isAndroid10to12 = Platform.isAndroid &&
+        androidSdkVersion != null &&
+        androidSdkVersion >= 29 &&
+        androidSdkVersion <= 32;
 
-    // On iOS simulator, even if permission shows as permanently denied, it may still be possible to save
     final shouldTrySave = status.isGranted ||
-        (Platform.isIOS && isSimulator && status.isPermanentlyDenied);
+        (isAndroid10to12 && !status.isPermanentlyDenied);
 
     if (shouldTrySave) {
       final success = await _captureAndSave(ctx, screenshotController);
@@ -39,12 +86,91 @@ Future<void> saveScreenshot(
     // Handle permission errors
     await _handlePermissionError(ctx, status, isSimulator);
   } catch (error) {
+    debugPrint('Error in saveScreenshot: $error');
     _showToast(ctx, 'ᠬᠠᠳᠠᠭᠠᠯᠠᠵᠤ ᠴᠢᠳᠠᠭᠰᠠᠨ ᠦᠭᠡᠢ : ${error.toString()}');
   }
 }
 
-/// Request photo permission
+/// Request photo permission based on platform and Android version
 Future<PermissionStatus> _requestPhotoPermission() async {
+  if (Platform.isIOS) {
+    // iOS: Try photosAddOnly first (iOS 14+), then fallback to photos
+    // Note: iOS 11+ may not require runtime permission for saving images
+    // if NSPhotoLibraryAddUsageDescription is in Info.plist
+    try {
+      debugPrint('Checking photosAddOnly permission...');
+      final addOnlyStatus = await Permission.photosAddOnly.status;
+      debugPrint('photosAddOnly status: $addOnlyStatus');
+      
+      if (addOnlyStatus.isGranted || addOnlyStatus.isLimited) {
+        return addOnlyStatus;
+      }
+      
+      // Request photosAddOnly permission
+      debugPrint('Requesting photosAddOnly permission...');
+      final requestedStatus = await Permission.photosAddOnly.request();
+      debugPrint('photosAddOnly request result: $requestedStatus');
+      
+      if (requestedStatus.isGranted || requestedStatus.isLimited) {
+        return requestedStatus;
+      }
+      
+      // Fallback to photos permission for older iOS versions
+      debugPrint('Falling back to photos permission...');
+      final photosStatus = await Permission.photos.status;
+      debugPrint('photos status: $photosStatus');
+      
+      if (photosStatus.isGranted || photosStatus.isLimited) {
+        return photosStatus;
+      }
+      
+      final photosRequested = await Permission.photos.request();
+      debugPrint('photos request result: $photosRequested');
+      return photosRequested;
+    } catch (e) {
+      debugPrint('Error requesting iOS permission: $e');
+      // Fallback to photos permission if photosAddOnly is not available
+      try {
+        final photosStatus = await Permission.photos.status;
+        return photosStatus.isGranted ? photosStatus : await Permission.photos.request();
+      } catch (_) {
+        // If all fails, return denied status
+        return PermissionStatus.denied;
+      }
+    }
+  } else if (Platform.isAndroid) {
+    final sdkVersion = await _getAndroidSdkVersion();
+
+    // Android 13+ (SDK 33+) uses READ_MEDIA_IMAGES (Permission.photos)
+    if (sdkVersion != null && sdkVersion >= 33) {
+      final status = await Permission.photos.status;
+      return status.isGranted ? status : await Permission.photos.request();
+    }
+    // Android 9 and below (SDK <= 28) uses storage permission
+    else if (sdkVersion != null && sdkVersion <= 28) {
+      final status = await Permission.storage.status;
+      return status.isGranted ? status : await Permission.storage.request();
+    }
+    // Android 10-12 (SDK 29-32) may not need permission due to scoped storage
+    // but we'll try storage permission as fallback
+    else {
+      // Try storage permission first
+      final storageStatus = await Permission.storage.status;
+      if (storageStatus.isGranted) {
+        return storageStatus;
+      }
+      // If not granted, try requesting it
+      final requestedStatus = await Permission.storage.request();
+      if (requestedStatus.isGranted) {
+        return requestedStatus;
+      }
+      // For Android 10-12, scoped storage might allow saving without permission
+      // Return a status that allows trying to save
+      return requestedStatus;
+    }
+  }
+
+  // Fallback for other platforms
   final status = await Permission.photos.status;
   return status.isGranted ? status : await Permission.photos.request();
 }
@@ -55,21 +181,52 @@ Future<bool> _captureAndSave(
   ScreenshotController screenshotController,
 ) async {
   try {
+    debugPrint('Starting to capture screenshot...');
     final imageBytes = await screenshotController.capture(pixelRatio: 3.0);
     if (imageBytes == null) {
+      debugPrint('Failed to capture screenshot: imageBytes is null');
       _showToast(ctx,
           'ᠳᠡᠯᠭᠡᠴᠡ ᠎ᠶᠢᠨ ᠵᠢᠷᠤᠭ ᠠᠪᠤᠯᠲᠠ ᠠᠮᠵᠢᠯᠲᠠ ᠦᠭᠡᠢ ᠪᠣᠯᠤᠯ᠎ᠠ ᠂ᠲᠠ ᠳᠠᠬᠢᠨ ᠲᠤᠷᠰᠢᠨ᠎ᠠ᠎ᠤᠤ ');
       return false;
     }
 
-    await ImageGallerySaverPlus.saveImage(
+    debugPrint('Screenshot captured, size: ${imageBytes.length} bytes');
+    debugPrint('Attempting to save to gallery...');
+    
+    final result = await ImageGallerySaverPlus.saveImage(
       imageBytes,
       quality: 90,
       name: 'quote_${DateTime.now().millisecondsSinceEpoch}',
     );
-    _showToast(ctx, 'ᠵᠢᠷᠤᠭ ᠠᠮᠵᠢᠯᠲᠠ ᠎ᠲᠠᠢ ᠬᠠᠳᠠᠭᠠᠯᠠᠭᠳᠠᠯ᠎ᠠ ');
-    return true;
-  } catch (_) {
+    
+    debugPrint('Save result: $result');
+    
+    // Check if save was successful
+    // image_gallery_saver_plus returns a map with 'isSuccess' key
+    if (result != null) {
+      final isSuccess = result['isSuccess'] == true || result['isSuccess'] == 1;
+      final filePath = result['filePath'];
+      
+      debugPrint('Save success: $isSuccess, filePath: $filePath');
+      
+      if (isSuccess) {
+        _showToast(ctx, 'ᠵᠢᠷᠤᠭ ᠠᠮᠵᠢᠯᠲᠠ ᠎ᠲᠠᠢ ᠬᠠᠳᠠᠭᠠᠯᠠᠭᠳᠠᠯ᠎ᠠ ');
+        return true;
+      } else {
+        final errorMsg = result['errorMessage'] ?? 'Unknown error';
+        debugPrint('Save failed: $errorMsg');
+        _showToast(ctx, 'ᠵᠢᠷᠤᠭ ᠠᠮᠵᠢᠯᠲᠠ ᠦᠭᠡᠢ ᠪᠣᠯᠤᠯ᠎ᠠ ᠂ᠲᠠ ᠳᠠᠬᠢᠨ ᠲᠤᠷᠰᠢᠨ᠎ᠠ᠎ᠤᠤ ');
+        return false;
+      }
+    } else {
+      debugPrint('Save result is null');
+      _showToast(ctx, 'ᠵᠢᠷᠤᠭ ᠠᠮᠵᠢᠯᠲᠠ ᠦᠭᠡᠢ ᠪᠣᠯᠤᠯ᠎ᠠ ᠂ᠲᠠ ᠳᠠᠬᠢᠨ ᠲᠤᠷᠰᠢᠨ᠎ᠠ᠎ᠤᠤ ');
+      return false;
+    }
+  } catch (e, stackTrace) {
+    // Log error for debugging
+    debugPrint('Error saving screenshot: $e');
+    debugPrint('Stack trace: $stackTrace');
     return false;
   }
 }
