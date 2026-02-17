@@ -1,0 +1,215 @@
+(ns mongol-drafts.services.update-check
+  "Version check and update (same as mongol-focus): interval and startup check using stats server app/version, app/download."
+  (:require
+   ["package:flutter/material.dart" :as m]
+   ["package:flutter/foundation.dart" :as fdn]
+   ["package:http/http.dart" :as http]
+   ["package:shared_preferences/shared_preferences.dart" :as sp]
+   ["package:package_info_plus/package_info_plus.dart" :as pkg]
+   ["package:url_launcher/url_launcher.dart" :as url]
+   ["package:mongol/mongol.dart" :as mgl]
+   ["dart:convert" :as convert]
+   ["dart:core" :as dc]
+   [clojure.string :as str]
+   [components.dialog :as dialog]
+   [mongol-drafts.services.env :as env]
+   [mongol-drafts.services.updater :as updater]))
+
+(def ^:private last-check-key "update_last_check_ms")
+(def ^:private default-check-interval-days 3)
+(defonce ^:private startup-check-scheduled? (atom false))
+(defonce ^:private checking? (atom false))
+
+(defn- parse-int [v]
+  (try
+    (dc/int.parse (str v))
+    (catch Exception _ 0)))
+
+(defn- parse-version [v]
+  (let [core (-> (or v "")
+                 (str/split #"[+-]" 2)
+                 first)
+        parts (map parse-int (str/split core #"\."))
+        padded (take 3 (concat parts (repeat 0)))]
+    (vec padded)))
+
+(defn- compare-versions [a b]
+  (let [va (parse-version a)
+        vb (parse-version b)]
+    (loop [i 0]
+      (if (= i (count va))
+        0
+        (let [x (nth va i)
+              y (nth vb i)]
+          (cond
+            (> x y) 1
+            (< x y) -1
+            :else (recur (inc i))))))))
+
+(defn- build-url [base-url path]
+  (if (str/ends-with? base-url "/")
+    (str base-url path)
+    (str base-url "/" path)))
+
+(defn- with-app-id [base-url path app-id]
+  (let [encoded (dc/Uri.encodeComponent app-id)]
+    (str (build-url base-url path) "?app_id=" encoded)))
+
+(defn- current-platform []
+  (cond
+    fdn/kIsWeb :web
+    (= fdn/defaultTargetPlatform fdn/TargetPlatform.iOS) :ios
+    (= fdn/defaultTargetPlatform fdn/TargetPlatform.android) :android
+    :else :other))
+
+(defn- select-download-url [download-data]
+  (let [android-url (get download-data "android_url")
+        ios-url (get download-data "ios_url")]
+    (case (current-platform)
+      :ios ios-url
+      :android android-url
+      (or android-url ios-url))))
+
+(defn- get-check-interval-days []
+  (let [value (env/get "UPDATE_CHECK_INTERVAL_DAYS")]
+    (if (and value (not (str/blank? value)))
+      (max 1 (parse-int value))
+      default-check-interval-days)))
+
+(defn- should-check-startup? [prefs]
+  (let [last-ms (.getInt prefs last-check-key)
+        now-ms (.-millisecondsSinceEpoch (dc/DateTime.now))
+        interval-ms (* (get-check-interval-days) 24 60 60 1000)]
+    (or (nil? last-ms) (> (- now-ms (or last-ms 0)) interval-ms))))
+
+(defn- set-last-check! [prefs]
+  (let [now-ms (.-millisecondsSinceEpoch (dc/DateTime.now))]
+    (await (.setInt prefs last-check-key now-ms))))
+
+(defn get-current-version! []
+  (let [info (await (pkg/PackageInfo.fromPlatform))]
+    (.-version info)))
+
+(defn- fetch-version-data! [base-url app-id headers]
+  (let [url (with-app-id base-url "app/version" app-id)
+        uri (dc/Uri.parse url)
+        resp (await (http/get uri .headers headers))]
+    (when (= 200 (.-statusCode resp))
+      (convert/jsonDecode (.-body resp)))))
+
+(defn- fetch-download-data! [base-url app-id headers]
+  (let [url (with-app-id base-url "app/download" app-id)
+        uri (dc/Uri.parse url)
+        resp (await (http/get uri .headers headers))]
+    (when (= 200 (.-statusCode resp))
+      (convert/jsonDecode (.-body resp)))))
+
+(defn- opaque-dialog-bg
+  "Return an opaque background color for dialogs/barriers.
+   Needed because this app's dark theme uses a semi-transparent `surface`."
+  [ctx]
+  (let [brightness (-> m/Theme (.of ctx) .-brightness)]
+    (if (= brightness m/Brightness.dark)
+      (-> m/Colors .grey .-shade900)
+      (-> m/Colors .white))))
+
+(defn- show-info-dialog! [ctx title message]
+  (let [bg (opaque-dialog-bg ctx)]
+    (m/showDialog
+     .context ctx
+     ;; No translucent barrier.
+     .barrierColor bg
+     .builder
+     (fn [ctx]
+       (dialog/vertical-custom-dialog
+        {:title title
+         :height-factor 0.35
+         :width-factor 0.8
+         ;; Force opaque dialog background (don't rely on theme `surface`).
+         :decoration (m/BoxDecoration
+                      .color bg
+                      .borderRadius (m/BorderRadius.all (m/Radius.circular 28)))
+         :body (m/Center.
+                .child (mgl/MongolText. message .style (m/TextStyle. .fontSize 16.0)))
+         :actions [(m/TextButton.
+                    .onPressed #(m/Navigator.pop ctx)
+                    .child (mgl/MongolText. "ᠪᠣᠯᠢᠬᠤ"))]})))))
+
+(defn- show-update-dialog! [ctx current-version latest-version download-url]
+  (let [bg (opaque-dialog-bg ctx)]
+    (m/showDialog
+     .context ctx
+     ;; No translucent barrier.
+     .barrierColor bg
+     .builder
+     (fn [ctx]
+       (dialog/vertical-custom-dialog
+        {:title "ᠰᠢᠨ᠎ᠡ ᠬᠤᠪᠢᠯᠪᠤᠷᠢ"
+         :height-factor 0.4
+         :width-factor 0.85
+         ;; Force opaque dialog background (don't rely on theme `surface`).
+         :decoration (m/BoxDecoration
+                      .color bg
+                      .borderRadius (m/BorderRadius.all (m/Radius.circular 28)))
+         :body (m/Center.
+                .child (mgl/MongolText.
+                        (str "ᠣᠳᠣ: " current-version "\nᠬᠠᠮᠤᠭ ᠰᠢᠨ᠎ᠡ: " latest-version)
+                        .style (m/TextStyle. .fontSize 16.0)))
+         :actions [(mgl/MongolTextButton.
+                    .onPressed #(m/Navigator.pop ctx)
+                    .child (mgl/MongolText. "ᠪᠣᠯᠢᠬᠤ"))
+                   (mgl/MongolElevatedButton.
+                    .onPressed (fn []
+                                 (m/Navigator.pop ctx)
+                                 (when (and download-url (not (str/blank? download-url)))
+                                   (let [uri (dc/Uri.parse download-url)]
+                                     (await (url/launchUrl uri .mode url/LaunchMode.externalApplication))))
+                                 nil)
+                    .child (mgl/MongolText. "ᠰᠢᠨᠡᠴᠢᠯᠡᠬᠦ"))]})))))
+
+(defn check-for-update!
+  "Uses stats server when STATS_SERVER_URL and STATS_APP_ID are set; otherwise falls back to VERSION_JSON_URL."
+  ([ctx] (check-for-update! ctx {:manual? true}))
+  ([ctx {:keys [manual?] :or {manual? false}}]
+   (let [base-url (env/get "STATS_SERVER_URL")
+         app-id (env/get "STATS_APP_ID")]
+     (if (or (str/blank? base-url) (str/blank? app-id))
+       (when manual?
+         (updater/check-update-with-dialog ctx))
+       (when (compare-and-set! checking? false true)
+         (try
+           (let [prefs (await (.getInstance sp/SharedPreferences))
+                 headers {"Accept" "application/json"}]
+             (when (or manual? (should-check-startup? prefs))
+               (await (set-last-check! prefs))
+               (let [current-version (await (get-current-version!))
+                     version-data (await (fetch-version-data! base-url app-id headers))]
+                 (if (nil? version-data)
+                   (when manual?
+                     (show-info-dialog! ctx "ᠰᠢᠨᠡᠴᠢᠯᠡᠯᠲᠡ᠎ᠶᠢ ᠰᠢᠯᠭᠠᠬᠤ" "ᠰᠢᠯᠭᠠᠯᠲᠠ ᠠᠮᠵᠢᠯᠲᠠ ᠦᠭᠡᠢ ᠪᠣᠯᠤᠭᠰᠠᠨ"))
+                   (let [latest-version (get version-data "version")
+                         download-data (await (fetch-download-data! base-url app-id headers))
+                         download-url (select-download-url download-data)]
+                     (if (and latest-version
+                              (= 1 (compare-versions latest-version current-version)))
+                       (if (and download-url (not (str/blank? download-url)))
+                         (show-update-dialog! ctx current-version latest-version download-url)
+                         (when manual?
+                           (show-info-dialog! ctx "ᠰᠢᠨᠡᠴᠢᠯᠡᠯᠲᠡ᠎ᠶᠢ ᠰᠢᠯᠭᠠᠬᠤ"
+                                             "ᠰᠢᠨ᠎ᠡ ᠬᠤᠪᠢᠯᠪᠤᠷᠢ ᠢᠯᠡᠷᠡᠭᠰᠡᠨ ᠪᠠᠢᠨ᠎ᠠ ᠂ᠭᠡᠪᠡᠴᠦ ᠲᠠᠲᠠᠵᠤ ᠠᠪᠬᠤ ᠬᠠᠶᠢᠭ ᠣᠯᠳᠠᠭᠰᠠᠨ ᠦᠭᠡᠢ")))
+                       (when manual?
+                         (show-info-dialog! ctx "ᠰᠢᠨᠡᠴᠢᠯᠡᠯᠲᠡ᠎ᠶᠢ ᠰᠢᠯᠭᠠᠬᠤ" "ᠡᠨᠡ ᠪᠣᠯ ᠬᠠᠮᠤᠭ ᠎ᠤᠨ ᠰᠢᠨ᠎ᠡ ᠬᠤᠪᠢᠯᠪᠤᠷᠢ "))))))))
+           (catch Exception e
+             (when manual?
+               (show-info-dialog! ctx "ᠰᠢᠨᠡᠴᠢᠯᠡᠯᠲᠡ᠎ᠶᠢ ᠰᠢᠯᠭᠠᠬᠤ" (str "ᠰᠢᠯᠭᠠᠯᠲᠠ ᠠᠮᠵᠢᠯᠲᠠ ᠦᠭᠡᠢ ᠪᠣᠯᠤᠯ᠎ᠠ: " e))))
+           (finally
+             (reset! checking? false))))))))
+
+(defn ensure-startup-check!
+  "Run one automatic check after first frame if interval since last check has passed."
+  [ctx]
+  (when (compare-and-set! startup-check-scheduled? false true)
+    (let [binding (m/WidgetsBinding.instance)]
+      (.addPostFrameCallback binding
+                             (fn [_]
+                               (check-for-update! ctx {:manual? false}))))))

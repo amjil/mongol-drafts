@@ -1,0 +1,127 @@
+(ns mongol-drafts.widgets.feedback-dialog
+  "Single-field feedback dialog with Mongolian keyboard (content only, no title field)."
+  (:require
+   ["package:flutter/material.dart" :as m]
+   [cljd.flutter :as f]
+   [clojure.string :as str]
+   [virtual-keyboard.keyboard :as keyboard]
+   [components.tokens :as tokens]
+   [components.dialog :as dialog]
+   [components.text :as text]
+   [components.text-field :as text-field]))
+
+(defn- floating-submit-toolbar [{:keys [on-submit is-active]}]
+  (f/widget
+   :get {{{:flds [primary onPrimary]} .-colorScheme
+          brightness .-brightness} m/Theme}
+   :let [bg (if (= brightness m/Brightness.dark)
+              (-> m/Colors .grey .-shade900)
+              (-> m/Colors .white))]
+   (m/Positioned
+    .bottom (tokens/space :l)
+    .right (tokens/space :m)
+    .child
+    (m/Container
+     .decoration (m/BoxDecoration
+                  .color bg
+                  .borderRadius (m/BorderRadius.circular 32)
+                  .boxShadow [(m/BoxShadow
+                               .color (-> m/Colors.black (.withOpacity 0.1))
+                               .blurRadius 12
+                               .offset (m/Offset 0 4))])
+     .child
+     (m/Padding
+      .padding (m/EdgeInsets.all (tokens/space :xs))
+      .child
+      (m/AnimatedContainer
+       .duration (dart:core/Duration .milliseconds 200)
+       .curve m/Curves.easeInOut
+       .decoration (m/BoxDecoration
+                    .color (if is-active primary (-> primary (.withOpacity 0.3)))
+                    .shape m/BoxShape.circle)
+       .child (m/IconButton
+               .icon (m/Icon m/Icons.arrow_upward_rounded
+                             .color (if is-active onPrimary (-> onPrimary (.withOpacity 0.5))))
+               .onPressed (when is-active on-submit))))))))
+
+(defn feedback-dialog
+  "Dialog with one content field + Mongolian keyboard. on-submit receives the content string."
+  [{:keys [on-submit on-cancel]}]
+  (let [content-atom (atom "")]
+    (f/widget
+     :context ctx
+     :managed [content-ctrl (m/TextEditingController.)
+               focus-node (m/FocusNode)]
+     :get {{{:flds [surfaceVariant onSurface]} .-colorScheme
+            {:flds [titleLarge bodyMedium]} .-textTheme} m/Theme}
+     :let [brightness (-> m/Theme (.of ctx) .-brightness)
+           dialog-bg (if (= brightness m/Brightness.dark)
+                       (-> m/Colors .grey .-shade900)
+                       (-> m/Colors .white))]
+     (dialog/vertical-custom-dialog
+      {:width-factor 1
+       :height-factor 1
+       :inset-padding m/EdgeInsets.zero
+       :shape (m/RoundedRectangleBorder
+               .borderRadius (m/BorderRadius.all (m/Radius.circular 0)))
+       :decoration (m/BoxDecoration
+                    .color dialog-bg
+                    .borderRadius (m/BorderRadius.all (m/Radius.circular 0)))
+       :child
+       (m/Column
+        .children
+        [(m/Expanded
+          .child
+          (m/Stack
+           .children
+           [(m/Row
+             .crossAxisAlignment m/CrossAxisAlignment.stretch
+             .children
+             [(m/Container
+               .alignment m/Alignment.topCenter
+               .padding (m/EdgeInsets.only .top (tokens/space :l) .left (tokens/space :m) .right (tokens/space :m))
+               .decoration (m/BoxDecoration
+                            .border (m/Border .right (m/BorderSide .color surfaceVariant .width 1.5)))
+               .child (text/text-block
+                       {:text "ᠰᠠᠨᠠᠯ ᠵᠥᠪᠯᠡᠯᠭᠡ "
+                        :style (.copyWith titleLarge
+                                         .fontWeight m/FontWeight.bold
+                                         .color onSurface)}))
+
+              (m/Expanded
+               .child
+               (m/Align
+                .alignment m/Alignment.topLeft
+                .child
+                (m/Padding
+                 .padding (m/EdgeInsets.all (tokens/space :l))
+                 .child
+                 (text-field/text-field
+                  {:controller content-ctrl
+                   :autofocus true
+                   :focus-node focus-node
+                   :hint "ᠰᠠᠨᠠᠯ ᠵᠥᠪᠯᠡᠯᠭᠡ ᠁"
+                   :max-lines nil
+                   :style (.copyWith bodyMedium
+                                    .fontSize 18.0
+                                    .color (.withOpacity onSurface 0.6))
+                   :on-changed #(swap! content-atom (constantly %))}))))])
+
+            (m/Align
+             .alignment m/Alignment.topRight
+             .child (m/IconButton
+                     .icon (m/Icon m/Icons.close)
+                     .onPressed on-cancel))
+
+            (f/widget
+             :watch [content content-atom]
+             (floating-submit-toolbar
+              {:is-active (not (str/blank? content))
+               :on-submit #(on-submit (str/trim @content-atom))}))
+
+            (keyboard/candidates (m/TextStyle. .fontSize 18 .fontFamily "OyunQaganTig"))]))
+
+         (m/Container
+          .decoration (m/BoxDecoration
+                       .border (m/Border .top (m/BorderSide .color surfaceVariant .width 0.5)))
+          .child (keyboard/keyboard {}))])}))))

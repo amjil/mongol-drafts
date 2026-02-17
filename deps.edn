@@ -5,6 +5,8 @@
         amjil/mongol-menu-bar
         {:git/url "https://github.com/amjil/mongol-menu-bar.git"
          :sha "806a92930e27a67c5ec096892f498089816c7961"}
+        amjil/mgl-components
+        {:local/root "../mgl-components"}
         amjil/mongol-virtual-keyboard
         {:git/url "https://github.com/amjil/mongol-virtual-keyboard.git"
          :sha "ab43a23db57bd7739a89989ca8b7ad739f9db509"}}

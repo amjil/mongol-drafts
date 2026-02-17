@@ -6,7 +6,8 @@
    [mongol-drafts.widgets.theme-dialog :as theme-dialog]
    [mongol-drafts.widgets.font-dialog :as font-dialog]
    [mongol-drafts.widgets.font-size-dialog :as font-size-dialog]
-   [mongol-drafts.services.updater :as updater]
+   [mongol-drafts.services.update-check :as update-check]
+   [mongol-drafts.services.feedback :as feedback]
    [mongol-drafts.states.theme :as theme-state]
    [mongol-drafts.states.font :as font-state]
    [mongol-drafts.states.global :as global-state]))
@@ -50,12 +51,14 @@
         :leading m/Icons.text_fields
         :subtitle (str "ᠣᠳᠣ : " draft-font-size)
         :on-tap (fn [] (font-size-dialog/show-draft-font-size-dialog ctx))}
-       {:title "Check for updates"
-        :leading m/Icons.info
+       {:title "ᠰᠢᠨᠡᠴᠢᠯᠡᠯᠲᠡ᠎ᠶᠢ ᠰᠢᠯᠭᠠᠬᠤ"
+        :leading m/Icons.system_update
         :subtitle (str "Version: " @global-state/build-number)
-        :on-tap (fn []
-                  (dart:core/print "check for updates")
-                  (updater/check-update-with-dialog ctx))}])])))
+        :on-tap (fn [] (update-check/check-for-update! ctx {:manual? true}))}
+       {:title "ᠰᠠᠨᠠᠯ ᠵᠥᠪᠯᠡᠯᠭᠡ "
+        :leading m/Icons.feedback
+        :subtitle "ᠲᠤᠰᠠᠯᠠᠮᠵᠢ ᠪᠠ ᠰᠠᠨᠠᠯ"
+        :on-tap (fn [] (feedback/open-feedback-dialog! ctx))}])])))
 
 (defn default-view []
   (f/widget

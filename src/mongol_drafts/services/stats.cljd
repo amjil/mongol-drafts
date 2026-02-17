@@ -1,0 +1,66 @@
+(ns mongol-drafts.services.stats
+  "Daily active report; same as mongol-focus logic/stats."
+  (:require
+   ["package:http/http.dart" :as http]
+   ["package:shared_preferences/shared_preferences.dart" :as sp]
+   ["dart:convert" :as convert]
+   ["dart:math" :as math]
+   ["dart:core" :as dc]
+   [clojure.string :as str]
+   [mongol-drafts.services.env :as env]))
+
+(def ^:private device-id-key "stats_device_id")
+(def ^:private last-report-date-key "stats_last_report_date")
+
+(defn- pad2 [n]
+  (if (< n 10) (str "0" n) (str n)))
+
+(defn- today-str []
+  (let [now (dc/DateTime.now)]
+    (str (.-year now) "-" (pad2 (.-month now)) "-" (pad2 (.-day now)))))
+
+(defn- random-hex [len]
+  (let [rng (math/Random.secure)]
+    (apply str (repeatedly len #(-> (.nextInt rng 16) (.toRadixString 16))))))
+
+(defn- ensure-device-id! [prefs]
+  (if-let [existing (.getString prefs device-id-key)]
+    existing
+    (let [device-id (random-hex 32)]
+      (await (.setString prefs device-id-key device-id))
+      device-id)))
+
+(defn- build-url [base-url]
+  (if (str/ends-with? base-url "/")
+    (str base-url "active")
+    (str base-url "/active")))
+
+(defn- should-report? [prefs today]
+  (not= (.getString prefs last-report-date-key) today))
+
+(defn get-device-id!
+  "Return the device id used for stats/feedback (ensures one exists)."
+  []
+  (let [prefs (await (.getInstance sp/SharedPreferences))]
+    (await (ensure-device-id! prefs))))
+
+(defn report-daily!
+  "Report daily activity to stats server at most once per day."
+  []
+  (let [base-url (env/get "STATS_SERVER_URL")
+        app-id (env/get "STATS_APP_ID")]
+    (when (and base-url app-id (not (str/blank? base-url)) (not (str/blank? app-id)))
+      (let [prefs (await (.getInstance sp/SharedPreferences))
+            today (today-str)]
+        (when (should-report? prefs today)
+          (let [device-id (await (ensure-device-id! prefs))
+                uri (dc/Uri.parse (build-url base-url))
+                body (convert/jsonEncode {"app_id" app-id "device_id" device-id})]
+            (try
+              (let [resp (await (http/post uri
+                                           .headers {"Content-Type" "application/json"}
+                                           .body body))]
+                (when (= 200 (.-statusCode resp))
+                  (await (.setString prefs last-report-date-key today))))
+              (catch Exception e
+                (dart:core/print (str "stats report failed: " e))))))))))

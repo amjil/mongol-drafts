@@ -17,7 +17,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 2.1.6
+version: 2.1.7
 
 environment:
   sdk: '>=3.4.3 <4.0.0'
@@ -49,10 +49,6 @@ dependencies:
   http: ^1.1.0
   adaptive_theme: ^3.6.0
   package_info_plus: ^9.0.0
-  flutter_context_menu:
-    path: /Users/amjil/projects/dart/flutter_context_menu/
-    # git:
-      # url: https://github.com/amjil/flutter_context_menu.git
   timer_button: ^2.1.1
     
   drift: 2.18.0
