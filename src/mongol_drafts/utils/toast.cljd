@@ -5,15 +5,17 @@
    ["package:flutter_styled_toast/flutter_styled_toast.dart" :as styled-toast]))
 
 (defn show-toast [ctx msg]
-  (styled-toast/showToastWidget
-   (m/Container
-    .padding (m.EdgeInsets/all 18)
-    .decoration (m/BoxDecoration
-                 .borderRadius (.all m/BorderRadius (.circular m/Radius 20))
-                 .color m.Colors/blueAccent)
-    .child
-    (mgl/MongolText msg))
-   .context ctx
-   .reverseAnimation styled-toast.StyledToastAnimation/fade
-   .animation styled-toast.StyledToastAnimation/fade
-   .position styled-toast.StyledToastPosition/center))
+  (let [scheme (-> m/Theme (.of ctx) .-colorScheme)]
+    (styled-toast/showToastWidget
+     (m/Container
+      .padding (m.EdgeInsets/all 18)
+      .decoration (m/BoxDecoration
+                   .borderRadius (.all m/BorderRadius (.circular m/Radius 20))
+                   .color (.-primaryContainer scheme))
+      .child
+      (mgl/MongolText msg
+                     .style (m/TextStyle .color (.-onPrimaryContainer scheme))))
+     .context ctx
+     .reverseAnimation styled-toast.StyledToastAnimation/fade
+     .animation styled-toast.StyledToastAnimation/fade
+     .position styled-toast.StyledToastPosition/center)))

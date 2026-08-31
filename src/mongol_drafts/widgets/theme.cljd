@@ -1,11 +1,168 @@
 (ns mongol-drafts.widgets.theme
-  (:require 
+  (:require
    ["package:flutter/material.dart" :as m]
    ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
    [mongol-drafts.services.pref :as pref]
    [mongol-drafts.states.font :as font-state]))
-   
+
 (declare default-light-theme default-dark-theme)
+
+(defn- argb [r g b]
+  (.fromARGB m/Color 255 r g b))
+
+;; Paper + ink: warm page, slate writing color, amber highlight, cinnabar flag.
+(def palette
+  {:light {:paper (argb 0xF6 0xF4 0xF0)
+           :card (argb 0xFF 0xFC 0xF9)
+           :ink (argb 0x3D 0x4F 0x5C)
+           :on-ink (argb 0xFF 0xFF 0xFF)
+           :mist (argb 0xE4 0xE9 0xEC)
+           :on-mist (argb 0x1C 0x2A 0x33)
+           :flag (argb 0xA6 0x4B 0x3D)
+           :on-flag (argb 0xFF 0xFF 0xFF)
+           :raised (argb 0xEB 0xE8 0xE3)
+           :on-raised (argb 0x2C 0x2A 0x26)
+           :amber (argb 0xB0 0x7D 0x2A)
+           :on-amber (argb 0xFF 0xF8 0xEC)
+           :sand (argb 0xE8 0xE4 0xDC)
+           :on-sand (argb 0x3D 0x2A 0x0E)
+           :outline (argb 0x8A 0x85 0x7C)
+           :hairline (argb 0xD9 0xD4 0xCC)
+           :text (argb 0x1C 0x1B 0x19)
+           :muted (argb 0x4A 0x47 0x42)
+           :error (argb 0xBA 0x1A 0x1A)
+           :on-error (argb 0xFF 0xFF 0xFF)
+           :wash (argb 0xE8 0xE4 0xDE)
+           :icon (argb 0xC4 0xA3 0x4A)}
+   :dark {:paper (argb 0x1A 0x1C 0x1E)
+          :card (argb 0x24 0x26 0x2A)
+          :ink (argb 0xB7 0xC5 0xCE)
+          :on-ink (argb 0x1A 0x2A 0x33)
+          :mist (argb 0x25 0x2A 0x2E)
+          :on-mist (argb 0xD5 0xDE 0xE3)
+          :flag (argb 0xE8 0xA3 0x99)
+          :on-flag (argb 0x3A 0x15 0x12)
+          :raised (argb 0x2E 0x31 0x35)
+          :on-raised (argb 0xE5 0xE2 0xDD)
+          :amber (argb 0xE0 0xB8 0x6A)
+          :on-amber (argb 0x3A 0x2A 0x0E)
+          :sand (argb 0x2A 0x28 0x24)
+          :on-sand (argb 0xF5 0xE6 0xC8)
+          :outline (argb 0x8E 0x8A 0x84)
+          :hairline (argb 0x3F 0x3C 0x38)
+          :text (argb 0xE6 0xE2 0xDC)
+          :muted (argb 0xC8 0xC4 0xBE)
+          :error (argb 0xFF 0xB4 0xAB)
+          :on-error (argb 0x3B 0x09 0x08)
+          :wash (argb 0x2C 0x2E 0x30)
+          :icon (argb 0xFF 0xD6 0x00)}})
+
+(defn- scheme-args [mode]
+  (let [{:keys [paper ink on-ink mist on-mist flag on-flag
+                raised on-raised amber on-amber sand on-sand
+                outline hairline text muted error on-error wash]}
+        (get palette mode)]
+    {:primary ink
+     :on-primary on-ink
+     :primary-container mist
+     :on-primary-container on-mist
+     :secondary flag
+     :on-secondary on-flag
+     :secondary-container raised
+     :on-secondary-container on-raised
+     :tertiary amber
+     :on-tertiary on-amber
+     :tertiary-container sand
+     :on-tertiary-container on-sand
+     :error error
+     :on-error on-error
+     :surface paper
+     :on-surface text
+     :surface-variant wash
+     :on-surface-variant muted
+     :outline outline
+     :outline-variant hairline}))
+
+(defn- scheme [mode]
+  (let [{:keys [primary on-primary primary-container on-primary-container
+                secondary on-secondary secondary-container on-secondary-container
+                tertiary on-tertiary tertiary-container on-tertiary-container
+                error on-error surface on-surface surface-variant on-surface-variant
+                outline outline-variant]}
+        (scheme-args mode)]
+    (if (= mode :light)
+      (.light m/ColorScheme
+              .primary primary
+              .onPrimary on-primary
+              .primaryContainer primary-container
+              .onPrimaryContainer on-primary-container
+              .secondary secondary
+              .onSecondary on-secondary
+              .secondaryContainer secondary-container
+              .onSecondaryContainer on-secondary-container
+              .tertiary tertiary
+              .onTertiary on-tertiary
+              .tertiaryContainer tertiary-container
+              .onTertiaryContainer on-tertiary-container
+              .error error
+              .onError on-error
+              .surface surface
+              .onSurface on-surface
+              .surfaceVariant surface-variant
+              .onSurfaceVariant on-surface-variant
+              .outline outline
+              .outlineVariant outline-variant)
+      (.dark m/ColorScheme
+             .primary primary
+             .onPrimary on-primary
+             .primaryContainer primary-container
+             .onPrimaryContainer on-primary-container
+             .secondary secondary
+             .onSecondary on-secondary
+             .secondaryContainer secondary-container
+             .onSecondaryContainer on-secondary-container
+             .tertiary tertiary
+             .onTertiary on-tertiary
+             .tertiaryContainer tertiary-container
+             .onTertiaryContainer on-tertiary-container
+             .error error
+             .onError on-error
+             .surface surface
+             .onSurface on-surface
+             .surfaceVariant surface-variant
+             .onSurfaceVariant on-surface-variant
+             .outline outline
+             .outlineVariant outline-variant))))
+
+(defn- theme-data [app-font mode]
+  (let [{:keys [paper card ink icon hairline]} (get palette mode)
+        color-scheme (scheme mode)]
+    (m/ThemeData
+     .useMaterial3 true
+     .brightness (if (= mode :light) m.Brightness/light m.Brightness/dark)
+     .fontFamily app-font
+     .scaffoldBackgroundColor paper
+     .canvasColor paper
+     .cardColor card
+     .dividerColor hairline
+     .colorScheme color-scheme
+     .cardTheme (m/CardThemeData .color card .elevation 0)
+     .iconTheme (m/IconThemeData .color icon)
+     .dividerTheme (m/DividerThemeData
+                    .color hairline
+                    .space 1.0
+                    .thickness 1.0)
+     .textSelectionTheme (m/TextSelectionThemeData
+                          .cursorColor icon
+                          .selectionColor (-> ^m/Color icon (.withOpacity 0.28))
+                          .selectionHandleColor icon)
+     .textButtonTheme (m/TextButtonThemeData
+                       .style (m/ButtonStyle
+                               .foregroundColor (#/(m/WidgetStatePropertyAll m/Color?) ink)))
+     .dialogBackgroundColor card
+     .bottomSheetTheme (m/BottomSheetThemeData
+                        .backgroundColor card
+                        .modalBackgroundColor card))))
 
 (defn set-dark [ctx]
   (pref/set-int "theme-setting" 1)
@@ -44,72 +201,10 @@
         adaptive.AdaptiveThemeMode/system))))
 
 (defn get-light-theme [app-font]
-  (m/ThemeData
-   .fontFamily app-font
-   .scaffoldBackgroundColor (-> m/Colors .white)
-   .colorScheme
-   (.light m/ColorScheme
-           .primary m.Colors/black
-           .onPrimary m.Colors/white
-           .surface (-> m/Colors .white)
-           .onSurface (-> m/Colors .black87)
-           .surfaceVariant (-> m/Colors .grey .-shade100)
-           .onSurfaceVariant (-> m/Colors .black87)
-           .outlineVariant (-> m/Colors .yellowAccent .-shade400)
-           .secondary m.Colors/red
-           .tertiary (-> m/Colors .blueGrey .-shade600)
-           .primaryContainer (-> m/Colors .blueGrey .-shade50)
-           .secondaryContainer (-> m/Colors .grey .-shade100)
-           .onSecondaryContainer (-> m/Colors .black87)
-           .tertiaryContainer (-> m/Colors .grey .-shade200))
-   .cardTheme (m/CardThemeData .color (-> m/Colors .white))
-   .iconTheme (m/IconThemeData .color (-> m/Colors .blueGrey .-shade600))
-   .textSelectionTheme (m/TextSelectionThemeData
-                       .cursorColor (-> m/Colors .blueGrey .-shade600)
-                       .selectionColor (-> m/Colors .blueGrey .-shade200)
-                       .selectionHandleColor (-> m/Colors .blueGrey .-shade600))
-   .textButtonTheme (m/TextButtonThemeData
-                     .style (m/ButtonStyle
-                             .foregroundColor (-> m/MaterialStateProperty
-                                                  (.resolveWith (fn [_states] (-> m/Colors .blueGrey .-shade900))))))
-   ;;    .textTheme (m/TextTheme
-   ;;                .titleMedium (m/TextStyle .color m.Colors/white
-   ;;                                          .fontSize 20.0)
-   ;;                .bodyText1 (m/TextStyle .color m.Colors/white70
-   ;;                                        .fontSize 18.0))
-   ))
+  (theme-data app-font :light))
 
 (defn get-dark-theme [app-font]
-  (m/ThemeData
-   .fontFamily app-font
-   .scaffoldBackgroundColor (-> m/Colors .black45)
-   .colorScheme
-   (.dark m/ColorScheme
-          .primary m.Colors/blueGrey
-          .onPrimary m.Colors/white
-          .surface m.Colors/white60
-          .outlineVariant (-> m/Colors .yellowAccent)
-          .secondary m.Colors/red
-          .tertiary (-> m/Colors .black45)
-          .primaryContainer (-> m/Colors .grey .-shade900)
-          .secondaryContainer (-> m/Colors .grey .-shade800)
-          .tertiaryContainer (-> m/Colors .grey .-shade700))
-   .cardTheme (m/CardThemeData .color m.Colors/blueGrey)
-   .iconTheme (m/IconThemeData .color (-> m/Colors .yellowAccent .-shade700))
-   .textSelectionTheme (m/TextSelectionThemeData
-                       .cursorColor (-> m/Colors .yellowAccent .-shade700)
-                       .selectionColor (-> m/Colors .yellowAccent .-shade400)
-                       .selectionHandleColor (-> m/Colors .yellowAccent .-shade700))
-   .textButtonTheme (m/TextButtonThemeData
-                     .style (m/ButtonStyle
-                             .foregroundColor (-> m/MaterialStateProperty
-                                                  (.resolveWith (fn [_states] (-> m/Colors .yellowAccent .-shade200))))))
-   ;;    .textTheme (m/TextTheme
-   ;;                .titleMedium (m/TextStyle .color m.Colors/white
-   ;;                                        .fontSize 20.0)
-   ;;                .bodyText1 (m/TextStyle .color m.Colors/white70
-   ;;                                          .fontSize 18.0))
-   ))
+  (theme-data app-font :dark))
 
 ;; Default themes for backward compatibility
 (def default-light-theme

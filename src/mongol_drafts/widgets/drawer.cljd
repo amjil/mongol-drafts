@@ -62,7 +62,7 @@
           (m/Material
            .color (if (or (true? show-drawer-search)
                           (not-empty draft-search))
-                    (-> m/Theme (.of ctx) .-colorScheme .-outlineVariant)
+                    (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
                     (-> m.Colors/transparent))
            .shape (m/CircleBorder
                    .side (m/BorderSide
@@ -70,7 +70,7 @@
                           .width 2)))
           (m/InkWell
            .customBorder (m/CircleBorder)
-           .splashColor (-> m.Colors/blueGrey)
+           .splashColor (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
            .onTap (fn []
                     (swap! global-state/state assoc :show-drawer-search
                            (not (:show-drawer-search @global-state/state)))
@@ -179,7 +179,7 @@
         (m/Material
          .color (if (or (not-empty tag-search)
                         (true? show-sub-drawer-search))
-                  (-> m/Theme (.of ctx) .-colorScheme .-outlineVariant)
+                  (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
                   (-> m.Colors/transparent))
          .shape (m/CircleBorder
                  .side (m/BorderSide
@@ -187,7 +187,6 @@
                         .width 2)))
         (m/InkWell
          .customBorder (m/CircleBorder)
-         ;;  .splashColor (-> m.Colors/blue)
          .onTap (fn []
                   (swap! global-state/state assoc :show-sub-drawer-search
                          (not (:show-sub-drawer-search @global-state/state)))

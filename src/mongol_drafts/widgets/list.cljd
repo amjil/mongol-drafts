@@ -119,6 +119,6 @@
            (if (draft-state/flagged? (-> contents (nth i) (get "flag")))
              (m/Icon m/Icons.flag
                      .size 12
-                     .color m.Colors/red)
+                     .color (-> m/Theme (.of context) .-colorScheme .-secondary))
              (m/Container))])))))))
 

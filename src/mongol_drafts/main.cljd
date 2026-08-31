@@ -22,22 +22,23 @@
   (f/widget
    :context ctx
    :watch [{_theme-mode :mode} theme-state/theme-state
-           {app-font :app-font} font-state/font-state]
+           {app-font :app-font} font-state/font-state
+           {_brightness :theme/brightness} global-state/state]
    :let [w  (-> m/MediaQuery (.of ctx) .-size .-width)
+         light-theme (theme/get-light-theme app-font)
+         dark-theme (theme/get-dark-theme app-font)
+         dark? (= (theme-state/get-effective-brightness ctx) m.Brightness/dark)
+         ^m/ThemeData active-theme (if dark? dark-theme light-theme)
+         ^m/ColorScheme scheme (.-colorScheme active-theme)
          info (merge keyboard-options/keyboard-option
+                     (keyboard-options/system-style active-theme)
                      {:keyboard/key-cap-border-radius 6
                       :keyboard/font-size 18
-                      :keyboard/key-container-color m/Colors.grey.shade500
                       :keyboard/mongol-font-family app-font
-                      ;; :keyboard/key-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-                      ;; :keyboard/action-keys-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
-                      ;; :keyboard/action-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                      ;; :keyboard/key-text-color (-> m/Theme (.of ctx) .-colorScheme .-surface)
-                      ;; :keyboard/long-press-container-color (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-                      }
-                     {:keyboard/width w})
-         light-theme (theme/get-light-theme app-font)
-         dark-theme (theme/get-dark-theme app-font)]
+                      :keyboard/background-color (.-tertiaryContainer scheme)
+                      :keyboard/return-key-color (.-primary scheme)
+                      :keyboard/selected-popup-color (.-primary scheme)
+                      :keyboard/width w})]
    :bind {:info info :state (atom keyboard-options/keyboard-state)}
    (adaptive/AdaptiveTheme
     .light light-theme

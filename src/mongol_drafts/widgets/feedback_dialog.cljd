@@ -12,11 +12,8 @@
 
 (defn- floating-submit-toolbar [{:keys [on-submit is-active]}]
   (f/widget
-   :get {{{:flds [primary onPrimary]} .-colorScheme
-          brightness .-brightness} m/Theme}
-   :let [bg (if (= brightness m/Brightness.dark)
-              (-> m/Colors .grey .-shade900)
-              (-> m/Colors .white))]
+   :get {{{:flds [primary onPrimary surface]} .-colorScheme} m/Theme}
+   :let [bg surface]
    (m/Positioned
     .bottom (tokens/space :l)
     .right (tokens/space :m)
@@ -53,12 +50,9 @@
      :context ctx
      :managed [content-ctrl (m/TextEditingController.)
                focus-node (m/FocusNode)]
-     :get {{{:flds [surfaceVariant onSurface]} .-colorScheme
+     :get {{{:flds [surface surfaceVariant onSurface]} .-colorScheme
             {:flds [titleLarge bodyMedium]} .-textTheme} m/Theme}
-     :let [brightness (-> m/Theme (.of ctx) .-brightness)
-           dialog-bg (if (= brightness m/Brightness.dark)
-                       (-> m/Colors .grey .-shade900)
-                       (-> m/Colors .white))]
+     :let [dialog-bg surface]
      (dialog/vertical-custom-dialog
       {:width-factor 1
        :height-factor 1

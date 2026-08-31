@@ -10,10 +10,7 @@
   (f/widget
    :context ctx
    :let [theme (-> m/Theme (.of ctx))
-         brightness (.-brightness theme)
-         card-color (if (= brightness m/Brightness.light)
-                      (-> m/Colors .white)
-                      (.-cardColor theme))]
+         card-color (.-cardColor theme)]
    (m/Container
     .margin (m.EdgeInsets/only .left 20)
     .decoration (m/BoxDecoration
