@@ -2,26 +2,93 @@
   (:require
    ["package:flutter/material.dart" :as m]
    ["package:mongol/mongol.dart" :as mgl]
-   [cljd.flutter :as f]))
+   [cljd.flutter :as f]
+   [components.tokens :as tokens]
+   [mongol-drafts.states.font :as font-state]))
 
-(defn empty-content-view []
+(def default-message "ᠶᠠᠭᠤ ᠎ᠴᠤ ᠦᠭᠡᠢ")
+
+(defn- rule-line [color]
+  (m/Container
+   .width 1.5
+   .decoration (m/BoxDecoration
+                .color color
+                .borderRadius (.circular m/BorderRadius 1))))
+
+(defn- paper-mark [icon]
   (f/widget
-   (m/Center)
-   (m/Padding
-    .padding
-    (.fromLTRB m/EdgeInsets 0 40 0 0))
-   (m/Column
+   :context ctx
+   :let [theme (-> m/Theme (.of ctx))
+         scheme (.-colorScheme theme)
+         gold (-> theme .-iconTheme .-color)
+         hairline (-> ^m/Color (.-outlineVariant scheme) (.withOpacity 0.85))
+         mark (or icon m/Icons.article_outlined)]
+   (m/Container
+    .width 72
+    .height 120
+    .decoration (m/BoxDecoration
+                 .color (.-cardColor theme)
+                 .borderRadius (.circular m/BorderRadius (tokens/radius :m))
+                 .border (m/Border.all .color (.-outlineVariant scheme) .width 1)))
+   (m/Stack
     .children
-    [(m/Text
-      "{}"
-      .style
-      (m/TextStyle .fontSize 40
-                   .fontFamily "roboto"))
-     (m/SizedBox
-      .height 20)
-     (m/Row
-      .mainAxisAlignment m.MainAxisAlignment/center
-      .children [(mgl/MongolText "ᠶᠭᠤ" .style (m/TextStyle .fontSize 20))
-                 (mgl/MongolText "᠎ᠴᠤ" .style (m/TextStyle .fontSize 20))
-                 (mgl/MongolText "ᠦᠭᠡᠢ" .style (m/TextStyle .fontSize 20))])])))
+    [(m/Positioned.fill
+      .child
+      (m/Padding
+       .padding (.fromLTRB m/EdgeInsets 18 16 18 36)
+       .child
+       (m/Row
+        .mainAxisAlignment m.MainAxisAlignment/spaceEvenly
+        .crossAxisAlignment m.CrossAxisAlignment/stretch
+        .children
+        [(rule-line hairline)
+         (rule-line hairline)
+         (rule-line hairline)])))
+     (m/Positioned
+      .top 10
+      .right 10
+      .child
+      (m/Container
+       .width 7
+       .height 7
+       .decoration (m/BoxDecoration
+                    .shape m/BoxShape.circle
+                    .color (-> ^m/Color gold (.withOpacity 0.75)))))
+     (m/Align
+      .alignment m/Alignment.bottomCenter
+      .child
+      (m/Padding
+       .padding (.only m/EdgeInsets .bottom 12)
+       .child
+       (m/Icon mark
+               .size 22
+               .color (-> ^m/Color gold (.withOpacity 0.7)))))])))
 
+(defn empty-content-view
+  ([]
+   (empty-content-view {}))
+  ([{:keys [icon message]}]
+   (f/widget
+    :context ctx
+    :watch [{app-font :app-font} font-state/font-state]
+    :let [scheme (-> m/Theme (.of ctx) .-colorScheme)
+          caption (or message default-message)]
+    (m/Center
+     .child
+     (m/Padding
+      .padding (.symmetric m/EdgeInsets .horizontal (tokens/space :l)
+                           .vertical (tokens/space :xl))
+      .child
+      (m/Row
+       .mainAxisSize m.MainAxisSize/min
+       .crossAxisAlignment m.CrossAxisAlignment/center
+       .children
+       [(paper-mark icon)
+        (m/SizedBox .width (tokens/space :l))
+        (mgl/MongolText
+         caption
+         .style (m/TextStyle
+                 .fontFamily app-font
+                 .fontSize (tokens/font-size :l)
+                 .height 1.7
+                 .color (.-onSurfaceVariant scheme)))]))))))

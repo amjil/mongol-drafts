@@ -59,7 +59,9 @@
      (m/Expanded
       .child
       (if (empty? contents)
-        (empty-content/empty-content-view)
+        (empty-content/empty-content-view
+         {:icon m/Icons.search_off_outlined
+          :message "ᠣᠯᠳᠠᠭᠰᠠᠨ ᠦᠭᠡᠢ"})
         (list-content/widget)))])))
   
 (defn search-field []
