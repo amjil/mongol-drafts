@@ -164,9 +164,12 @@
         (swap! gs/state assoc :draft/status -1)
         (query-drafts (:draft-search @gs/state) true)))))
 
+(defn flagged? [flag]
+  (or (true? flag) (= 1 flag)))
+
 (defn toggle-draft-flag [id]
-  (let [flag (-> @gs/state :draft (get "flag"))]
-    (if (= 1 flag)
+  (let [on? (flagged? (-> @gs/state :draft (get "flag")))]
+    (if on?
       (draft-service/unflag-draft id)
       (draft-service/flag-draft id))
     (swap! gs/state assoc :draft
@@ -174,11 +177,11 @@
             (-> @gs/state :draft)
              (.update
               "flag"
-              (fn [_] (if (= 1 flag) 0 1)))))))
+              (fn [_] (not on?)))))))
 
 (defn toggle-drafts-item-flag [i]
   (let [draft (-> @gs/state :drafts :contents (nth i))]
-    (if (= 1 (get draft "flag"))
+    (if (flagged? (get draft "flag"))
       (do
         (draft-service/unflag-draft (get draft "id"))
         (if (= 1 (:draft/tabbar-index @gs/state))
@@ -186,11 +189,11 @@
                  (remove #(= (get draft "id") (get % "id"))
                          (get-in @gs/state [:drafts :contents])))
           (swap! gs/state assoc-in [:drafts :contents i]
-                 (doto draft (.update "flag" (fn [_] 0))))))
+                 (doto draft (.update "flag" (fn [_] false))))))
       (do
         (draft-service/flag-draft (get draft "id"))
         (swap! gs/state assoc-in [:drafts :contents i]
-               (doto draft (.update "flag" (fn [_] 1))))))))
+               (doto draft (.update "flag" (fn [_] true))))))))
 
 (defn recycle-draft [i]
   (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]

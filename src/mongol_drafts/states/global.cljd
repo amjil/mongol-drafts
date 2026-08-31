@@ -19,8 +19,10 @@
 
 
 (def build-number (atom nil))
+(def version (atom nil))
 
 (defn set-build-number []
   (-> (pip/PackageInfo.fromPlatform)
       (.then (fn [info]
-               (reset! build-number (.-buildNumber info))))))
+               (reset! build-number (.-buildNumber info))
+               (reset! version (.-version info))))))

@@ -62,10 +62,10 @@
        db
        "SELECT id, name, related_num
         FROM tags 
-        WHERE name like '%?%'
+        WHERE name LIKE ?
         ORDER BY related_num desc
         ;"
-       .variables [(drift/Variable word)])))))
+       .variables [(drift/Variable (str "%" word "%"))])))))
 
 (defn query-tag-with-name [^String n]
   (let [^schema/AppDatabase db (db/get-db)]

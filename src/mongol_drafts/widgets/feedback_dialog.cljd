@@ -47,7 +47,8 @@
 (defn feedback-dialog
   "Dialog with one content field + Mongolian keyboard. on-submit receives the content string."
   [{:keys [on-submit on-cancel]}]
-  (let [content-atom (atom "")]
+  (let [content-atom (atom "")
+        keyboard-state (atom {})]
     (f/widget
      :context ctx
      :managed [content-ctrl (m/TextEditingController.)
@@ -97,6 +98,7 @@
                  .padding (m/EdgeInsets.all (tokens/space :l))
                  .child
                  (text-field/text-field
+                  keyboard-state
                   {:controller content-ctrl
                    :autofocus true
                    :focus-node focus-node

@@ -69,12 +69,11 @@
             (if (not= (:draft/tabbar-index @global-state/state) 3)
               (slidable/SlidableAction .onPressed
                                        (fn [context]
-                                         (await (draft-state/recycle-draft i))
                                          (let [id (-> @global-state/state :drafts :contents (nth i) (get "id"))]
+                                           (await (draft-state/recycle-draft i))
                                            (when (= id (-> @global-state/state :draft (get "id")))
                                              (await (draft-state/new-draft))
-                                             (draft-state/focus-on-draft text-controller)))
-                                         (dart:core/print "slide delete"))
+                                             (draft-state/focus-on-draft text-controller))))
                                        .backgroundColor (.red m/Colors)
                                        .foregroundColor (.white m/Colors)
                                        .padding (m.EdgeInsets/all 0)
@@ -117,7 +116,7 @@
              (let [^String orig-content (-> contents (nth i) (get "content"))
                    ^String content (.trim orig-content)]
                (mgl/MongolText content .maxLines 1)))
-           (if (true? (-> contents (nth i) (get "flag")))
+           (if (draft-state/flagged? (-> contents (nth i) (get "flag")))
              (m/Icon m/Icons.flag
                      .size 12
                      .color m.Colors/red)

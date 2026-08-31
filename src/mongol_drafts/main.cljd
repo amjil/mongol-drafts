@@ -1,13 +1,13 @@
 (ns mongol-drafts.main
   (:require
    ["package:flutter/material.dart" :as m]
+   ["package:flutter/foundation.dart" :refer [kIsWeb]]
    ["package:flutter_dotenv/flutter_dotenv.dart" :as dotenv]
    ["package:adaptive_theme/adaptive_theme.dart" :as adaptive]
    [virtual-keyboard.input-control :as control]
    [virtual-keyboard.options :as keyboard-options]
-   [virtual-keyboard.keyboard-candidates :as kc]
-   [virtual-keyboard.zip-utils :as zip-utils]
-   [virtual-keyboard.fst-reader :as fst-reader]
+   [ime-core.fst-engine :as fst-engine]
+   [ime-core.next-word :as next-word]
    [cljd.flutter :as f]
    [mongol-drafts.services.db :as db-service]
    [mongol-drafts.states.profile :as profile]
@@ -88,11 +88,9 @@
   (await
    (db-service/init-db))
 
-  ;; load the data.zip & next.zip
-  (zip-utils/load-assets-parallel
-    [[kc/next "assets/next.zip"]])
-    
-  (fst-reader/ensure-loaded)
+  (when-not kIsWeb
+    (await (next-word/ensure-loaded))
+    (await (fst-engine/ensure-loaded)))
 
   (let [workspace (await (workspace-service/get-or-create-default))]
     (swap! global-state/state assoc :workspace workspace))

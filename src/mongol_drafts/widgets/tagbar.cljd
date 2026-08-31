@@ -70,7 +70,7 @@
         (m/Padding
          .padding (.all m/EdgeInsets 2)
          .child (m/Icon m/Icons.flag
-                        .color (if (= 1 flag)
+                        .color (if (draft-state/flagged? flag)
                                  (-> m/Theme (.of ctx) .-colorScheme .-secondary)
                                  nil)))))
       (m/SizedBox .height 4)

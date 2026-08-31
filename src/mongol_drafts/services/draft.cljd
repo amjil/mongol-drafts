@@ -98,59 +98,48 @@
                           (drift/Variable id)]))]
     num))
   
+(defn- sql-placeholders [n]
+  (clojure.string/join ", " (repeat n "?")))
+
+(defn- draft-filter-sql [tag-in-ids tag-out-ids flag status]
+  (str
+   (if (not-empty tag-in-ids)
+     (str " and id in (select draft_id from draft_tags where tag_id in ("
+          (sql-placeholders (count tag-in-ids)) "))")
+     "")
+   (if (not-empty tag-out-ids)
+     (str " and id not in (select draft_id from draft_tags where tag_id in ("
+          (sql-placeholders (count tag-out-ids)) "))")
+     "")
+   (if (or (true? flag) (= 1 flag))
+     " and flag = 1 "
+     "")
+   (if (number? status)
+     " and status = ? "
+     "")))
+
+(defn- draft-filter-vars [tag-in-ids tag-out-ids status]
+  (cond-> []
+    (not-empty tag-in-ids)
+    (into (map #(drift/Variable %) tag-in-ids))
+    (not-empty tag-out-ids)
+    (into (map #(drift/Variable %) tag-out-ids))
+    (number? status)
+    (conj (drift/Variable status))))
+
 (defn list-drafts [tag-in-ids tag-out-ids
                    flag status]
-  (let [^schema/AppDatabase db (db/get-db)]
+  (let [^schema/AppDatabase db (db/get-db)
+        filter-sql (draft-filter-sql tag-in-ids tag-out-ids flag status)
+        variables (draft-filter-vars tag-in-ids tag-out-ids status)]
     (await
      (.get
       (.customSelect
        db
-       (str
-        "select *
-          from drafts a 
-          where 1 = 1 "
-        (cond
-          (and (empty? tag-in-ids)
-               (empty? tag-out-ids))
-          ""
-
-          (and (not-empty tag-in-ids) (not-empty tag-out-ids))
-          (str
-           " and id in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
-           ")"
-           " and id not in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
-           ")")
-
-          (not-empty tag-in-ids)
-          (str
-           " and id in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
-           ")")
-
-          (not-empty tag-out-ids)
-          (str
-           " and id not in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
-           ")"))
-        (if (and (number? flag) (= 1 flag))
-          " and flag = 1 "
-          " ")
-        (if (number? status)
-          (str " and status = " status " ")
-          " ")
-        "
-       order by updated_at desc
-       ;"))))))
+       (str "select * from drafts a where 1 = 1 "
+            filter-sql
+            " order by updated_at desc;")
+       .variables variables)))))
 
 (defn last-draft []
   (let [^schema/AppDatabase db (db/get-db)]
@@ -180,56 +169,16 @@
 
 (defn query-drafts [word tag-in-ids tag-out-ids
                     flag status]
-  (let [^schema/AppDatabase db (db/get-db)]
+  (let [^schema/AppDatabase db (db/get-db)
+        filter-sql (draft-filter-sql tag-in-ids tag-out-ids flag status)
+        variables (conj (draft-filter-vars tag-in-ids tag-out-ids status)
+                        (drift/Variable (str "%" word "%")))]
     (await
      (.get
       (.customSelect
        db
-       (str
-        "select *
-          from drafts a 
-          where 1 = 1 "
-        (cond
-          (and (empty? tag-in-ids)
-               (empty? tag-out-ids))
-          ""
-
-          (and (not-empty tag-in-ids) (not-empty tag-out-ids))
-          (str
-           " and id in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
-           ")"
-           " and id not in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
-           ")")
-
-          (not-empty tag-in-ids)
-          (str
-           " and id in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-in-ids)) ")")
-           ")")
-
-          (not-empty tag-out-ids)
-          (str
-           " and id not in 
-             (select draft_id from draft_tags 
-                where tag_id in "
-           (str "(" (clojure.string/join ", " (map #(str "'" % "'") tag-out-ids)) ")")
-           ")"))
-        (if (and (number? flag) (= 1 flag))
-          " and flag = 1 "
-          " ")
-        (if (number? status)
-          (str " and status = " status " ")
-          " ")
-        (str
-         " and content like '%" word "%' ")
-        "
-         order by updated_at desc
-         ;"))))))
+       (str "select * from drafts a where 1 = 1 "
+            filter-sql
+            " and content like ? "
+            " order by updated_at desc;")
+       .variables variables)))))

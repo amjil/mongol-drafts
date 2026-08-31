@@ -53,7 +53,7 @@
         :on-tap (fn [] (font-size-dialog/show-draft-font-size-dialog ctx))}
        {:title "ᠰᠢᠨᠡᠴᠢᠯᠡᠯᠲᠡ᠎ᠶᠢ ᠰᠢᠯᠭᠠᠬᠤ"
         :leading m/Icons.system_update
-        :subtitle (str "Version: " @global-state/build-number)
+        :subtitle (str "Version: " (or @global-state/version @global-state/build-number))
         :on-tap (fn [] (update-check/check-for-update! ctx {:manual? true}))}
        {:title "ᠰᠠᠨᠠᠯ ᠵᠥᠪᠯᠡᠯᠭᠡ "
         :leading m/Icons.feedback
