@@ -30,6 +30,7 @@
 (defn- action [icon color on-pressed]
   (slidable/SlidableAction
    .onPressed (fn [_] (on-pressed))
+   .autoClose false
    .backgroundColor color
    .foregroundColor (.white m/Colors)
    .padding (m.EdgeInsets/all 0)
@@ -138,22 +139,24 @@
             draft :draft
             tab :draft/tabbar-index} global-state/state
            {draft-font :draft-font} font-state/font-state]
-   :let [current-id (get draft "id")
+   :let [items (vec contents)
+         current-id (get draft "id")
          empty-icon (condp = tab
                       1 m/Icons.flag_outlined
                       2 m/Icons.archive_outlined
                       3 m/Icons.delete_outline
                       m/Icons.inbox_outlined)]
-   (if (empty? contents)
+   (if (empty? items)
      (empty-content/empty-content-view {:icon empty-icon})
      (m.ListView/separated
+      .key (m/ValueKey (count items))
       .separatorBuilder (fn [_ _] (m/SizedBox .width (tokens/space :s)))
       .scrollDirection m.Axis/horizontal
       .padding (.fromLTRB m/EdgeInsets 16 12 16 12)
-      .itemCount (count contents)
+      .itemCount (count items)
       .itemBuilder
       (fn [^m/BuildContext context i]
-        (let [item (nth contents i)
+        (let [item (nth items i)
               selected? (= current-id (get item "id"))]
           (slidable/Slidable
            .key (m/ValueKey (or (get item "id") i))

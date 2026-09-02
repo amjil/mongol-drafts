@@ -221,7 +221,7 @@
           (in-drawer-tag-search-field controller)
           (m/Container))
         (m/Container
-         .margin (.only m/EdgeInsets .top 6)
+         .margin (.only m/EdgeInsets .top 6 .right 6)
          .child
          (m/Column
           .mainAxisAlignment m.MainAxisAlignment/spaceBetween

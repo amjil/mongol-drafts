@@ -37,12 +37,19 @@
             result (-> (draft-service/last-draft) await last .-data)]
         (swap! gs/state assoc :draft result)))))
 
+(defn- draft-contents []
+  (or (get-in @gs/state [:drafts :contents]) []))
+
+(defn- without-draft-id [id]
+  (into [] (remove #(= id (get % "id")) (draft-contents))))
+
+(defn- dissociate-draft [id]
+  (swap! gs/state assoc-in [:drafts :contents] (without-draft-id id)))
+
 (defn delete-draft [i]
-  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
-    (draft-service/delete-draft id)
-    (swap! gs/state assoc-in [:drafts :contents]
-           (remove #(= id (get % "id"))
-                   (get-in @gs/state [:drafts :contents])))))
+  (let [id (-> (draft-contents) (nth i) (get "id"))]
+    (dissociate-draft id)
+    (await (draft-service/delete-draft id))))
 
 (defn update-draft [content]
   (let [draft (:draft @gs/state)]
@@ -185,9 +192,7 @@
       (do
         (draft-service/unflag-draft (get draft "id"))
         (if (= 1 (:draft/tabbar-index @gs/state))
-          (swap! gs/state assoc-in [:drafts :contents]
-                 (remove #(= (get draft "id") (get % "id"))
-                         (get-in @gs/state [:drafts :contents])))
+          (dissociate-draft (get draft "id"))
           (swap! gs/state assoc-in [:drafts :contents i]
                  (doto draft (.update "flag" (fn [_] false))))))
       (do
@@ -196,23 +201,17 @@
                (doto draft (.update "flag" (fn [_] true))))))))
 
 (defn recycle-draft [i]
-  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
-    (draft-service/recycle-draft id)
-    (swap! gs/state assoc-in [:drafts :contents]
-           (remove #(= id (get % "id"))
-                   (get-in @gs/state [:drafts :contents])))))
+  (let [id (-> (draft-contents) (nth i) (get "id"))]
+    (dissociate-draft id)
+    (await (draft-service/recycle-draft id))))
 
 (defn archive-draft [i]
-  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
-    (draft-service/archive-draft id)
-    (swap! gs/state assoc-in [:drafts :contents]
-           (remove #(= id (get % "id"))
-                   (get-in @gs/state [:drafts :contents])))))
+  (let [id (-> (draft-contents) (nth i) (get "id"))]
+    (dissociate-draft id)
+    (await (draft-service/archive-draft id))))
 
 (defn inbox-draft [i]
-  (let [id (-> @gs/state :drafts :contents (nth i) (get "id"))]
-    (draft-service/inbox-draft id)
-    (swap! gs/state assoc-in [:drafts :contents]
-           (remove #(= id (get % "id"))
-                   (get-in @gs/state [:drafts :contents])))))
+  (let [id (-> (draft-contents) (nth i) (get "id"))]
+    (dissociate-draft id)
+    (await (draft-service/inbox-draft id))))
 

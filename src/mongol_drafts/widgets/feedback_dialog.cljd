@@ -63,11 +63,13 @@
                     .color dialog-bg
                     .borderRadius (m/BorderRadius.all (m/Radius.circular 0)))
        :child
-       (m/Column
-        .children
-        [(m/Expanded
-          .child
-          (m/Stack
+       (m/SafeArea
+        .child
+        (m/Column
+         .children
+         [(m/Expanded
+           .child
+           (m/Stack
            .children
            [(m/Row
              .crossAxisAlignment m/CrossAxisAlignment.stretch
@@ -120,4 +122,4 @@
          (m/Container
           .decoration (m/BoxDecoration
                        .border (m/Border .top (m/BorderSide .color surfaceVariant .width 0.5)))
-          .child (keyboard/keyboard {}))])}))))
+          .child (keyboard/keyboard {}))]))}))))
