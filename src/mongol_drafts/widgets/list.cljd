@@ -11,11 +11,26 @@
    [mongol-drafts.states.font :as font-state]
    [mongol-drafts.states.tag :as tag-state]))
 
-(defn- short-date [v]
-  (when (some? v)
+(defn- pad2 [n]
+  (if (< n 10) (str "0" n) (str n)))
+
+(defn- as-date-time [v]
+  (cond
+    (nil? v) nil
+    (instance? DateTime v) v
+    (number? v)
+    (DateTime/fromMillisecondsSinceEpoch
+     (if (>= v 1000000000000) v (* v 1000)))
+    :else
     (let [s (str v)]
-      (when (>= (count s) 10)
-        (str (subs s 5 7) "-" (subs s 8 10))))))
+      (when (>= (count s) 8)
+        (try
+          (DateTime/parse s)
+          (catch Exception _ nil))))))
+
+(defn- short-date [v]
+  (when-let [dt (as-date-time v)]
+    (str (pad2 (.-month dt)) "-" (pad2 (.-day dt)))))
 
 (defn- open-draft [navigator text-controller draft]
   (draft-state/set-current-draft text-controller (get draft "id"))
@@ -30,7 +45,7 @@
 (defn- action [icon color on-pressed]
   (slidable/SlidableAction
    .onPressed (fn [_] (on-pressed))
-   .autoClose false
+   .autoClose true
    .backgroundColor color
    .foregroundColor (.white m/Colors)
    .padding (m.EdgeInsets/all 0)
