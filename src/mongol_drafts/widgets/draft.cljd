@@ -120,4 +120,16 @@
       .bottom (+ 40 (keyboard/get-height info))
       .left (/ width 4)
       .child
-      (keyboard/candidates-panel (m/TextStyle. .fontSize 18 .fontFamily "OyunQaganTig")))])))
+      (keyboard/candidates-panel (m/TextStyle. .fontSize 18 .fontFamily "OyunQaganTig")))
+     (if (true? show-search-dialog)
+       (m/Positioned
+        .top 0
+        .right 0
+        .child
+        (m/SafeArea
+         .child
+         (m/Padding
+          .padding (.only m/EdgeInsets .top 4 .right 8)
+          .child
+          (search/close-button))))
+       (m/Container))])))
