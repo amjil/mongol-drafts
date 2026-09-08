@@ -26,8 +26,6 @@
   (doall
    (map (fn [k]
           (let [result (await (get-profile-setting k))]
-            (dart:core/print (str "-------" k))
-            (dart:core/print (str "-------result = " result))
             (swap! gs/state assoc-in [:profile (first k)]
                    (if (nil? result)
                      (last k)

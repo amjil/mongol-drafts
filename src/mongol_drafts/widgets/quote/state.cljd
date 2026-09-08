@@ -37,3 +37,12 @@
 
 (defn set-preview-background-color! [color]
   (swap! preview-font-state assoc :background-color color))
+
+(defn prepare-from-draft! [draft]
+  (reset! content-state (or (get draft "content") ""))
+  (reset! author-state "")
+  (reset! preview-state false)
+  (reset! image-path-state nil)
+  (swap! preview-font-state assoc
+         :font (font-state/get-draft-font)
+         :font-size (font-state/get-draft-font-size)))

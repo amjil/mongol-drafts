@@ -72,7 +72,9 @@
   ;;   .padding (.all m/EdgeInsets 0))
    (mgl/MongolTextField
     .controller controller
-    .onChanged (fn [x] (draft-state/query-drafts x false))
+    .onChanged (fn [x]
+                 (swap! global-state/state assoc :draft-search x)
+                 (draft-state/query-drafts x false))
     .autofocus true
     .maxLines 1
     .minLines 1
@@ -84,7 +86,9 @@
      .suffixIcon
      (m/IconButton .onPressed
                    (fn []
-                     (.clear controller))
+                     (.clear controller)
+                     (swap! global-state/state assoc :draft-search "")
+                     (draft-state/query-drafts "" false))
                    .icon (m/Icon m/Icons.clear))
      .isDense true
      ;;  Todo : when hintText is present Text cursor position error

@@ -24,8 +24,7 @@
       .children
       [(button-bar/quote-editor-bar
         state/preview-state
-        (fn []
-          (dart:core/print "share sentence >>.")))
+        (fn []))
        (m/Expanded
         .child
         (m/Stack

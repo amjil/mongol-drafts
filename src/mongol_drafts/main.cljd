@@ -17,7 +17,8 @@
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.services.workspace :as workspace-service]
    [mongol-drafts.widgets.draft :as draft]
-   [mongol-drafts.widgets.theme :as theme]))
+   [mongol-drafts.widgets.theme :as theme]
+   [mongol-drafts.services.stats :as stats]))
 
 (defn app []
   (f/widget
@@ -51,7 +52,7 @@
     .builder
     (fn [theme dark-theme]
       (m/MaterialApp
-       .title "Welcome to Flutter"
+       .title "Mongol Drafts"
        .theme theme
        .darkTheme dark-theme
        .debugShowCheckedModeBanner false
@@ -72,13 +73,12 @@
 
   ;; prepopulate the profile settings
   (profile/prepopulate-profile-settings)
-  (let [window (-> m/WidgetsBinding .instance .-window)]
-    (swap! global-state/state assoc :theme/brightness (.-platformBrightness window))
+  (let [dispatcher (-> m/WidgetsBinding .instance .-platformDispatcher)]
+    (swap! global-state/state assoc :theme/brightness (.-platformBrightness dispatcher))
     (set!
-     (.-onPlatformBrightnessChanged window)
+     (.-onPlatformBrightnessChanged dispatcher)
      (fn []
-       ;;  (dart:core/print (str "brightnes = " (.-platformBrightness window)))
-       (swap! global-state/state assoc :theme/brightness (.-platformBrightness window)))))
+       (swap! global-state/state assoc :theme/brightness (.-platformBrightness dispatcher)))))
 
   ;; set the control
   (control/set-control)
@@ -98,6 +98,8 @@
     (swap! global-state/state assoc :workspace workspace))
 
   (await (draft-state/ensure-current-draft))
+
+  (stats/report-daily!)
 
   (m/runApp
    (app)))

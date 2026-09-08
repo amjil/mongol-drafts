@@ -1,11 +1,9 @@
 (ns mongol-drafts.widgets.toolbar
   (:require
    ["package:flutter/material.dart" :as m]
-   ["dart:async" :as async]
    [cljd.flutter :as f]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.selection :as selection-state]
-   [mongol-drafts.widgets.quote-editor :as quote-editor]
    [virtual-keyboard.keyboard-action :as keyboard-action]
    [mongol-drafts.widgets.button-bar :as button]))
 
@@ -83,8 +81,7 @@
     .children
     [(m/GestureDetector
       .child (m/Icon m/Icons.menu)
-      .onTap (fn []
-                (dart:core/print "toolbar menu button >>.")))
+      .onTap (fn [] nil))
      (m/Expanded
       .child
       (m/SingleChildScrollView

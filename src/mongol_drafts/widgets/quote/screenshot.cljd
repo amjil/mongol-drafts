@@ -24,7 +24,6 @@
     [(button-bar/quote-editor-bar
       state/preview-state
       (fn []
-        (dart:core/print "save-screenshot button clicked")
         (save-screenshot ctx screenshot-controller)))
      (m/Expanded
       .child

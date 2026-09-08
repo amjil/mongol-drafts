@@ -162,7 +162,7 @@
    (if (empty? items)
      (empty-content/empty-content-view {:icon empty-icon})
      (m.ListView/separated
-      .key (m/ValueKey (count items))
+      .key (m/ValueKey (or tab 0))
       .separatorBuilder (fn [_ _] (m/SizedBox .width (tokens/space :s)))
       .scrollDirection m.Axis/horizontal
       .padding (.fromLTRB m/EdgeInsets 16 12 16 12)

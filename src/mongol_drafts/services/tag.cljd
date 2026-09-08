@@ -146,4 +146,4 @@
         db
         "UPDATE tags SET related_num = related_num - 1
          WHERE id = ?"
-        .variables [tag_id])))))
+        .variables [(drift/Variable tag_id)])))))

@@ -1,9 +1,31 @@
 (ns mongol-drafts.states.draft
   (:require
+   ["dart:async" :as async]
    [mongol-drafts.services.draft :as draft-service]
    [mongol-drafts.services.workspace :as workspace-service]
    [mongol-drafts.states.global :as gs]
    [mongol-drafts.states.counter :as counter-state]))
+
+(def ^:private save-delay-ms 500)
+(defonce ^:private save-timer (atom nil))
+(defonce ^:private pending-save (atom nil))
+
+(defn- cancel-save-timer! []
+  (when-let [t @save-timer]
+    (.cancel t)
+    (reset! save-timer nil)))
+
+(defn flush-pending-save! []
+  (cancel-save-timer!)
+  (when-let [{:keys [id content]} @pending-save]
+    (reset! pending-save nil)
+    (when id
+      (await (draft-service/update-draft id content)))))
+
+(defn- discard-pending-save! [id]
+  (when (= id (:id @pending-save))
+    (cancel-save-timer!)
+    (reset! pending-save nil)))
 
 (defn- ensure-workspace-id []
   (if-let [workspace-id (get (:workspace @gs/state) "id")]
@@ -13,6 +35,7 @@
       (get workspace "id"))))
 
 (defn set-current-draft [controller id]
+  (await (flush-pending-save!))
   (let [result (await (draft-service/get-draft id))
         draft (-> result first .-data)]
     (set! (.-text controller) (get draft "content"))
@@ -20,6 +43,7 @@
     (counter-state/count-contents gs/state (get draft "content"))))
 
 (defn set-current-draft-without-controller [id]
+  (await (flush-pending-save!))
   (let [result (await (draft-service/get-draft id))
         draft (-> result first .-data)]
     (swap! gs/state assoc :draft draft)))
@@ -32,6 +56,7 @@
   (or (nil? content) (empty? content)))
 
 (defn new-draft []
+  (await (flush-pending-save!))
   (let [result (await (draft-service/last-draft))
         last (some-> result first .-data)]
     (if (and last
@@ -63,6 +88,7 @@
 (defn delete-draft [i]
   (let [id (-> (draft-contents) (nth i) (get "id"))
         current? (= id (get (:draft @gs/state) "id"))]
+    (discard-pending-save! id)
     (dissociate-draft id)
     (await (draft-service/delete-draft id))
     current?))
@@ -83,23 +109,29 @@
 (defn update-draft [content]
   (let [draft (:draft @gs/state)
         id (get draft "id")
-        recycled? (= -1 (get draft "status"))]
-    (await (draft-service/update-draft id content))
-    (let [next (cond-> (put-draft-field draft "content" content)
-                 recycled? (put-draft-field "status" 0))
-          tab (:draft/tabbar-index @gs/state)]
-      (swap! gs/state assoc :draft next)
-      (when recycled?
-        (cond
-          (= 3 tab)
-          (dissociate-draft id)
+        recycled? (= -1 (get draft "status"))
+        next (cond-> (put-draft-field draft "content" content)
+               recycled? (put-draft-field "status" 0))
+        tab (:draft/tabbar-index @gs/state)]
+    (swap! gs/state assoc :draft next)
+    (when recycled?
+      (cond
+        (= 3 tab)
+        (dissociate-draft id)
 
-          (= 0 tab)
-          (prepend-draft next)
+        (= 0 tab)
+        (prepend-draft next)
 
-          (and (= 1 tab) (flagged? (get next "flag")))
-          (prepend-draft next)))
-      (counter-state/count-contents gs/state content))))
+        (and (= 1 tab) (flagged? (get next "flag")))
+        (prepend-draft next)))
+    (counter-state/count-contents gs/state content)
+    (reset! pending-save {:id id :content content})
+    (cancel-save-timer!)
+    (reset! save-timer
+            (async/Timer.
+             (dart:core/Duration. .milliseconds save-delay-ms)
+             (fn []
+               (flush-pending-save!))))))
 
 (defn list-drafts [state]
   (let [;num (-> @state :drafts :contents count)
@@ -220,11 +252,7 @@
       (draft-service/unflag-draft id)
       (draft-service/flag-draft id))
     (swap! gs/state assoc :draft
-           (doto
-            (-> @gs/state :draft)
-             (.update
-              "flag"
-              (fn [_] (not on?)))))))
+           (put-draft-field (:draft @gs/state) "flag" (not on?)))))
 
 (defn- draft-with-flag [draft flagged?]
   (doto (Map/from draft)

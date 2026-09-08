@@ -17,29 +17,31 @@
          show-no-new-version-dialog)
 
 
+(defn- parse-int [v]
+  (try
+    (dart:core/int.parse (str v))
+    (catch Exception _ 0)))
+
 (defn- parse-version [version]
-  (let [parts (str/split version #"\.")
-        major (dart:core/int.parse (first parts))
-        minor (dart:core/int.parse (second parts))
-        patch (dart:core/int.parse (nth parts 2))]
-    {:major major :minor minor :patch patch}))
+  (let [core (-> (str (or version ""))
+                 (str/split #"[+-]" 2)
+                 first)
+        parts (map parse-int (str/split core #"\."))
+        padded (take 3 (concat parts (repeat 0)))]
+    (vec padded)))
 
 (defn compare-version [v1 v2]
-  (if (= v1 v2)
-    0
-    (let [v1-parsed (parse-version v1)
-          v2-parsed (parse-version v2)]
-      (loop [xs v1-parsed
-             ys v2-parsed]
-        (cond
-          (and (empty? xs) (empty? ys)) 0
-          (empty? xs) -1
-          (empty? ys) 1
-          :else (let [x (first xs)
-                      y (first ys)]
-                  (if (= x y)
-                    (recur (rest xs) (rest ys))
-                    (compare x y))))))))
+  (let [va (parse-version v1)
+        vb (parse-version v2)]
+    (loop [i 0]
+      (if (= i (count va))
+        0
+        (let [x (nth va i)
+              y (nth vb i)]
+          (cond
+            (> x y) 1
+            (< x y) -1
+            :else (recur (inc i))))))))
       
 
 (defn get-version-json-url []
@@ -77,24 +79,27 @@
 (defn request-storage-permission []
   ;; "Android 13+ may not need this"
   (try
-    (let [status (.request (.-storage ph/Permission))]
-      status)
+    (await (.request (.-storage ph/Permission)))
     (catch Exception e
       (dart:core/print e))))
 
+(defn- apk-save-path [dir-path]
+  (if (str/ends-with? dir-path "/")
+    (str dir-path "update.apk")
+    (str dir-path "/update.apk")))
 
 (defn download-and-install [apk-url progress-cb]
   (let [tmp-dir (await (pp/getTemporaryDirectory))
-        save-path (str (.-path tmp-dir) "update.apk")
+        save-path (apk-save-path (.-path tmp-dir))
         client (dio/Dio.)]
-    (.download client
-               apk-url
-               save-path
-               .onReceiveProgress (fn [received total]
-                                    (when progress-cb
-                                      (progress-cb received total))))
-                                      
-    (.open OpenFilex save-path)))
+    (await
+     (.download client
+                apk-url
+                save-path
+                .onReceiveProgress (fn [received total]
+                                     (when progress-cb
+                                       (progress-cb received total)))))
+    (await (.open OpenFilex save-path))))
     
 
 (defn get-app-store-url []
@@ -110,16 +115,14 @@
 (defn show-update-dialog [ctx info]
   (let [is-ios (io/Platform.isIOS)
         apk (:downloadUrl info)
+        changelog (or (:changelog info) (get info "changelog"))
         app-store-url (get-app-store-url)
         on-update-click (fn []
                           (m/Navigator.pop ctx)
                           (if is-ios
-                            (if app-store-url
-                              (open-app-store app-store-url)
-                              (dart:core/print "App Store URL not configured"))
-                            (download-and-install
-                             apk (fn [received total]
-                                   (dart:core/print (str "received: " received " total: " total))))))]
+                            (when app-store-url
+                              (open-app-store app-store-url))
+                            (download-and-install apk nil)))]
 
     (m/showDialog
      .context ctx
@@ -130,9 +133,9 @@
                 (m/Row
                  .children
                  [(mgl/MongolText (str "New version found: " (:versionCode info)))
-                  (if (empty? (get info "changelog"))
+                  (if (or (nil? changelog) (empty? changelog))
                     (m/SizedBox)
-                    (mgl/MongolText (get info "changelog")))])
+                    (mgl/MongolText changelog))])
                 .actions
                 [(m/TextButton .child (mgl/MongolText "Not now")
                                .onPressed (fn [] (m/Navigator.pop ctx)))

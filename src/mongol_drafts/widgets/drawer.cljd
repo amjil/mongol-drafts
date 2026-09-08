@@ -11,15 +11,14 @@
 
 (declare left-sub-drawer
          in-drawer-tag-search-field
-         in-drawer-draft-search-field)
+         in-drawer-draft-search-field
+         drawer-header
+         drawer-search-slot
+         drawer-filter-rail)
 
 (defn left-drawer []
   (f/widget
    :context ctx
-   :watch [{filter-tags :filter-tags
-            omitted-tags :omitted-tags
-            show-drawer-search :show-drawer-search
-            draft-search :draft-search} global-state/state]
    :managed [^m/TextEditingController
              draft-search-controller (m/TextEditingController)]
    (m/Drawer
@@ -41,89 +40,106 @@
    (m/SafeArea)
    (m/Column
     .children
-    [(m/Row
-      .children
-      [(m/Row
-        .children
-        [(m/SizedBox .width 10)
-         (f/widget
-          :get [m/Navigator]
-          :context ctx
-          (m/GestureDetector
-           .onTap (fn []
-                    (.pop navigator ctx))
-           .child
-           (m/Icon m/Icons.arrow_circle_down)))])
-       (m/Spacer)
-       (m/Row
-        .children
-        [(f/widget
-          :context ctx
-          (m/Material
-           .color (if (or (true? show-drawer-search)
-                          (not-empty draft-search))
-                    (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
-                    (-> m.Colors/transparent))
-           .shape (m/CircleBorder
-                   .side (m/BorderSide
-                          .color (-> m/Theme (.of ctx) .-iconTheme .-color)
-                          .width 2)))
-          (m/InkWell
-           .customBorder (m/CircleBorder)
-           .splashColor (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
-           .onTap (fn []
-                    (swap! global-state/state assoc :show-drawer-search
-                           (not (:show-drawer-search @global-state/state)))
-                    (when (and
-                           (false? (:show-drawer-search @global-state/state))
-                           (true? (:show-stacked-keyboard @global-state/state)))
-                      (swap! global-state/state assoc :show-stacked-keyboard false))))
-          (m/Padding
-           .padding (.all m/EdgeInsets 2)
-           .child (m/Icon m/Icons.search
-                          .size 18)))
-         (m/SizedBox .width 20)
-         (m/GestureDetector
-          .onTap (fn []
-                   (.clear draft-search-controller)
-                   (tag-state/clear-filter)
-                   (draft-state/query-drafts "" false))
-          .child
-          (m/Icon m/Icons.cancel_outlined))
-         (m/SizedBox .width 20)
-         (m/Icon m/Icons.pending_outlined)
-         (m/SizedBox .width 10)])])
+    [(drawer-header draft-search-controller)
      (m/Divider)
      (m/Expanded
       .child
       (m/Row
        .crossAxisAlignment m.CrossAxisAlignment/start
        .children
-       [(if (true? show-drawer-search)
-          (in-drawer-draft-search-field draft-search-controller)
-          (m/Container))
-        (f/widget
-         :context ctx
-         (m/GestureDetector
-          .onTap (fn []
-                   (-> m/Scaffold (.of ctx) (.openDrawer)))
-          .child
-          (m/Column
-           .children
-           [(m/Padding
-             .padding (.fromLTRB m/EdgeInsets 8 10 8 0)
-             .child (m/Icon m/Icons.filter_list_outlined))
-            (m/SizedBox .height 10)
-            (mgl/MongolText
-             (clojure.string/join
-              "᠂ "
-              (concat
-               (map #(get % "name") filter-tags)
-               (map #(str "!" (get % "name")) omitted-tags))))])))
+       [(drawer-search-slot draft-search-controller)
+        (drawer-filter-rail)
         (m/VerticalDivider)
         (m/Expanded
          .child
          (tabbar/tabbar))]))])))
+
+(defn drawer-header [draft-search-controller]
+  (f/widget
+   :context ctx
+   :watch [{show-drawer-search :show-drawer-search
+            draft-search :draft-search} global-state/state]
+   (m/Row
+    .children
+    [(m/Row
+      .children
+      [(m/SizedBox .width 10)
+       (f/widget
+        :get [m/Navigator]
+        :context ctx
+        (m/GestureDetector
+         .onTap (fn []
+                  (.pop navigator ctx))
+         .child
+         (m/Icon m/Icons.arrow_circle_down)))])
+     (m/Spacer)
+     (m/Row
+      .children
+      [(f/widget
+        :context ctx
+        (m/Material
+         .color (if (or (true? show-drawer-search)
+                        (not-empty draft-search))
+                  (-> m/Theme (.of ctx) .-colorScheme .-tertiary)
+                  (-> m.Colors/transparent))
+         .shape (m/CircleBorder
+                 .side (m/BorderSide
+                        .color (-> m/Theme (.of ctx) .-iconTheme .-color)
+                        .width 2)))
+        (m/InkWell
+         .customBorder (m/CircleBorder)
+         .splashColor (-> m/Theme (.of ctx) .-colorScheme .-tertiaryContainer)
+         .onTap (fn []
+                  (swap! global-state/state assoc :show-drawer-search
+                         (not (:show-drawer-search @global-state/state)))
+                  (when (and
+                         (false? (:show-drawer-search @global-state/state))
+                         (true? (:show-stacked-keyboard @global-state/state)))
+                    (swap! global-state/state assoc :show-stacked-keyboard false))))
+        (m/Padding
+         .padding (.all m/EdgeInsets 2)
+         .child (m/Icon m/Icons.search
+                        .size 18)))
+       (m/SizedBox .width 20)
+       (m/GestureDetector
+        .onTap (fn []
+                 (.clear draft-search-controller)
+                 (tag-state/clear-filter)
+                 (draft-state/query-drafts "" false))
+        .child
+        (m/Icon m/Icons.cancel_outlined))
+       (m/SizedBox .width 20)
+       (m/Icon m/Icons.pending_outlined)
+       (m/SizedBox .width 10)])])))
+
+(defn drawer-search-slot [draft-search-controller]
+  (f/widget
+   :watch [{show-drawer-search :show-drawer-search} global-state/state]
+   (if (true? show-drawer-search)
+     (in-drawer-draft-search-field draft-search-controller)
+     (m/Container))))
+
+(defn drawer-filter-rail []
+  (f/widget
+   :context ctx
+   :watch [{filter-tags :filter-tags
+            omitted-tags :omitted-tags} global-state/state]
+   (m/GestureDetector
+    .onTap (fn []
+             (-> m/Scaffold (.of ctx) (.openDrawer)))
+    .child
+    (m/Column
+     .children
+     [(m/Padding
+       .padding (.fromLTRB m/EdgeInsets 8 10 8 0)
+       .child (m/Icon m/Icons.filter_list_outlined))
+      (m/SizedBox .height 10)
+      (mgl/MongolText
+       (clojure.string/join
+        "᠂ "
+        (concat
+         (map #(get % "name") filter-tags)
+         (map #(str "!" (get % "name")) omitted-tags))))]))))
 ;;
 (defn filtered-tag [tag]
   (m/GestureDetector
@@ -316,9 +332,9 @@
     .padding (.all m/EdgeInsets 6))
    (mgl/MongolTextField
     .controller draft-search-controller
-    .onChanged (fn [x] 
-                 (draft-state/query-drafts x false)
-                 (swap! global-state/state assoc :draft-search x))
+    .onChanged (fn [x]
+                 (swap! global-state/state assoc :draft-search x)
+                 (draft-state/query-drafts x false))
     .autofocus true
     .maxLines 1
     .onTap (fn []

@@ -3,6 +3,7 @@
    ["package:flutter/material.dart" :as m]
    [cljd.flutter :as f]
    [mongol-drafts.widgets.profile :as profile]
+   [mongol-drafts.widgets.quote.state :as quote-state]
    [mongol-drafts.states.global :as global-state]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.tag :as tag-state]
@@ -24,7 +25,7 @@
       .padding (.all m/EdgeInsets 2)
       .child child)))))
 
-(defn topbar [controller quote-widget]
+(defn topbar [controller quote-builder]
   (f/widget
    :context ctx
    :watch [{char-count :editor/chars
@@ -55,9 +56,10 @@
       (str char-count "c" word-count "w"))
      (bar-button
       (m/Icon m/Icons.share)
-      (fn [] 
-        ;; Todo open sentence editor
-        (.push (-> m/Navigator (.of ctx)) (m/MaterialPageRoute .builder (fn [ctx] quote-widget)))
+      (fn []
+        (quote-state/prepare-from-draft! (:draft @global-state/state))
+        (.push (-> m/Navigator (.of ctx))
+               (m/MaterialPageRoute .builder quote-builder))
         nil))
      (bar-button
       (m/Icon m/Icons.search)
@@ -95,11 +97,9 @@
 
 ;;;
 (defn keyboard-upper-bar []
-  (m/Expanded
-   .child
-   (m/Row
-    .children
-    [(keyboard-close-button false)])))
+  (m/Row
+   .children
+   [(keyboard-close-button false)]))
 
 (defn quote-editor-bar [preview-state save-fn]
   (f/widget

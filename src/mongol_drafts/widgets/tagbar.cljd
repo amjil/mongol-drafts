@@ -64,7 +64,6 @@
        (m/InkWell
         .customBorder (m/CircleBorder)
         .onTap (fn []
-                 (dart:core/print "tag button >>.")
                  (draft-state/toggle-draft-flag (get draft "id")))
         .child
         (m/Padding

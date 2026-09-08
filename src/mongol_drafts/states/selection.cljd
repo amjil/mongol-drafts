@@ -76,11 +76,12 @@
   (let [selection (.-selection controller)
         text (.-text controller)
         clipboard-data (await (services.Clipboard/getData (.kTextPlain services/Clipboard)))
-        clipboard-text (.-text clipboard-data)
-        new-text (.replaceRange text (.-start selection) (.-end selection) clipboard-text)
-        new-str-length (.-length clipboard-text)]
-    (set! (.-text controller) new-text)
-    (set! (.-selection controller)
-          (.copyWith selection
-                     .baseOffset (+ (.-start selection) new-str-length)
-                     .extentOffset (+ (.-start selection) new-str-length)))))
+        clipboard-text (when clipboard-data (.-text clipboard-data))]
+    (when (and clipboard-text (not (empty? clipboard-text)))
+      (let [new-text (.replaceRange text (.-start selection) (.-end selection) clipboard-text)
+            new-str-length (.-length clipboard-text)]
+        (set! (.-text controller) new-text)
+        (set! (.-selection controller)
+              (.copyWith selection
+                         .baseOffset (+ (.-start selection) new-str-length)
+                         .extentOffset (+ (.-start selection) new-str-length)))))))

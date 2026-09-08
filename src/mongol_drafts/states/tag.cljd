@@ -1,6 +1,5 @@
 (ns mongol-drafts.states.tag
   (:require
-   ["package:flutter/material.dart" :as m]
    [mongol-drafts.services.tag :as tag-service]
    [mongol-drafts.states.draft :as draft-state]
    [mongol-drafts.states.global :as gs]))
@@ -9,19 +8,20 @@
 
 (defn get-draft-tags [state id]
   (let [tags (await (tag-service/query-draft-tags id))]
-    (dart:core/print (str "tags = " (map (fn [x] (.-data x)) tags)))
     (swap! state assoc :draft-tags (map (fn [x] (.-data x)) tags))))
 
 (defn add-draft-tag [name]
-  (let [workspace-id (-> @gs/state :workspace (get "id"))]
-    (dart:core/print (str "workspace-id: " workspace-id))
-    (when workspace-id
-      (let [id  (await (tag-service/create-tag workspace-id name))
-            draft-id (-> @gs/state :draft (get "id"))]
+  (let [workspace-id (-> @gs/state :workspace (get "id"))
+        trimmed (clojure.string/trim (or name ""))]
+    (when (and workspace-id (not (empty? trimmed)))
+      (let [id (await (tag-service/create-tag workspace-id trimmed))
+            draft-id (-> @gs/state :draft (get "id"))
+            existing (:draft-tags @gs/state)]
         (when draft-id
-          (let [_ (await (tag-service/add-draft-tag draft-id id))]
+          (await (tag-service/add-draft-tag draft-id id))
+          (when-not (some #(= id (get % "id")) existing)
             (swap! gs/state update :draft-tags concat
-                   [{"id" id "name" name "related_num" 1}])))))))
+                   [{"id" id "name" trimmed "related_num" 1}])))))))
 
 (defn delete-draft-tag [id]
   (let [draft (:draft @gs/state)
@@ -32,7 +32,7 @@
 
 (defn query-tags [q]
   (let [result (await (tag-service/query-tags q))]
-    (swap! gs/state assoc :tags result)
+    (swap! gs/state assoc :tags (map #(.-data %) result))
     (update-filtered-tags)))
 
 (defn all-tags []
