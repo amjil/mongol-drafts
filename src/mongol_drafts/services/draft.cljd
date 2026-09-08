@@ -42,7 +42,7 @@
         num (await
              (.customUpdate
               db
-              "UPDATE drafts SET content = ?, updated_at = ? WHERE id = ?"
+              "UPDATE drafts SET content = ?, updated_at = ?, status = CASE WHEN status = -1 THEN 0 ELSE status END WHERE id = ?"
               .variables [(drift/Variable content)
                           (drift/Variable (DateTime/now))
                           (drift/Variable id)]))]
@@ -150,6 +150,19 @@
        "select *
         from drafts
         order by created_at desc
+        limit 1
+        ;")))))
+
+(defn latest-draft []
+  (let [^schema/AppDatabase db (db/get-db)]
+    (await
+     (.get
+      (.customSelect
+       db
+       "select *
+        from drafts
+        where status != -1
+        order by updated_at desc
         limit 1
         ;")))))
 

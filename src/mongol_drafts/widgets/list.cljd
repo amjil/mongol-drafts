@@ -64,18 +64,16 @@
                         #(draft-state/inbox-draft i)))
               (when (not= tab 3)
                 (action m/Icons.delete (.red m/Colors)
-                        (fn []
-                          (let [id (-> @global-state/state :drafts :contents (nth i) (get "id"))]
-                            (await (draft-state/recycle-draft i))
-                            (when (= id (-> @global-state/state :draft (get "id")))
-                              (await (draft-state/new-draft))
-                              (draft-state/focus-on-draft text-controller))))))
+                        #(draft-state/recycle-draft i)))
               (when (some #{tab} [0 1])
                 (action m/Icons.archive (.blue m/Colors)
                         #(draft-state/archive-draft i)))
               (when (= tab 3)
                 (action m/Icons.delete_forever (.red m/Colors)
-                        #(draft-state/delete-draft i)))]))))
+                        (fn []
+                          (when (await (draft-state/delete-draft i))
+                            (await (draft-state/new-draft))
+                            (draft-state/focus-on-draft text-controller)))))]))))
 
 (defn- draft-card [context draft selected? draft-font on-tap]
   (let [scheme (-> m/Theme (.of context) .-colorScheme)

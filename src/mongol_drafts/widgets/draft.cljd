@@ -22,9 +22,10 @@
   (f/widget
    :context ctx
    :get [:info]
-   :let [_ (draft-state/new-draft)
-         width (-> m/MediaQuery (.of ctx) .-size .-width)]
-   :managed [^m/TextEditingController text-controller (m/TextEditingController)]
+   :let [width (-> m/MediaQuery (.of ctx) .-size .-width)]
+   :managed [^m/TextEditingController text-controller
+             (m/TextEditingController.
+              .text (or (get (:draft @global-state/state) "content") ""))]
    :bind {:text-controller text-controller}
    :watch [{:keys [tag-viewable
                    show-keyboard

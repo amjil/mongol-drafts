@@ -6,7 +6,7 @@
    [mongol-drafts.states.counter :as counter-state]))
 
 (defn- ensure-workspace-id []
-  (if-let [workspace-id (-> @gs/state :workspace :id)]
+  (if-let [workspace-id (get (:workspace @gs/state) "id")]
     workspace-id
     (let [workspace (await (workspace-service/get-or-create-default))]
       (swap! gs/state assoc :workspace workspace)
@@ -24,18 +24,32 @@
         draft (-> result first .-data)]
     (swap! gs/state assoc :draft draft)))
 
-(defn new-draft []
-  (let [result (await (draft-service/last-draft))]
-    (cond
-      (and (not-empty result) (empty? (-> result first .-data (get "content"))))
-      (swap! gs/state assoc :draft
-             (-> result last .-data))
+(defn- apply-draft [draft]
+  (swap! gs/state assoc :draft draft)
+  (counter-state/count-contents gs/state (get draft "content")))
 
-      :else
+(defn- blank-content? [content]
+  (or (nil? content) (empty? content)))
+
+(defn new-draft []
+  (let [result (await (draft-service/last-draft))
+        last (some-> result first .-data)]
+    (if (and last
+             (blank-content? (get last "content"))
+             (not= -1 (get last "status")))
+      (apply-draft last)
       (let [workspace-id (await (ensure-workspace-id))
-            _ (await (draft-service/create-draft workspace-id ""))
-            result (-> (draft-service/last-draft) await last .-data)]
-        (swap! gs/state assoc :draft result)))))
+            row (await (draft-service/create-draft workspace-id ""))]
+        (apply-draft (.-data row))))))
+
+(defn ensure-current-draft []
+  (when-not (:draft @gs/state)
+    (let [result (await (draft-service/latest-draft))]
+      (if (not-empty result)
+        (apply-draft (-> result first .-data))
+        (let [workspace-id (await (ensure-workspace-id))
+              row (await (draft-service/create-draft workspace-id ""))]
+          (apply-draft (.-data row)))))))
 
 (defn- draft-contents []
   (or (get-in @gs/state [:drafts :contents]) []))
@@ -47,16 +61,45 @@
   (swap! gs/state assoc-in [:drafts :contents] (without-draft-id id)))
 
 (defn delete-draft [i]
-  (let [id (-> (draft-contents) (nth i) (get "id"))]
+  (let [id (-> (draft-contents) (nth i) (get "id"))
+        current? (= id (get (:draft @gs/state) "id"))]
     (dissociate-draft id)
-    (await (draft-service/delete-draft id))))
+    (await (draft-service/delete-draft id))
+    current?))
+
+(defn- put-draft-field [draft k v]
+  (doto (Map/from draft)
+    (.update k (fn [_] v))))
+
+(defn- prepend-draft [draft]
+  (let [id (get draft "id")]
+    (when-not (some #(= id (get % "id")) (draft-contents))
+      (swap! gs/state assoc-in [:drafts :contents]
+             (into [draft] (draft-contents))))))
+
+(defn flagged? [flag]
+  (or (true? flag) (= 1 flag)))
 
 (defn update-draft [content]
-  (let [draft (:draft @gs/state)]
-    (await (draft-service/update-draft (get draft "id") content))
-    (swap! gs/state assoc :draft
-           (doto draft (.update "content" (fn [_] content))))
-    (counter-state/count-contents gs/state content)))
+  (let [draft (:draft @gs/state)
+        id (get draft "id")
+        recycled? (= -1 (get draft "status"))]
+    (await (draft-service/update-draft id content))
+    (let [next (cond-> (put-draft-field draft "content" content)
+                 recycled? (put-draft-field "status" 0))
+          tab (:draft/tabbar-index @gs/state)]
+      (swap! gs/state assoc :draft next)
+      (when recycled?
+        (cond
+          (= 3 tab)
+          (dissociate-draft id)
+
+          (= 0 tab)
+          (prepend-draft next)
+
+          (and (= 1 tab) (flagged? (get next "flag")))
+          (prepend-draft next)))
+      (counter-state/count-contents gs/state content))))
 
 (defn list-drafts [state]
   (let [;num (-> @state :drafts :contents count)
@@ -171,9 +214,6 @@
         (swap! gs/state assoc :draft/status -1)
         (query-drafts (:draft-search @gs/state) true)))))
 
-(defn flagged? [flag]
-  (or (true? flag) (= 1 flag)))
-
 (defn toggle-draft-flag [id]
   (let [on? (flagged? (-> @gs/state :draft (get "flag")))]
     (if on?
@@ -209,7 +249,10 @@
 (defn recycle-draft [i]
   (let [id (-> (draft-contents) (nth i) (get "id"))]
     (dissociate-draft id)
-    (await (draft-service/recycle-draft id))))
+    (await (draft-service/recycle-draft id))
+    (when (= id (get (:draft @gs/state) "id"))
+      (swap! gs/state assoc :draft
+             (put-draft-field (:draft @gs/state) "status" -1)))))
 
 (defn archive-draft [i]
   (let [id (-> (draft-contents) (nth i) (get "id"))]
